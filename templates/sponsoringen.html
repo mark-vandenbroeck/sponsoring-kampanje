@@ -302,14 +302,24 @@
                             <div class="d-flex gap-1">
                                 {% if sponsoring.logo_origineel %}
                                     <a href="{{ url_for('uploaded_file', filename=sponsoring.logo_origineel) }}" target="_blank" class="text-decoration-none">
-                                        <img src="{{ url_for('uploaded_file', filename=sponsoring.logo_origineel) }}" class="thumbnail" alt="Logo origineel">
+                                        {% set thumbnail = get_thumbnail_path(sponsoring.logo_origineel) %}
+                                        {% if thumbnail %}
+                                            <img src="{{ url_for('uploaded_file', filename=thumbnail) }}" class="thumbnail" alt="Logo origineel (PDF)">
+                                        {% else %}
+                                            <img src="{{ url_for('uploaded_file', filename=sponsoring.logo_origineel) }}" class="thumbnail" alt="Logo origineel">
+                                        {% endif %}
                                     </a>
                                 {% else %}
                                     <span class="badge bg-secondary">Geen</span>
                                 {% endif %}
                                 {% if sponsoring.logo_afgewerkt_file %}
                                     <a href="{{ url_for('uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}" target="_blank" class="text-decoration-none">
-                                        <img src="{{ url_for('uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}" class="thumbnail" alt="Logo afgewerkt">
+                                        {% set thumbnail = get_thumbnail_path(sponsoring.logo_afgewerkt_file) %}
+                                        {% if thumbnail %}
+                                            <img src="{{ url_for('uploaded_file', filename=thumbnail) }}" class="thumbnail" alt="Logo afgewerkt (PDF)">
+                                        {% else %}
+                                            <img src="{{ url_for('uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}" class="thumbnail" alt="Logo afgewerkt">
+                                        {% endif %}
                                     </a>
                                 {% else %}
                                     <span class="badge bg-secondary">Geen</span>

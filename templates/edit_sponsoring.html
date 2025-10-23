@@ -152,7 +152,12 @@
                                 {% if sponsoring.logo_origineel %}
                                 <div class="mt-2">
                                     <small class="text-muted">Huidig logo:</small>
-                                    <img src="{{ url_for('uploaded_file', filename=sponsoring.logo_origineel) }}" class="img-fluid rounded" style="max-width: 300px; max-height: 200px;" alt="Huidig logo origineel">
+                                    {% set thumbnail = get_thumbnail_path(sponsoring.logo_origineel) %}
+                                    {% if thumbnail %}
+                                        <img src="{{ url_for('uploaded_file', filename=thumbnail) }}" class="img-fluid rounded" style="max-width: 300px; max-height: 200px;" alt="Huidig logo origineel (PDF)">
+                                    {% else %}
+                                        <img src="{{ url_for('uploaded_file', filename=sponsoring.logo_origineel) }}" class="img-fluid rounded" style="max-width: 300px; max-height: 200px;" alt="Huidig logo origineel">
+                                    {% endif %}
                                 </div>
                                 {% endif %}
                             </div>
@@ -165,7 +170,12 @@
                                 {% if sponsoring.logo_afgewerkt_file %}
                                 <div class="mt-2">
                                     <small class="text-muted">Huidig logo:</small>
-                                    <img src="{{ url_for('uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}" class="img-fluid rounded" style="max-width: 300px; max-height: 200px;" alt="Huidig logo afgewerkt">
+                                    {% set thumbnail = get_thumbnail_path(sponsoring.logo_afgewerkt_file) %}
+                                    {% if thumbnail %}
+                                        <img src="{{ url_for('uploaded_file', filename=thumbnail) }}" class="img-fluid rounded" style="max-width: 300px; max-height: 200px;" alt="Huidig logo afgewerkt (PDF)">
+                                    {% else %}
+                                        <img src="{{ url_for('uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}" class="img-fluid rounded" style="max-width: 300px; max-height: 200px;" alt="Huidig logo afgewerkt">
+                                    {% endif %}
                                 </div>
                                 {% endif %}
                             </div>

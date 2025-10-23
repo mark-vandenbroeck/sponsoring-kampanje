@@ -14,6 +14,8 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
+from pdf2image import convert_from_path
+from PIL import Image
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
@@ -37,6 +39,52 @@ def format_european_currency(amount):
     # Replace comma with dot for thousands separator, and dot with comma for decimal
     formatted = formatted.replace(",", "X").replace(".", ",").replace("X", ".")
     return formatted
+
+# Helper function for generating PDF thumbnails
+def generate_pdf_thumbnail(pdf_path, thumbnail_path, size=(200, 200)):
+    """Generate a thumbnail from the first page of a PDF file."""
+    try:
+        # Convert first page of PDF to image
+        images = convert_from_path(pdf_path, first_page=1, last_page=1, dpi=150)
+        if images:
+            # Get the first page
+            first_page = images[0]
+            # Create thumbnail
+            first_page.thumbnail(size, Image.Resampling.LANCZOS)
+            # Save thumbnail
+            first_page.save(thumbnail_path, 'PNG')
+            return True
+    except Exception as e:
+        print(f"Error generating PDF thumbnail: {e}")
+    return False
+
+# Helper function to get thumbnail path for a file
+def get_thumbnail_path(filename):
+    """Get the thumbnail path for a file, generating it if it's a PDF and doesn't exist."""
+    if not filename:
+        return None
+    
+    # Check if file is a PDF
+    if not filename.lower().endswith('.pdf'):
+        return None
+    
+    # Create thumbnail filename
+    base_name = os.path.splitext(filename)[0]
+    thumbnail_filename = f"{base_name}_thumb.png"
+    thumbnail_path = os.path.join(app.config['UPLOAD_FOLDER'], thumbnail_filename)
+    
+    # If thumbnail doesn't exist, try to generate it
+    if not os.path.exists(thumbnail_path):
+        pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        if os.path.exists(pdf_path):
+            if generate_pdf_thumbnail(pdf_path, thumbnail_path):
+                return thumbnail_filename
+            else:
+                return None
+        else:
+            return None
+    
+    return thumbnail_filename
 
 # Helper function for getting display amount with fallback
 def get_display_amount(sponsoring):
@@ -149,13 +197,13 @@ class Sponsoring(db.Model):
     logo_origineel = db.Column(db.String(255))
     logo_afgewerkt_file = db.Column(db.String(255))
 
-# Context processor to make current_user available in all templates
+# Context processor to make current_user and helper functions available in all templates
 @app.context_processor
 def inject_user():
     if 'user_id' in session:
         user = Gebruiker.query.get(session['user_id'])
-        return dict(current_user=user)
-    return dict(current_user=None)
+        return dict(current_user=user, get_thumbnail_path=get_thumbnail_path)
+    return dict(current_user=None, get_thumbnail_path=get_thumbnail_path)
 
 # Authentication decorators
 def login_required(f):

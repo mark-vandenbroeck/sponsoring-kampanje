@@ -125,7 +125,12 @@
                         <h6>Logo Origineel</h6>
                         {% if sponsoring.logo_origineel %}
                             <a href="{{ url_for('uploaded_file', filename=sponsoring.logo_origineel) }}" target="_blank" class="text-decoration-none">
-                                <img src="{{ url_for('uploaded_file', filename=sponsoring.logo_origineel) }}" class="img-fluid rounded" style="max-width: 200px; max-height: 150px;" alt="Logo origineel">
+                                {% set thumbnail = get_thumbnail_path(sponsoring.logo_origineel) %}
+                                {% if thumbnail %}
+                                    <img src="{{ url_for('uploaded_file', filename=thumbnail) }}" class="img-fluid rounded" style="max-width: 200px; max-height: 150px;" alt="Logo origineel (PDF)">
+                                {% else %}
+                                    <img src="{{ url_for('uploaded_file', filename=sponsoring.logo_origineel) }}" class="img-fluid rounded" style="max-width: 200px; max-height: 150px;" alt="Logo origineel">
+                                {% endif %}
                             </a>
                             <p class="mt-2">
                                 <a href="{{ url_for('uploaded_file', filename=sponsoring.logo_origineel) }}" target="_blank" class="btn btn-sm btn-outline-primary">
@@ -141,7 +146,12 @@
                         <h6>Logo Afgewerkt</h6>
                         {% if sponsoring.logo_afgewerkt_file %}
                             <a href="{{ url_for('uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}" target="_blank" class="text-decoration-none">
-                                <img src="{{ url_for('uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}" class="img-fluid rounded" style="max-width: 200px; max-height: 150px;" alt="Logo afgewerkt">
+                                {% set thumbnail = get_thumbnail_path(sponsoring.logo_afgewerkt_file) %}
+                                {% if thumbnail %}
+                                    <img src="{{ url_for('uploaded_file', filename=thumbnail) }}" class="img-fluid rounded" style="max-width: 200px; max-height: 150px;" alt="Logo afgewerkt (PDF)">
+                                {% else %}
+                                    <img src="{{ url_for('uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}" class="img-fluid rounded" style="max-width: 200px; max-height: 150px;" alt="Logo afgewerkt">
+                                {% endif %}
                             </a>
                             <p class="mt-2">
                                 <a href="{{ url_for('uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}" target="_blank" class="btn btn-sm btn-outline-primary">
