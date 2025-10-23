@@ -10,6 +10,7 @@ Een moderne Python Flask applicatie voor het beheren van evenement sponsoringen 
 - **Kontrakt beheer**: Definieer verschillende kontrakt types per evenement
 - **Sponsoring tracking**: Volg sponsoringen met bedragen, facturatie en betaling status
 - **Logo beheer**: Upload en beheer originele en afgewerkte logo's (alle bestandstypen)
+- **Smart thumbnails**: Automatische thumbnail generatie voor PDF, EPS, SVG, AI en PSD bestanden
 
 ### Geavanceerde Features
 - **Authenticatie & Autorisatie**: Volledig gebruikerssysteem met rollen (Beheerder, Gebruiker, Lezer)
@@ -21,12 +22,20 @@ Een moderne Python Flask applicatie voor het beheren van evenement sponsoringen 
 - **Responsive design**: Werkt perfect op desktop, tablet en mobiel
 - **Modern UI**: Strakke interface met levendige maar zachte kleuren
 - **File management**: Veilige bestandsuploads met thumbnails en zip downloads
+- **Design file support**: Volledige ondersteuning voor professionele design bestanden (AI, PSD, EPS, SVG, PDF)
 
 ### Smart Filtering & Defaults
 - **Intelligente defaults**: De applicatie selecteert automatisch het meest recente evenement als default filter
 - **Consistent gedrag**: Zelfde default logica op alle pagina's (kontrakten, sponsoringen, exports)
 - **Gebruiksvriendelijk**: Gebruikers zien direct relevante data zonder handmatige selectie
 - **Flexibele filtering**: Volledige controle over welke data wordt getoond via dropdown filters
+
+### Smart Thumbnail Generation
+- **Automatische thumbnails**: Genereert automatisch PNG thumbnails voor design bestanden
+- **Ondersteunde formaten**: PDF, EPS, SVG, AI (Adobe Illustrator), PSD (Adobe Photoshop)
+- **Hoge kwaliteit**: Thumbnails behouden de visuele kwaliteit van het origineel
+- **Fallback support**: Toont origineel bestand als thumbnail generatie faalt
+- **Upload limieten**: Ondersteunt bestanden tot 50MB voor grote design bestanden
 
 ## Installatie
 
