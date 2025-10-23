@@ -16,6 +16,9 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from pdf2image import convert_from_path
 from PIL import Image
+import cairosvg
+import subprocess
+import tempfile
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
@@ -40,7 +43,24 @@ def format_european_currency(amount):
     formatted = formatted.replace(",", "X").replace(".", ",").replace("X", ".")
     return formatted
 
-# Helper function for generating PDF thumbnails
+# Helper function for generating thumbnails from various file types
+def generate_thumbnail(file_path, thumbnail_path, size=(200, 200)):
+    """Generate a thumbnail from various file types (PDF, EPS, SVG)."""
+    try:
+        file_ext = os.path.splitext(file_path)[1].lower()
+        
+        if file_ext == '.pdf':
+            return generate_pdf_thumbnail(file_path, thumbnail_path, size)
+        elif file_ext == '.eps':
+            return generate_eps_thumbnail(file_path, thumbnail_path, size)
+        elif file_ext == '.svg':
+            return generate_svg_thumbnail(file_path, thumbnail_path, size)
+        else:
+            return False
+    except Exception as e:
+        print(f"Error generating thumbnail: {e}")
+    return False
+
 def generate_pdf_thumbnail(pdf_path, thumbnail_path, size=(200, 200)):
     """Generate a thumbnail from the first page of a PDF file."""
     try:
@@ -58,14 +78,50 @@ def generate_pdf_thumbnail(pdf_path, thumbnail_path, size=(200, 200)):
         print(f"Error generating PDF thumbnail: {e}")
     return False
 
+def generate_eps_thumbnail(eps_path, thumbnail_path, size=(200, 200)):
+    """Generate a thumbnail from an EPS file using Ghostscript."""
+    try:
+        # Use Ghostscript to convert EPS to PNG
+        cmd = [
+            'gs', '-dNOPAUSE', '-dBATCH', '-sDEVICE=png16m',
+            f'-dDEVICEWIDTHPOINTS={size[0]}', f'-dDEVICEHEIGHTPOINTS={size[1]}',
+            f'-sOutputFile={thumbnail_path}', eps_path
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode == 0 and os.path.exists(thumbnail_path):
+            return True
+    except Exception as e:
+        print(f"Error generating EPS thumbnail: {e}")
+    return False
+
+def generate_svg_thumbnail(svg_path, thumbnail_path, size=(200, 200)):
+    """Generate a thumbnail from an SVG file using CairoSVG."""
+    try:
+        # Convert SVG to PNG using CairoSVG
+        with open(svg_path, 'rb') as svg_file:
+            png_data = cairosvg.svg2png(
+                bytestring=svg_file.read(),
+                output_width=size[0],
+                output_height=size[1]
+            )
+        
+        # Save the PNG data
+        with open(thumbnail_path, 'wb') as png_file:
+            png_file.write(png_data)
+        return True
+    except Exception as e:
+        print(f"Error generating SVG thumbnail: {e}")
+    return False
+
 # Helper function to get thumbnail path for a file
 def get_thumbnail_path(filename):
-    """Get the thumbnail path for a file, generating it if it's a PDF and doesn't exist."""
+    """Get the thumbnail path for a file, generating it if it's a supported format and doesn't exist."""
     if not filename:
         return None
     
-    # Check if file is a PDF
-    if not filename.lower().endswith('.pdf'):
+    # Check if file is a supported format
+    supported_extensions = ['.pdf', '.eps', '.svg']
+    if not any(filename.lower().endswith(ext) for ext in supported_extensions):
         return None
     
     # Create thumbnail filename
@@ -75,9 +131,9 @@ def get_thumbnail_path(filename):
     
     # If thumbnail doesn't exist, try to generate it
     if not os.path.exists(thumbnail_path):
-        pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        if os.path.exists(pdf_path):
-            if generate_pdf_thumbnail(pdf_path, thumbnail_path):
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        if os.path.exists(file_path):
+            if generate_thumbnail(file_path, thumbnail_path):
                 return thumbnail_filename
             else:
                 return None
