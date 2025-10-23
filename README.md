@@ -27,12 +27,14 @@ Een moderne Python Flask applicatie voor het beheren van evenement sponsoringen 
 - Python 3.8 of hoger
 - pip (Python package manager)
 
-### Lokale Installatie
+### GitHub Deployment
+
+#### **Option 1: Clone en Lokale Setup**
 
 1. **Clone de repository:**
 ```bash
-git clone <repository-url>
-cd Sponsoring
+git clone https://github.com/mark-vandenbroeck/sponsoring-kampanje.git
+cd sponsoring-kampanje
 ```
 
 2. **Installeer de vereiste packages:**
@@ -48,6 +50,46 @@ python app.py
 4. **Open je browser:**
 - Lokale toegang: `http://localhost:5100`
 - Netwerk toegang: `http://[jouw-ip]:5100`
+
+#### **Option 2: Docker Deployment vanuit GitHub**
+
+1. **Clone de repository:**
+```bash
+git clone https://github.com/mark-vandenbroeck/sponsoring-kampanje.git
+cd sponsoring-kampanje
+```
+
+2. **Build Docker container:**
+```bash
+docker build -t sponsoring-kampanje .
+```
+
+3. **Run met data persistence:**
+```bash
+# Maak data directory
+mkdir -p data
+
+# Start container
+docker run -d -p 5100:5100 \
+  -v $(pwd)/data:/app/data \
+  -v $(pwd)/data/uploads:/app/static/uploads \
+  --name sponsoring-app \
+  sponsoring-kampanje
+```
+
+4. **Of gebruik docker-compose:**
+```bash
+docker-compose up -d
+```
+
+#### **Option 3: One-Command Deployment**
+
+```bash
+# Clone en deploy in één commando
+git clone https://github.com/mark-vandenbroeck/sponsoring-kampanje.git && \
+cd sponsoring-kampanje && \
+./deploy.sh production
+```
 
 ### Eerste Setup
 Bij de eerste start wordt automatisch:
@@ -187,6 +229,219 @@ server {
         add_header Cache-Control "public, immutable";
     }
 }
+```
+
+## GitHub Deployment Instructies
+
+### **🚀 Snelle Start vanuit GitHub**
+
+#### **1. Repository Clonen**
+```bash
+# Clone de repository
+git clone https://github.com/mark-vandenbroeck/sponsoring-kampanje.git
+cd sponsoring-kampanje
+
+# Bekijk beschikbare branches
+git branch -a
+```
+
+#### **2. Lokale Development Setup**
+```bash
+# Installeer dependencies
+pip install -r requirements.txt
+
+# Start development server
+python app.py
+```
+
+#### **3. Docker Deployment**
+```bash
+# Build Docker image
+docker build -t sponsoring-kampanje .
+
+# Run met persistent data
+docker run -d -p 5100:5100 \
+  -v $(pwd)/data:/app/data \
+  -v $(pwd)/data/uploads:/app/static/uploads \
+  --name sponsoring-app \
+  sponsoring-kampanje
+
+# Of gebruik docker-compose
+docker-compose up -d
+```
+
+#### **4. Production Deployment**
+```bash
+# Gebruik deploy script
+chmod +x deploy.sh
+./deploy.sh production
+
+# Of handmatig
+FLASK_ENV=production docker-compose up -d
+```
+
+### **📋 GitHub Workflow**
+
+#### **Development Workflow:**
+```bash
+# 1. Fork repository (voor contributies)
+# 2. Clone je fork
+git clone https://github.com/jouw-username/sponsoring-kampanje.git
+
+# 3. Maak feature branch
+git checkout -b feature/nieuwe-functie
+
+# 4. Maak wijzigingen en commit
+git add .
+git commit -m "Voeg nieuwe functie toe"
+
+# 5. Push naar je fork
+git push origin feature/nieuwe-functie
+
+# 6. Maak Pull Request op GitHub
+```
+
+#### **Updates Ophalen:**
+```bash
+# Updates ophalen van originele repository
+git remote add upstream https://github.com/mark-vandenbroeck/sponsoring-kampanje.git
+git fetch upstream
+git merge upstream/main
+```
+
+### **🔧 GitHub Actions (CI/CD)**
+
+#### **Automatische Deployment Setup:**
+1. **Maak `.github/workflows/deploy.yml`:**
+```yaml
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Deploy to server
+      run: |
+        # Je deployment script hier
+        ./deploy.sh production
+```
+
+#### **Environment Variables in GitHub:**
+- Ga naar **Settings > Secrets and variables > Actions**
+- Voeg toe:
+  - `SECRET_KEY`: Je Flask secret key
+  - `DATABASE_URL`: Database connection string
+  - `SERVER_HOST`: Server hostname
+
+### **📦 Release Management**
+
+#### **Nieuwe Release Maken:**
+```bash
+# 1. Update versie in app.py
+# 2. Commit changes
+git add .
+git commit -m "Release v1.1.0"
+
+# 3. Tag release
+git tag -a v1.1.0 -m "Release version 1.1.0"
+git push origin v1.1.0
+
+# 4. Maak GitHub Release
+# Ga naar GitHub > Releases > Create a new release
+```
+
+#### **Changelog Onderhoud:**
+```bash
+# Update CHANGELOG.md
+git add CHANGELOG.md
+git commit -m "Update changelog for v1.1.0"
+```
+
+### **🛡️ Security Best Practices**
+
+#### **Repository Security:**
+- ✅ **Private repository** voor bedrijfsapplicaties
+- ✅ **Branch protection** op main branch
+- ✅ **Required reviews** voor pull requests
+- ✅ **Secrets management** voor credentials
+
+#### **Deployment Security:**
+```bash
+# Gebruik environment variables
+export SECRET_KEY="$(openssl rand -hex 32)"
+export FLASK_ENV=production
+
+# Database security
+# - Gebruik sterke database passwords
+# - Enable SSL voor database connections
+# - Regular backups
+```
+
+### **📊 Monitoring & Logs**
+
+#### **GitHub Insights:**
+- **Traffic:** Bekijk repository views en clones
+- **Contributors:** Zie wie bijdraagt
+- **Issues:** Bug tracking en feature requests
+- **Pull Requests:** Code review process
+
+#### **Application Monitoring:**
+```bash
+# Docker logs
+docker logs -f sponsoring-app
+
+# System monitoring
+docker stats sponsoring-app
+
+# Health checks
+curl -f http://localhost:5100/ || echo "Application down"
+```
+
+### **🔄 Backup & Recovery**
+
+#### **Database Backup:**
+```bash
+# Backup database
+docker exec sponsoring-app cp /app/data/sponsoring.db /app/data/backup-$(date +%Y%m%d).db
+
+# Restore database
+docker exec sponsoring-app cp /app/data/backup-20241023.db /app/data/sponsoring.db
+```
+
+#### **Code Backup:**
+```bash
+# Clone repository op backup server
+git clone https://github.com/mark-vandenbroeck/sponsoring-kampanje.git
+
+# Regular updates
+cd sponsoring-kampanje
+git pull origin main
+```
+
+### **📞 Support & Troubleshooting**
+
+#### **GitHub Issues:**
+- **Bug Reports:** Gebruik GitHub Issues
+- **Feature Requests:** Maak een issue met label "enhancement"
+- **Documentation:** Verbeter README.md via pull requests
+
+#### **Common Issues:**
+```bash
+# Port already in use
+lsof -ti:5100 | xargs kill -9
+
+# Docker container issues
+docker system prune -a
+docker-compose down && docker-compose up -d
+
+# Permission issues
+sudo chown -R $USER:$USER .
 ```
 
 ### Productie Checklist
