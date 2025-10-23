@@ -242,7 +242,7 @@ server {
 
 # Applicatie beschikbaar op:
 # - HTTP:  http://localhost (redirect naar HTTPS)
-# - HTTPS: https://localhost
+# - HTTPS: https://localhost:5443
 # - Direct: http://localhost:5100
 ```
 
@@ -291,7 +291,7 @@ cd sponsoring-kampanje
 ./deploy-https.sh development
 
 # 3. Open browser
-# https://localhost (accept self-signed certificate)
+# https://localhost:5443 (accept self-signed certificate)
 ```
 
 #### **Production Setup:**
