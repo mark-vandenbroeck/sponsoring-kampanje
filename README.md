@@ -15,11 +15,18 @@ Een moderne Python Flask applicatie voor het beheren van evenement sponsoringen 
 - **Authenticatie & Autorisatie**: Volledig gebruikerssysteem met rollen (Beheerder, Gebruiker, Lezer)
 - **Rolgebaseerde toegang**: Verschillende rechten per gebruikerstype
 - **Geavanceerde filtering**: Filter op evenement, kontrakt, sponsor, bestuurslid, status
+- **Smart defaults**: Automatische selectie van het meest recente evenement als default filter
 - **Export functionaliteit**: Excel en PDF export voor alle overzichten
 - **Rich text editing**: WYSIWYG editor voor vrije tekstvelden
 - **Responsive design**: Werkt perfect op desktop, tablet en mobiel
 - **Modern UI**: Strakke interface met levendige maar zachte kleuren
 - **File management**: Veilige bestandsuploads met thumbnails en zip downloads
+
+### Smart Filtering & Defaults
+- **Intelligente defaults**: De applicatie selecteert automatisch het meest recente evenement als default filter
+- **Consistent gedrag**: Zelfde default logica op alle pagina's (kontrakten, sponsoringen, exports)
+- **Gebruiksvriendelijk**: Gebruikers zien direct relevante data zonder handmatige selectie
+- **Flexibele filtering**: Volledige controle over welke data wordt getoond via dropdown filters
 
 ## Installatie
 
