@@ -822,6 +822,12 @@ def kontrakten():
     sort_key = request.args.get('sort', '')
     sort_dir = request.args.get('dir', 'asc')
     
+    # If no evenement filter is provided, default to the most recent event
+    if not evenement_filter:
+        latest_evenement = Evenement.query.order_by(Evenement.datum.desc()).first()
+        if latest_evenement:
+            evenement_filter = str(latest_evenement.id)
+    
     # Start with base query
     query = Kontrakt.query.join(Evenement)
     
@@ -929,6 +935,12 @@ def export_kontrakten_excel():
     # Get filter parameters
     evenement_filter = request.args.get('evenement', '')
     
+    # If no evenement filter is provided, default to the most recent event
+    if not evenement_filter:
+        latest_evenement = Evenement.query.order_by(Evenement.datum.desc()).first()
+        if latest_evenement:
+            evenement_filter = str(latest_evenement.id)
+    
     query = Kontrakt.query
     if evenement_filter:
         query = query.filter(Kontrakt.evenement_id == evenement_filter)
@@ -964,6 +976,12 @@ def export_kontrakten_excel():
 def export_kontrakten_pdf():
     # Get filter parameters
     evenement_filter = request.args.get('evenement', '')
+    
+    # If no evenement filter is provided, default to the most recent event
+    if not evenement_filter:
+        latest_evenement = Evenement.query.order_by(Evenement.datum.desc()).first()
+        if latest_evenement:
+            evenement_filter = str(latest_evenement.id)
     
     query = Kontrakt.query
     if evenement_filter:
@@ -1271,6 +1289,12 @@ def sponsoringen():
     sort_key = request.args.get('sort', '')  # '', 'evenement', 'kontrakt', 'sponsor', 'aangebracht', 'bedrag'
     sort_dir = request.args.get('dir', 'asc')  # 'asc' or 'desc'
     
+    # If no evenement filter is provided, default to the most recent event
+    if not evenement_filter:
+        latest_evenement = Evenement.query.order_by(Evenement.datum.desc()).first()
+        if latest_evenement:
+            evenement_filter = str(latest_evenement.id)
+    
     # Build query
     query = Sponsoring.query
     
@@ -1551,6 +1575,12 @@ def export_sponsoringen_excel():
     gefactureerd_filter = request.args.get('gefactureerd', '')
     betaald_filter = request.args.get('betaald', '')
     
+    # If no evenement filter is provided, default to the most recent event
+    if not evenement_filter:
+        latest_evenement = Evenement.query.order_by(Evenement.datum.desc()).first()
+        if latest_evenement:
+            evenement_filter = str(latest_evenement.id)
+    
     query = Sponsoring.query
     if evenement_filter:
         query = query.filter(Sponsoring.evenement_id == evenement_filter)
@@ -1628,6 +1658,12 @@ def export_sponsoringen_pdf():
     logo_afgewerkt_filter = request.args.get('logo_afgewerkt', '')
     gefactureerd_filter = request.args.get('gefactureerd', '')
     betaald_filter = request.args.get('betaald', '')
+    
+    # If no evenement filter is provided, default to the most recent event
+    if not evenement_filter:
+        latest_evenement = Evenement.query.order_by(Evenement.datum.desc()).first()
+        if latest_evenement:
+            evenement_filter = str(latest_evenement.id)
     
     query = Sponsoring.query
     if evenement_filter:
