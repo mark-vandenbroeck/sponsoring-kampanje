@@ -19,6 +19,7 @@ from PIL import Image
 import cairosvg
 import subprocess
 import tempfile
+from psd_tools import PSDImage
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
@@ -45,7 +46,7 @@ def format_european_currency(amount):
 
 # Helper function for generating thumbnails from various file types
 def generate_thumbnail(file_path, thumbnail_path, size=(200, 200)):
-    """Generate a thumbnail from various file types (PDF, EPS, SVG)."""
+    """Generate a thumbnail from various file types (PDF, EPS, SVG, AI, PSD)."""
     try:
         file_ext = os.path.splitext(file_path)[1].lower()
         
@@ -55,6 +56,10 @@ def generate_thumbnail(file_path, thumbnail_path, size=(200, 200)):
             return generate_eps_thumbnail(file_path, thumbnail_path, size)
         elif file_ext == '.svg':
             return generate_svg_thumbnail(file_path, thumbnail_path, size)
+        elif file_ext == '.ai':
+            return generate_ai_thumbnail(file_path, thumbnail_path, size)
+        elif file_ext == '.psd':
+            return generate_psd_thumbnail(file_path, thumbnail_path, size)
         else:
             return False
     except Exception as e:
@@ -113,6 +118,46 @@ def generate_svg_thumbnail(svg_path, thumbnail_path, size=(200, 200)):
         print(f"Error generating SVG thumbnail: {e}")
     return False
 
+def generate_ai_thumbnail(ai_path, thumbnail_path, size=(200, 200)):
+    """Generate a thumbnail from an AI file using Ghostscript."""
+    try:
+        # AI files are essentially EPS files, so we can use Ghostscript
+        # Use Ghostscript to convert AI to PNG
+        cmd = [
+            'gs', '-dNOPAUSE', '-dBATCH', '-sDEVICE=png16m',
+            f'-dDEVICEWIDTHPOINTS={size[0]}', f'-dDEVICEHEIGHTPOINTS={size[1]}',
+            f'-sOutputFile={thumbnail_path}', ai_path
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode == 0 and os.path.exists(thumbnail_path):
+            return True
+    except Exception as e:
+        print(f"Error generating AI thumbnail: {e}")
+    return False
+
+def generate_psd_thumbnail(psd_path, thumbnail_path, size=(200, 200)):
+    """Generate a thumbnail from a PSD file using psd-tools."""
+    try:
+        # Load PSD file
+        psd = PSDImage.open(psd_path)
+        
+        # Get the composite image (flattened version)
+        composite = psd.composite()
+        
+        # Convert to RGB if necessary
+        if composite.mode != 'RGB':
+            composite = composite.convert('RGB')
+        
+        # Create thumbnail
+        composite.thumbnail(size, Image.Resampling.LANCZOS)
+        
+        # Save thumbnail
+        composite.save(thumbnail_path, 'PNG')
+        return True
+    except Exception as e:
+        print(f"Error generating PSD thumbnail: {e}")
+    return False
+
 # Helper function to get thumbnail path for a file
 def get_thumbnail_path(filename):
     """Get the thumbnail path for a file, generating it if it's a supported format and doesn't exist."""
@@ -120,7 +165,7 @@ def get_thumbnail_path(filename):
         return None
     
     # Check if file is a supported format
-    supported_extensions = ['.pdf', '.eps', '.svg']
+    supported_extensions = ['.pdf', '.eps', '.svg', '.ai', '.psd']
     if not any(filename.lower().endswith(ext) for ext in supported_extensions):
         return None
     
