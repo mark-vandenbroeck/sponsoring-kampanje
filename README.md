@@ -231,6 +231,121 @@ server {
 }
 ```
 
+## HTTPS Setup
+
+### **🔒 HTTPS Configuratie Opties**
+
+#### **Option 1: Self-Signed Certificaten (Development)**
+```bash
+# Quick HTTPS setup voor development
+./deploy-https.sh development
+
+# Applicatie beschikbaar op:
+# - HTTP:  http://localhost (redirect naar HTTPS)
+# - HTTPS: https://localhost
+# - Direct: http://localhost:5100
+```
+
+#### **Option 2: Let's Encrypt (Productie)**
+```bash
+# Let's Encrypt setup voor productie
+./setup-letsencrypt.sh your-domain.com admin@your-domain.com
+
+# Vereisten:
+# - Eigen domein (bijv. sponsoring.kampanje.be)
+# - Domein wijst naar server IP
+# - Poort 80 en 443 open in firewall
+```
+
+#### **Option 3: Cloud Provider SSL**
+- **AWS:** Certificate Manager + Application Load Balancer
+- **DigitalOcean:** Load Balancer met SSL
+- **Cloudflare:** Free SSL + CDN
+- **Google Cloud:** SSL Certificates
+
+### **🛡️ HTTPS Security Features**
+
+#### **SSL/TLS Configuratie:**
+- ✅ **TLS 1.2 en 1.3** ondersteuning
+- ✅ **Sterke cipher suites** (ECDHE, AES-256-GCM)
+- ✅ **HTTP/2** ondersteuning
+- ✅ **HSTS** (HTTP Strict Transport Security)
+- ✅ **XSS Protection** headers
+- ✅ **Content Security Policy**
+- ✅ **Rate limiting** (10 requests/second)
+
+#### **Automatische Redirects:**
+- ✅ **HTTP → HTTPS** redirect
+- ✅ **www → non-www** (optioneel)
+- ✅ **Trailing slash** normalisatie
+
+### **📋 HTTPS Deployment Stappen**
+
+#### **Development Setup:**
+```bash
+# 1. Clone repository
+git clone https://github.com/mark-vandenbroeck/sponsoring-kampanje.git
+cd sponsoring-kampanje
+
+# 2. HTTPS development deployment
+./deploy-https.sh development
+
+# 3. Open browser
+# https://localhost (accept self-signed certificate)
+```
+
+#### **Production Setup:**
+```bash
+# 1. Server voorbereiden
+sudo apt-get update
+sudo apt-get install docker.io docker-compose
+
+# 2. Domein configureren
+# DNS: sponsoring.kampanje.be → server-ip
+
+# 3. Let's Encrypt setup
+./setup-letsencrypt.sh sponsoring.kampanje.be admin@kampanje.be
+
+# 4. Automatische vernieuwing
+sudo crontab -e
+# Voeg toe: 0 12 * * * /path/to/sponsoring-kampanje/setup-letsencrypt.sh renew
+```
+
+### **🔧 HTTPS Management**
+
+#### **SSL Certificaat Beheer:**
+```bash
+# Certificaat status
+openssl x509 -in ssl/sponsoring.crt -text -noout
+
+# Certificaat vernieuwing (Let's Encrypt)
+docker-compose -f docker-compose-letsencrypt.yml run --rm certbot renew
+
+# Certificaat testen
+curl -I https://your-domain.com
+```
+
+#### **Security Headers Testen:**
+```bash
+# Security headers controleren
+curl -I https://your-domain.com
+
+# SSL Labs test (online)
+# https://www.ssllabs.com/ssltest/
+```
+
+### **⚠️ Browser Waarschuwingen**
+
+#### **Self-Signed Certificaten:**
+- **Chrome:** "Your connection is not private" → Advanced → Proceed to localhost
+- **Firefox:** "Warning: Potential Security Risk" → Advanced → Accept the Risk
+- **Safari:** "This Connection Is Not Private" → Show Details → Visit this website
+
+#### **Oplossingen:**
+- **Development:** Accepteer self-signed certificaat
+- **Productie:** Gebruik Let's Encrypt of commerciële certificaten
+- **Team:** Deel certificaat via secure channel
+
 ## GitHub Deployment Instructies
 
 ### **🚀 Snelle Start vanuit GitHub**
