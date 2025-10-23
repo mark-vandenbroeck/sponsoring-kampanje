@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Gebruikers{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-user-cog me-2"></i>Gebruikers</h2>
+                <a href="{{ url_for('gebruiker_toevoegen') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Nieuwe Gebruiker
+                </a>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Rol</th>
+                                    <th>Eerste Aanmelding</th>
+                                    <th>Laatste Activiteit</th>
+                                    <th>Status</th>
+                                    <th>Acties</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for gebruiker in gebruikers %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ gebruiker.email }}</strong>
+                                        {% if gebruiker.id == current_user.id %}
+                                            <span class="badge bg-info ms-1">Jij</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if gebruiker.rol == 'beheerder' %}bg-danger
+                                            {% elif gebruiker.rol == 'gebruiker' %}bg-primary
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ gebruiker.rol.title() }}
+                                        </span>
+                                    </td>
+                                    <td>{{ gebruiker.eerste_aanmelding.strftime('%d/%m/%Y %H:%M') if gebruiker.eerste_aanmelding else 'Nog niet ingelogd' }}</td>
+                                    <td>{{ gebruiker.laatste_activiteit.strftime('%d/%m/%Y %H:%M') if gebruiker.laatste_activiteit else 'Nog niet ingelogd' }}</td>
+                                    <td>
+                                        {% if gebruiker.password_hash %}
+                                            <span class="badge bg-success">Actief</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Wachtwoord vereist</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ url_for('gebruiker_bewerken', user_id=gebruiker.id) }}" 
+                                               class="btn btn-outline-primary btn-sm" title="Bewerken">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            {% if gebruiker.password_hash %}
+                                                <form method="POST" action="{{ url_for('gebruiker_wachtwoord_reset', user_id=gebruiker.id) }}" 
+                                                      style="display: inline;" 
+                                                      onsubmit="return confirm('Weet je zeker dat je het wachtwoord van {{ gebruiker.email }} wilt resetten?')">
+                                                    <button type="submit" class="btn btn-outline-warning btn-sm" title="Wachtwoord resetten">
+                                                        <i class="fas fa-key"></i>
+                                                    </button>
+                                                </form>
+                                            {% else %}
+                                                <span class="text-muted" title="Geen wachtwoord ingesteld">
+                                                    <i class="fas fa-key text-muted"></i>
+                                                </span>
+                                            {% endif %}
+                                            {% if gebruiker.id != current_user.id %}
+                                                <form method="POST" action="{{ url_for('gebruiker_verwijderen', user_id=gebruiker.id) }}" 
+                                                      style="display: inline;" 
+                                                      onsubmit="return confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Verwijderen">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

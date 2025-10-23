@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Sponsoring De Kampanje{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container-fluid">
+        <h1 class="page-title">
+            <i class="fas fa-tachometer-alt me-3"></i>
+            Dashboard
+        </h1>
+        <p class="lead mb-0">Overzicht van alle sponsoring activiteiten</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="stats-number">{{ evenementen_count }}</div>
+            <div class="stats-label">Evenementen</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="stats-number">{{ sponsoringen_count }}</div>
+            <div class="stats-label">Sponsoringen</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="stats-number">{{ sponsors_count }}</div>
+            <div class="stats-label">Sponsors</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="stats-number">{{ bestuursleden_count }}</div>
+            <div class="stats-label">Bestuursleden</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Recente Evenementen
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recente_evenementen %}
+                    {% for evenement in recente_evenementen %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h6 class="mb-1">{{ evenement.naam }}</h6>
+                            <small class="text-muted">{{ evenement.datum.strftime('%d/%m/%Y') }} - {{ evenement.locatie }}</small>
+                        </div>
+                        <a href="{{ url_for('evenement_detail', id=evenement.id) }}" class="btn btn-sm btn-outline-primary">
+                            Bekijk
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">Geen evenementen gevonden.</p>
+                {% endif %}
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('evenementen') }}" class="btn btn-primary">
+                        Alle Evenementen
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-handshake me-2"></i>
+                    Recente Sponsoringen
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recente_sponsoringen %}
+                    {% for sponsoring in recente_sponsoringen %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h6 class="mb-1">{{ sponsoring.sponsor.naam }}</h6>
+                            <small class="text-muted">{{ sponsoring.evenement.naam }} - {{ sponsoring.kontrakt.kontrakt }}</small>
+                        </div>
+                        <a href="{{ url_for('sponsoring_detail', id=sponsoring.id) }}" class="btn btn-sm btn-outline-success">
+                            Bekijk
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">Geen sponsoringen gevonden.</p>
+                {% endif %}
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('sponsoringen') }}" class="btn btn-success">
+                        Alle Sponsoringen
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Snelle Acties
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <a href="{{ url_for('add_evenement') }}" class="btn btn-primary w-100 mb-3">
+                            <i class="fas fa-plus me-2"></i>
+                            Nieuw Evenement
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{{ url_for('add_sponsoring') }}" class="btn btn-success w-100 mb-3">
+                            <i class="fas fa-plus me-2"></i>
+                            Nieuwe Sponsoring
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{{ url_for('add_sponsor') }}" class="btn btn-info w-100 mb-3">
+                            <i class="fas fa-plus me-2"></i>
+                            Nieuwe Sponsor
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{{ url_for('add_kontrakt') }}" class="btn btn-warning w-100 mb-3">
+                            <i class="fas fa-plus me-2"></i>
+                            Nieuw Kontrakt
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}{{ sponsor.naam }} - Sponsoring De Kampanje{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="page-title">
+            <i class="fas fa-building me-3"></i>
+            {{ sponsor.naam }}
+        </h1>
+        <p class="lead mb-0">Sponsor Details</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Sponsor Informatie
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Naam:</strong> {{ sponsor.naam }}</p>
+                        {% if sponsor.btw_nummer %}
+                        <p><strong>BTW-nummer:</strong> {{ sponsor.btw_nummer }}</p>
+                        {% endif %}
+                        {% if sponsor.kontaktpersoon %}
+                        <p><strong>Kontaktpersoon:</strong> {{ sponsor.kontaktpersoon }}</p>
+                        {% endif %}
+                        {% if sponsor.telefoon %}
+                        <p><strong>Telefoon:</strong> {{ sponsor.telefoon }}</p>
+                        {% endif %}
+                        {% if sponsor.email %}
+                        <p><strong>Email:</strong> {{ sponsor.email }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {% if sponsor.straat or sponsor.huisnummer or sponsor.postcode or sponsor.gemeente %}
+                        <p><strong>Adres:</strong></p>
+                        <p>
+                            {% if sponsor.straat %}{{ sponsor.straat }}{% endif %}
+                            {% if sponsor.huisnummer %} {{ sponsor.huisnummer }}{% endif %}<br>
+                            {% if sponsor.postcode %}{{ sponsor.postcode }}{% endif %}
+                            {% if sponsor.gemeente %} {{ sponsor.gemeente }}{% endif %}
+                        </p>
+                        {% endif %}
+                        {% if sponsor.bestuurslid %}
+                        <p><strong>Bestuurslid:</strong> 
+                            <a href="{{ url_for('bestuurslid_detail', id=sponsor.bestuurslid.id) }}" class="text-decoration-none">
+                                {{ sponsor.bestuurslid.naam or sponsor.bestuurslid.initialen }}
+                            </a>
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if sponsor.opmerkingen %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-note-sticky me-2"></i>
+                    Opmerkingen
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="rich-text-content">{{ sponsor.opmerkingen|safe }}</div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-handshake me-2"></i>
+                    Sponsoringen
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if sponsor.sponsoringen %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Evenement</th>
+                                <th>Kontrakt</th>
+                                <th class="amount-column">Bedrag</th>
+                                <th>Status</th>
+                                <th>Acties</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sponsoring in sponsor.sponsoringen %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('evenement_detail', id=sponsoring.evenement.id) }}" class="text-decoration-none">
+                                        {{ sponsoring.evenement.naam }}
+                                    </a>
+                                    <br><small class="text-muted">{{ sponsoring.evenement.datum.strftime('%d/%m/%Y') }}</small>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('kontrakt_detail', id=sponsoring.kontrakt.id) }}" class="text-decoration-none">
+                                        {{ sponsoring.kontrakt.kontrakt }}
+                                    </a>
+                                </td>
+                                <td class="amount-column">€{{ format_european_currency(sponsoring.facturatiebedrag_incl_btw or 0) }}</td>
+                                <td>
+                                    {% if sponsoring.betaald %}
+                                        <span class="badge bg-success">Betaald</span>
+                                    {% elif sponsoring.gefactureerd %}
+                                        <span class="badge bg-warning">Gefactureerd</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">In behandeling</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('sponsoring_detail', id=sponsoring.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        {% if sponsor.sponsoringen %}
+                        <tfoot>
+                            <tr class="table-info">
+                                <td colspan="2"><strong>Totaal:</strong></td>
+                                <td class="amount-column"><strong>€{{ format_european_currency(total_bedrag) }}</strong></td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tfoot>
+                        {% endif %}
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">Geen sponsoringen voor deze sponsor.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Statistieken
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-12">
+                        <div class="stats-number text-primary">{{ sponsor.sponsoringen|length }}</div>
+                        <div class="stats-label">Sponsoringen</div>
+                    </div>
+                </div>
+                
+                {% set total_bedrag = sponsor.sponsoringen|sum(attribute='facturatiebedrag_incl_btw') %}
+                {% if total_bedrag %}
+                <hr>
+                <div class="text-center">
+                    <div class="stats-number text-success">€{{ format_european_currency(total_bedrag) }}</div>
+                    <div class="stats-label">Totaal Bedrag</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tools me-2"></i>
+                    Acties
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if current_user and current_user.is_gebruiker() %}
+                        <a href="{{ url_for('edit_sponsor', id=sponsor.id) }}" class="btn btn-warning">
+                            <i class="fas fa-edit me-2"></i>
+                            Bewerken
+                        </a>
+                        <a href="{{ url_for('add_sponsoring') }}?sponsor_id={{ sponsor.id }}" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i>
+                            Nieuwe Sponsoring
+                        </a>
+                    {% endif %}
+                    <a href="{{ url_for('sponsors') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Terug naar Overzicht
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

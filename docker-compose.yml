@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  sponsoring-app:
+    build: .
+    ports:
+      - "5100:5100"
+    volumes:
+      # Persist database
+      - ./data:/app/data
+      # Persist uploads
+      - ./static/uploads:/app/static/uploads
+      # Optional: mount config
+      - ./config:/app/config:ro
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=app.py
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5100/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - sponsoring-app
+    restart: unless-stopped

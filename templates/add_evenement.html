@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Nieuw Evenement - Sponsoring De Kampanje{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="page-title">
+            <i class="fas fa-plus me-3"></i>
+            Nieuw Evenement
+        </h1>
+        <p class="lead mb-0">Voeg een nieuw evenement toe</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Evenement Details
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="evenementcode" class="form-label">Evenementcode *</label>
+                                <input type="text" class="form-control" id="evenementcode" name="evenementcode" required>
+                                <div class="form-text">Korte unieke code voor het evenement</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="datum" class="form-label">Datum *</label>
+                                <input type="date" class="form-control" id="datum" name="datum" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="naam" class="form-label">Volledige Naam *</label>
+                        <input type="text" class="form-control" id="naam" name="naam" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="locatie" class="form-label">Locatie *</label>
+                        <input type="text" class="form-control" id="locatie" name="locatie" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="omschrijving" class="form-label">Omschrijving</label>
+                        <div class="rich-text-editor" data-target="omschrijving"></div>
+                        <input type="hidden" id="omschrijving" name="omschrijving">
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('evenementen') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Terug
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>
+                            Opslaan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,792 @@
+{% extends "base.html" %}
+
+{% block title %}Sponsors - Sponsoring De Kampanje{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container-fluid">
+        <h1 class="page-title">
+            <i class="fas fa-building me-3"></i>
+            Sponsors
+        </h1>
+        <p class="lead mb-0">Beheer alle sponsors</p>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4>Alle Sponsors ({{ sponsors|length }})</h4>
+    </div>
+    <div class="d-flex gap-2">
+        {% if current_user and current_user.is_gebruiker() %}
+            <a href="{{ url_for('add_sponsor') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>
+                Nieuwe Sponsor
+            </a>
+        {% endif %}
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-download me-2"></i>
+                Exporteren
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ url_for('export_sponsors_excel', bestuurslid=request.args.get('bestuurslid', ''), naam=request.args.get('naam', ''), kontaktpersoon=request.args.get('kontaktpersoon', '')) }}">
+                    <i class="fas fa-file-excel me-2"></i>Excel
+                </a></li>
+                <li><a class="dropdown-item" href="{{ url_for('export_sponsors_pdf', bestuurslid=request.args.get('bestuurslid', ''), naam=request.args.get('naam', ''), kontaktpersoon=request.args.get('kontaktpersoon', '')) }}">
+                    <i class="fas fa-file-pdf me-2"></i>PDF
+                </a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Section -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-2">
+                   <div class="col-md-3">
+                       <label for="naam_search" class="form-label small">Bedrijfsnaam</label>
+                       <div class="position-relative">
+                           <input type="text" class="form-control form-control-sm" id="naam_search" placeholder="Type om te zoeken..." autocomplete="off" value="{{ selected_naam }}">
+                           <input type="hidden" id="naam" name="naam" value="{{ selected_naam }}">
+                           <div id="naam_dropdown" class="dropdown-menu w-100" style="display: none; max-height: 200px; overflow-y: auto;">
+                               <a href="#" class="dropdown-item naam-option" data-name="">
+                                   Alle bedrijven
+                               </a>
+                               {% for sponsor in all_sponsors %}
+                               <a href="#" class="dropdown-item naam-option" data-name="{{ sponsor.naam }}">
+                                   {{ sponsor.naam }}
+                               </a>
+                               {% endfor %}
+                           </div>
+                       </div>
+                   </div>
+            <div class="col-md-3">
+                <label for="kontaktpersoon_search" class="form-label small">Kontaktpersoon</label>
+                <div class="position-relative">
+                    <input type="text" class="form-control form-control-sm" id="kontaktpersoon_search" placeholder="Type om te zoeken..." autocomplete="off" value="{{ selected_kontaktpersoon }}">
+                    <input type="hidden" id="kontaktpersoon" name="kontaktpersoon" value="{{ selected_kontaktpersoon }}">
+                    <div id="kontaktpersoon_dropdown" class="dropdown-menu w-100" style="display: none; max-height: 200px; overflow-y: auto;">
+                        <a href="#" class="dropdown-item kontaktpersoon-option" data-name="">
+                            Alle kontaktpersonen
+                        </a>
+                        {% for sponsor in all_sponsors %}
+                        <a href="#" class="dropdown-item kontaktpersoon-option" data-name="{{ sponsor.kontaktpersoon }}">
+                            {{ sponsor.kontaktpersoon }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label for="bestuurslid_search" class="form-label small">Bestuurslid</label>
+                <div class="position-relative">
+                    <input type="text" class="form-control form-control-sm" id="bestuurslid_search" placeholder="Type om te zoeken..." autocomplete="off" value="{{ bestuursleden|selectattr('id', 'equalto', selected_bestuurslid|int if selected_bestuurslid else 0)|map(attribute='naam')|first or bestuursleden|selectattr('id', 'equalto', selected_bestuurslid|int if selected_bestuurslid else 0)|map(attribute='initialen')|first or '' }}">
+                    <input type="hidden" id="bestuurslid" name="bestuurslid" value="{{ selected_bestuurslid }}">
+                    <div id="bestuurslid_dropdown" class="dropdown-menu w-100" style="display: none; max-height: 200px; overflow-y: auto;">
+                        <a href="#" class="dropdown-item bestuurslid-option" data-id="" data-name="">
+                            Alle bestuursleden
+                        </a>
+                        {% for bestuurslid in bestuursleden %}
+                        <a href="#" class="dropdown-item bestuurslid-option" data-id="{{ bestuurslid.id }}" data-name="{{ bestuurslid.naam or bestuurslid.initialen }}">
+                            {{ bestuurslid.naam or bestuurslid.initialen }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small">&nbsp;</label>
+                <div class="d-flex gap-1">
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                    <a href="{{ url_for('sponsors') }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+        
+        <!-- Active Filters Display -->
+        {% if selected_naam or selected_kontaktpersoon or selected_bestuurslid %}
+        <div class="mt-2">
+            <small class="text-muted">
+                <strong>Filters actief:</strong>
+                {% if selected_naam %}
+                    Bedrijfsnaam: {{ selected_naam }}
+                {% endif %}
+                {% if selected_kontaktpersoon %}
+                    {% if selected_naam %} | {% endif %}
+                    Kontaktpersoon: {{ selected_kontaktpersoon }}
+                {% endif %}
+                {% if selected_bestuurslid %}
+                    {% if selected_naam or selected_kontaktpersoon %} | {% endif %}
+                    Bestuurslid: 
+                    {% for bestuurslid in bestuursleden %}
+                        {% if bestuurslid.id|string == selected_bestuurslid %}
+                            {{ bestuurslid.naam or bestuurslid.initialen }}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </small>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        {% if sponsors %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>
+                            <a class="text-decoration-none" href="{{ url_for('sponsors', bestuurslid=selected_bestuurslid, naam=selected_naam, kontaktpersoon=selected_kontaktpersoon, sort='naam', dir='desc' if selected_sort=='naam' and selected_dir=='asc' else 'asc') }}">
+                                Naam
+                                {% if selected_sort == 'naam' %}
+                                  <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
+                                {% else %}
+                                  <i class="fas fa-sort ms-1 text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-decoration-none" href="{{ url_for('sponsors', bestuurslid=selected_bestuurslid, naam=selected_naam, kontaktpersoon=selected_kontaktpersoon, sort='kontaktpersoon', dir='desc' if selected_sort=='kontaktpersoon' and selected_dir=='asc' else 'asc') }}">
+                                Kontaktpersoon
+                                {% if selected_sort == 'kontaktpersoon' %}
+                                  <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
+                                {% else %}
+                                  <i class="fas fa-sort ms-1 text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-decoration-none" href="{{ url_for('sponsors', bestuurslid=selected_bestuurslid, naam=selected_naam, kontaktpersoon=selected_kontaktpersoon, sort='telefoon', dir='desc' if selected_sort=='telefoon' and selected_dir=='asc' else 'asc') }}">
+                                Telefoon
+                                {% if selected_sort == 'telefoon' %}
+                                  <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
+                                {% else %}
+                                  <i class="fas fa-sort ms-1 text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-decoration-none" href="{{ url_for('sponsors', bestuurslid=selected_bestuurslid, naam=selected_naam, kontaktpersoon=selected_kontaktpersoon, sort='email', dir='desc' if selected_sort=='email' and selected_dir=='asc' else 'asc') }}">
+                                Email
+                                {% if selected_sort == 'email' %}
+                                  <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
+                                {% else %}
+                                  <i class="fas fa-sort ms-1 text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-decoration-none" href="{{ url_for('sponsors', bestuurslid=selected_bestuurslid, naam=selected_naam, kontaktpersoon=selected_kontaktpersoon, sort='bestuurslid', dir='desc' if selected_sort=='bestuurslid' and selected_dir=='asc' else 'asc') }}">
+                                Bestuurslid
+                                {% if selected_sort == 'bestuurslid' %}
+                                  <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
+                                {% else %}
+                                  <i class="fas fa-sort ms-1 text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-decoration-none" href="{{ url_for('sponsors', bestuurslid=selected_bestuurslid, naam=selected_naam, kontaktpersoon=selected_kontaktpersoon, sort='sponsoringen', dir='desc' if selected_sort=='sponsoringen' and selected_dir=='asc' else 'asc') }}">
+                                Sponsoringen
+                                {% if selected_sort == 'sponsoringen' %}
+                                  <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
+                                {% else %}
+                                  <i class="fas fa-sort ms-1 text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>Acties</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sponsor in sponsors %}
+                    <tr>
+                        <td>
+                            <strong>{{ sponsor.naam }}</strong>
+                            {% if sponsor.btw_nummer %}
+                            <br><small class="text-muted">BTW: {{ sponsor.btw_nummer }}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ sponsor.kontaktpersoon or '-' }}</td>
+                        <td>{{ sponsor.telefoon or '-' }}</td>
+                        <td>{{ sponsor.email or '-' }}</td>
+                        <td>
+                            {% if sponsor.bestuurslid %}
+                                <a href="{{ url_for('bestuurslid_detail', id=sponsor.bestuurslid.id) }}" class="text-decoration-none">
+                                    {{ sponsor.bestuurslid.naam or sponsor.bestuurslid.initialen }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-success">{{ sponsor.sponsoringen|length }}</span>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('sponsor_detail', id=sponsor.id) }}" class="btn btn-sm btn-outline-primary" title="Bekijken">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if current_user and current_user.is_gebruiker() %}
+                                    <a href="{{ url_for('edit_sponsor', id=sponsor.id) }}" class="btn btn-sm btn-outline-warning" title="Bewerken">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                {% endif %}
+                                {% if current_user and current_user.is_beheerder() %}
+                                    <form method="POST" action="{{ url_for('delete_sponsor', id=sponsor.id) }}" style="display: inline;" 
+                                          onsubmit="return confirm('Weet je zeker dat je sponsor \"{{ sponsor.naam }}\" wilt verwijderen?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Verwijderen">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-building fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Geen sponsors gevonden</h5>
+            <p class="text-muted">Voeg je eerste sponsor toe om te beginnen.</p>
+            <a href="{{ url_for('add_sponsor') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>
+                Nieuwe Sponsor
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bestuurslidSearch = document.getElementById('bestuurslid_search');
+    const bestuurslidId = document.getElementById('bestuurslid');
+    const bestuurslidDropdown = document.getElementById('bestuurslid_dropdown');
+    
+    console.log('Bestuurslid elements found:', {
+        search: !!bestuurslidSearch,
+        id: !!bestuurslidId,
+        dropdown: !!bestuurslidDropdown
+    });
+    
+    // Show/hide dropdown
+    function toggleDropdown(show) {
+        if (show) {
+            // Get the input field's position
+            const inputRect = bestuurslidSearch.getBoundingClientRect();
+            
+            // Move dropdown to body to avoid CSS conflicts
+            document.body.appendChild(bestuurslidDropdown);
+            
+            // Remove all existing styles and set new ones
+            bestuurslidDropdown.removeAttribute('style');
+            bestuurslidDropdown.style.cssText = `
+                display: block !important;
+                position: fixed !important;
+                top: ${inputRect.bottom + 2}px !important;
+                left: ${inputRect.left}px !important;
+                width: ${inputRect.width}px !important;
+                z-index: 99999 !important;
+                background-color: white !important;
+                border: 1px solid #dee2e6 !important;
+                border-radius: 0.375rem !important;
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+                pointer-events: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                max-height: 200px !important;
+                overflow-y: auto !important;
+            `;
+            bestuurslidDropdown.tabIndex = -1;
+            console.log('Bestuurslid dropdown shown at position:', {
+                top: bestuurslidDropdown.style.top,
+                left: bestuurslidDropdown.style.left,
+                width: bestuurslidDropdown.style.width,
+                display: bestuurslidDropdown.style.display,
+                position: bestuurslidDropdown.style.position,
+                parentNode: bestuurslidDropdown.parentNode.tagName
+            });
+        } else {
+            bestuurslidDropdown.style.display = 'none';
+            console.log('Bestuurslid dropdown hidden');
+        }
+    }
+    
+    // Filter bestuursleden based on search term
+    function filterBestuursleden(searchTerm) {
+        const options = bestuurslidDropdown.querySelectorAll('.bestuurslid-option');
+        let hasVisibleOptions = false;
+        
+        options.forEach(option => {
+            const text = option.textContent.toLowerCase();
+            if (text.includes(searchTerm.toLowerCase())) {
+                option.style.display = 'block';
+                hasVisibleOptions = true;
+            } else {
+                option.style.display = 'none';
+            }
+        });
+        
+        return hasVisibleOptions;
+    }
+    
+    // Handle search input
+    bestuurslidSearch.addEventListener('input', function() {
+        const searchTerm = this.value;
+        if (searchTerm.length > 0) {
+            const hasResults = filterBestuursleden(searchTerm);
+            toggleDropdown(hasResults);
+            
+            // Update hidden input for filtering
+            bestuurslidId.value = searchTerm;
+        } else {
+            toggleDropdown(false);
+            bestuurslidId.value = '';
+        }
+    });
+    
+    // Handle focus
+    bestuurslidSearch.addEventListener('focus', function() {
+        console.log('Bestuurslid focus triggered');
+        if (this.value.length > 0) {
+            filterBestuursleden(this.value);
+        }
+        toggleDropdown(true);
+        console.log('Bestuurslid dropdown should be visible now');
+    });
+    
+    // Handle blur (with delay to allow clicks)
+    bestuurslidSearch.addEventListener('blur', function() {
+        setTimeout(() => {
+            // Check if the focus moved to the dropdown
+            const activeElement = document.activeElement;
+            if (!bestuurslidDropdown.contains(activeElement)) {
+                toggleDropdown(false);
+                // Submit form when leaving the field
+                if (this.value.length > 0) {
+                    this.closest('form').submit();
+                }
+            }
+        }, 200);
+    });
+    
+    bestuurslidSearch.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            this.closest('form').submit();
+        }
+    });
+    
+    // Handle option selection
+    bestuurslidDropdown.addEventListener('click', function(e) {
+        e.preventDefault();
+        const option = e.target.closest('.bestuurslid-option');
+        if (option) {
+            bestuurslidSearch.value = option.dataset.name;
+            bestuurslidId.value = option.dataset.id;
+            toggleDropdown(false);
+            
+            // Auto-submit form when selection is made
+            if (option.dataset.id !== '') {
+                this.closest('form').submit();
+            }
+        }
+    });
+    
+    // Handle keyboard navigation
+    bestuurslidSearch.addEventListener('keydown', function(e) {
+        const visibleOptions = Array.from(bestuurslidDropdown.querySelectorAll('.bestuurslid-option:not([style*="display: none"])'));
+        const currentIndex = visibleOptions.findIndex(option => option.classList.contains('active'));
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const nextIndex = currentIndex < visibleOptions.length - 1 ? currentIndex + 1 : 0;
+            visibleOptions.forEach(option => option.classList.remove('active'));
+            if (visibleOptions[nextIndex]) {
+                visibleOptions[nextIndex].classList.add('active');
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prevIndex = currentIndex > 0 ? currentIndex - 1 : visibleOptions.length - 1;
+            visibleOptions.forEach(option => option.classList.remove('active'));
+            if (visibleOptions[prevIndex]) {
+                visibleOptions[prevIndex].classList.add('active');
+            }
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const activeOption = bestuurslidDropdown.querySelector('.bestuurslid-option.active');
+            if (activeOption) {
+                bestuurslidSearch.value = activeOption.dataset.name;
+                bestuurslidId.value = activeOption.dataset.id;
+                toggleDropdown(false);
+                
+                // Auto-submit form when selection is made
+                if (activeOption.dataset.id !== '') {
+                    this.closest('form').submit();
+                }
+            }
+        } else if (e.key === 'Escape') {
+            toggleDropdown(false);
+        }
+    });
+    
+    // Naam filter functionality
+    const naamSearch = document.getElementById('naam_search');
+    const naamId = document.getElementById('naam');
+    const naamDropdown = document.getElementById('naam_dropdown');
+    
+    console.log('Naam elements found:', {
+        search: !!naamSearch,
+        id: !!naamId,
+        dropdown: !!naamDropdown
+    });
+    
+    function filterNamen(searchTerm) {
+        const options = naamDropdown.querySelectorAll('.naam-option');
+        let hasResults = false;
+        
+        options.forEach(option => {
+            const name = option.dataset.name.toLowerCase();
+            if (name.includes(searchTerm.toLowerCase()) || option.dataset.name === '') {
+                option.style.display = 'block';
+                hasResults = true;
+            } else {
+                option.style.display = 'none';
+            }
+        });
+        
+        return hasResults;
+    }
+    
+    function toggleNaamDropdown(show) {
+        if (show) {
+            // Get the input field's position
+            const inputRect = naamSearch.getBoundingClientRect();
+            
+            // Move dropdown to body to avoid CSS conflicts
+            document.body.appendChild(naamDropdown);
+            
+            // Remove all existing styles and set new ones
+            naamDropdown.removeAttribute('style');
+            naamDropdown.style.cssText = `
+                display: block !important;
+                position: fixed !important;
+                top: ${inputRect.bottom + 2}px !important;
+                left: ${inputRect.left}px !important;
+                width: ${inputRect.width}px !important;
+                z-index: 99999 !important;
+                background-color: white !important;
+                border: 1px solid #dee2e6 !important;
+                border-radius: 0.375rem !important;
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+                pointer-events: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                max-height: 200px !important;
+                overflow-y: auto !important;
+            `;
+            naamDropdown.tabIndex = -1;
+            console.log('Naam dropdown shown at position:', {
+                top: naamDropdown.style.top,
+                left: naamDropdown.style.left,
+                width: naamDropdown.style.width,
+                display: naamDropdown.style.display,
+                position: naamDropdown.style.position,
+                parentNode: naamDropdown.parentNode.tagName
+            });
+        } else {
+            naamDropdown.style.display = 'none';
+            console.log('Naam dropdown hidden');
+        }
+    }
+    
+    naamSearch.addEventListener('input', function() {
+        const searchTerm = this.value;
+        if (searchTerm.length > 0) {
+            const hasResults = filterNamen(searchTerm);
+            toggleNaamDropdown(hasResults);
+            
+            // Update hidden input for filtering
+            naamId.value = searchTerm;
+        } else {
+            // Show all options when input is cleared
+            const options = naamDropdown.querySelectorAll('.naam-option');
+            options.forEach(option => {
+                option.style.display = 'block';
+            });
+            toggleNaamDropdown(true);
+            naamId.value = '';
+        }
+    });
+    
+    naamSearch.addEventListener('focus', function() {
+        console.log('Naam focus triggered');
+        if (this.value.length > 0) {
+            filterNamen(this.value);
+        } else {
+            // Show all options when focused and no search term
+            const options = naamDropdown.querySelectorAll('.naam-option');
+            options.forEach(option => {
+                option.style.display = 'block';
+            });
+        }
+        toggleNaamDropdown(true);
+        console.log('Naam dropdown should be visible now');
+    });
+    
+    naamSearch.addEventListener('blur', function() {
+        setTimeout(() => {
+            // Check if the focus moved to the dropdown
+            const activeElement = document.activeElement;
+            if (!naamDropdown.contains(activeElement)) {
+                toggleNaamDropdown(false);
+                // Submit form when leaving the field
+                if (this.value.length > 0) {
+                    this.closest('form').submit();
+                }
+            }
+        }, 200);
+    });
+    
+    naamSearch.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            this.closest('form').submit();
+        }
+    });
+    
+    naamDropdown.addEventListener('click', function(e) {
+        e.preventDefault();
+        const option = e.target.closest('.naam-option');
+        if (option) {
+            naamSearch.value = option.dataset.name;
+            naamId.value = option.dataset.name;
+            toggleNaamDropdown(false);
+            
+            // Auto-submit form when selection is made
+            if (option.dataset.name !== '') {
+                this.closest('form').submit();
+            }
+        }
+    });
+    
+    naamSearch.addEventListener('keydown', function(e) {
+        const visibleOptions = Array.from(naamDropdown.querySelectorAll('.naam-option:not([style*="display: none"])'));
+        const currentIndex = visibleOptions.findIndex(option => option.classList.contains('active'));
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const nextIndex = currentIndex < visibleOptions.length - 1 ? currentIndex + 1 : 0;
+            visibleOptions.forEach(option => option.classList.remove('active'));
+            if (visibleOptions[nextIndex]) {
+                visibleOptions[nextIndex].classList.add('active');
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prevIndex = currentIndex > 0 ? currentIndex - 1 : visibleOptions.length - 1;
+            visibleOptions.forEach(option => option.classList.remove('active'));
+            if (visibleOptions[prevIndex]) {
+                visibleOptions[prevIndex].classList.add('active');
+            }
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const activeOption = naamDropdown.querySelector('.naam-option.active');
+            if (activeOption) {
+                naamSearch.value = activeOption.dataset.name;
+                naamId.value = activeOption.dataset.name;
+                toggleNaamDropdown(false);
+                
+                // Auto-submit form when selection is made
+                if (activeOption.dataset.name !== '') {
+                    this.closest('form').submit();
+                }
+            }
+        } else if (e.key === 'Escape') {
+            toggleNaamDropdown(false);
+        }
+    });
+    
+    // Kontaktpersoon filter functionality
+    const kontaktpersoonSearch = document.getElementById('kontaktpersoon_search');
+    const kontaktpersoonId = document.getElementById('kontaktpersoon');
+    const kontaktpersoonDropdown = document.getElementById('kontaktpersoon_dropdown');
+    
+    function filterKontaktpersonen(searchTerm) {
+        const options = kontaktpersoonDropdown.querySelectorAll('.kontaktpersoon-option');
+        let hasResults = false;
+        
+        options.forEach(option => {
+            const name = option.dataset.name.toLowerCase();
+            if (name.includes(searchTerm.toLowerCase()) || option.dataset.name === '') {
+                option.style.display = 'block';
+                hasResults = true;
+            } else {
+                option.style.display = 'none';
+            }
+        });
+        
+        return hasResults;
+    }
+    
+    function toggleKontaktpersoonDropdown(show) {
+        if (show) {
+            // Get the input field's position
+            const inputRect = kontaktpersoonSearch.getBoundingClientRect();
+            
+            // Move dropdown to body to avoid CSS conflicts
+            document.body.appendChild(kontaktpersoonDropdown);
+            
+            // Remove all existing styles and set new ones
+            kontaktpersoonDropdown.removeAttribute('style');
+            kontaktpersoonDropdown.style.cssText = `
+                display: block !important;
+                position: fixed !important;
+                top: ${inputRect.bottom + 2}px !important;
+                left: ${inputRect.left}px !important;
+                width: ${inputRect.width}px !important;
+                z-index: 99999 !important;
+                background-color: white !important;
+                border: 1px solid #dee2e6 !important;
+                border-radius: 0.375rem !important;
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+                pointer-events: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                max-height: 200px !important;
+                overflow-y: auto !important;
+            `;
+            kontaktpersoonDropdown.tabIndex = -1;
+            console.log('Kontaktpersoon dropdown shown at position:', {
+                top: kontaktpersoonDropdown.style.top,
+                left: kontaktpersoonDropdown.style.left,
+                width: kontaktpersoonDropdown.style.width,
+                display: kontaktpersoonDropdown.style.display,
+                position: kontaktpersoonDropdown.style.position,
+                parentNode: kontaktpersoonDropdown.parentNode.tagName
+            });
+        } else {
+            kontaktpersoonDropdown.style.display = 'none';
+            console.log('Kontaktpersoon dropdown hidden');
+        }
+    }
+    
+    kontaktpersoonSearch.addEventListener('input', function() {
+        const searchTerm = this.value;
+        if (searchTerm.length > 0) {
+            const hasResults = filterKontaktpersonen(searchTerm);
+            toggleKontaktpersoonDropdown(hasResults);
+            
+            // Update hidden input for filtering
+            kontaktpersoonId.value = searchTerm;
+        } else {
+            // Show all options when input is cleared
+            const options = kontaktpersoonDropdown.querySelectorAll('.kontaktpersoon-option');
+            options.forEach(option => {
+                option.style.display = 'block';
+            });
+            toggleKontaktpersoonDropdown(true);
+            kontaktpersoonId.value = '';
+        }
+    });
+    
+    kontaktpersoonSearch.addEventListener('focus', function() {
+        if (this.value.length > 0) {
+            filterKontaktpersonen(this.value);
+        } else {
+            // Show all options when focused and no search term
+            const options = kontaktpersoonDropdown.querySelectorAll('.kontaktpersoon-option');
+            options.forEach(option => {
+                option.style.display = 'block';
+            });
+        }
+        toggleKontaktpersoonDropdown(true);
+    });
+    
+    kontaktpersoonSearch.addEventListener('blur', function() {
+        setTimeout(() => {
+            // Check if the focus moved to the dropdown
+            const activeElement = document.activeElement;
+            if (!kontaktpersoonDropdown.contains(activeElement)) {
+                toggleKontaktpersoonDropdown(false);
+                // Submit form when leaving the field
+                if (this.value.length > 0) {
+                    this.closest('form').submit();
+                }
+            }
+        }, 200);
+    });
+    
+    kontaktpersoonSearch.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            this.closest('form').submit();
+        }
+    });
+    
+    kontaktpersoonDropdown.addEventListener('click', function(e) {
+        e.preventDefault();
+        const option = e.target.closest('.kontaktpersoon-option');
+        if (option) {
+            kontaktpersoonSearch.value = option.dataset.name;
+            kontaktpersoonId.value = option.dataset.name;
+            toggleKontaktpersoonDropdown(false);
+            
+            // Auto-submit form when selection is made
+            if (option.dataset.name !== '') {
+                this.closest('form').submit();
+            }
+        }
+    });
+    
+    kontaktpersoonSearch.addEventListener('keydown', function(e) {
+        const visibleOptions = Array.from(kontaktpersoonDropdown.querySelectorAll('.kontaktpersoon-option:not([style*="display: none"])'));
+        const currentIndex = visibleOptions.findIndex(option => option.classList.contains('active'));
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const nextIndex = currentIndex < visibleOptions.length - 1 ? currentIndex + 1 : 0;
+            visibleOptions.forEach(option => option.classList.remove('active'));
+            if (visibleOptions[nextIndex]) {
+                visibleOptions[nextIndex].classList.add('active');
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prevIndex = currentIndex > 0 ? currentIndex - 1 : visibleOptions.length - 1;
+            visibleOptions.forEach(option => option.classList.remove('active'));
+            if (visibleOptions[prevIndex]) {
+                visibleOptions[prevIndex].classList.add('active');
+            }
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const activeOption = kontaktpersoonDropdown.querySelector('.kontaktpersoon-option.active');
+            if (activeOption) {
+                kontaktpersoonSearch.value = activeOption.dataset.name;
+                kontaktpersoonId.value = activeOption.dataset.name;
+                toggleKontaktpersoonDropdown(false);
+                
+                // Auto-submit form when selection is made
+                if (activeOption.dataset.name !== '') {
+                    this.closest('form').submit();
+                }
+            }
+        } else if (e.key === 'Escape') {
+            toggleKontaktpersoonDropdown(false);
+        }
+    });
+});
+</script>
+{% endblock %}

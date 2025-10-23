@@ -1,0 +1,554 @@
+{% extends "base.html" %}
+
+{% block title %}Sponsoringen - Sponsoring De Kampanje{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container-fluid">
+        <h1 class="page-title">
+            <i class="fas fa-handshake me-3"></i>
+            Sponsoringen
+        </h1>
+        <p class="lead mb-0">Overzicht van alle sponsoringen</p>
+    </div>
+</div>
+
+<div class="filter-section">
+    <form method="GET" id="filterForm" action="{{ url_for('sponsoringen') }}">
+        <div class="row g-2">
+            <div class="col-md-2">
+                <label for="evenement" class="form-label small">Evenement</label>
+                <select class="form-control form-control-sm" id="evenement" name="evenement">
+                    <option value="">Alle</option>
+                    {% for evenement in evenementen %}
+                    <option value="{{ evenement.id }}" {% if selected_evenement == evenement.id|string %}selected{% endif %}>
+                        {{ evenement.naam }} ({{ evenement.datum.strftime('%d/%m/%Y') }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="kontrakt" class="form-label small">Kontrakt</label>
+                <select class="form-control form-control-sm" id="kontrakt" name="kontrakt">
+                    <option value="">Alle</option>
+                    {% for kontrakt in kontrakten %}
+                    <option value="{{ kontrakt.id }}" {% if selected_kontrakt == kontrakt.id|string %}selected{% endif %}>
+                        {{ kontrakt.kontrakt }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="sponsor_search" class="form-label small">Sponsor</label>
+                <div class="input-group">
+                    <input type="text" class="form-control form-control-sm" id="sponsor_search" placeholder="Type om te zoeken..." autocomplete="off" value="{{ sponsors|selectattr('id', 'equalto', selected_sponsor|int if selected_sponsor else 0)|map(attribute='naam')|first or '' }}">
+                    <input type="hidden" id="sponsor" name="sponsor" value="{{ selected_sponsor }}">
+                </div>
+                <div id="sponsor_dropdown" class="dropdown-menu w-100" style="display: none; max-height: 200px; overflow-y: auto;">
+                    <a href="#" class="dropdown-item sponsor-option" data-id="" data-name="">
+                        Alle sponsors
+                    </a>
+                    {% for sponsor in sponsors|sort(attribute='naam') %}
+                    <a href="#" class="dropdown-item sponsor-option" data-id="{{ sponsor.id }}" data-name="{{ sponsor.naam }}">
+                        {{ sponsor.naam }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-1">
+                <label for="logo_bezorgd" class="form-label small">Logo bezorgd</label>
+                <select class="form-control form-control-sm" id="logo_bezorgd" name="logo_bezorgd">
+                    <option value="">Alles</option>
+                    <option value="ja" {% if selected_logo_bezorgd == 'ja' %}selected{% endif %}>Ja</option>
+                    <option value="nee" {% if selected_logo_bezorgd == 'nee' %}selected{% endif %}>Nee</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <label for="logo_afgewerkt" class="form-label small">Logo afgewerkt</label>
+                <select class="form-control form-control-sm" id="logo_afgewerkt" name="logo_afgewerkt">
+                    <option value="">Alles</option>
+                    <option value="ja" {% if selected_logo_afgewerkt == 'ja' %}selected{% endif %}>Ja</option>
+                    <option value="nee" {% if selected_logo_afgewerkt == 'nee' %}selected{% endif %}>Nee</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <label for="gefactureerd" class="form-label small">Gefactureerd</label>
+                <select class="form-control form-control-sm" id="gefactureerd" name="gefactureerd">
+                    <option value="">Alles</option>
+                    <option value="ja" {% if selected_gefactureerd == 'ja' %}selected{% endif %}>Ja</option>
+                    <option value="nee" {% if selected_gefactureerd == 'nee' %}selected{% endif %}>Nee</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <label for="betaald" class="form-label small">Betaald</label>
+                <select class="form-control form-control-sm" id="betaald" name="betaald">
+                    <option value="">Alles</option>
+                    <option value="ja" {% if selected_betaald == 'ja' %}selected{% endif %}>Ja</option>
+                    <option value="nee" {% if selected_betaald == 'nee' %}selected{% endif %}>Nee</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">&nbsp;</label>
+                <div class="d-flex gap-1">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <a href="{{ url_for('sponsoringen') }}" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4>Gevonden Sponsoringen ({{ sponsoringen|length }})</h4>
+        {% if selected_evenement or selected_kontrakt or selected_sponsor or selected_logo_bezorgd or selected_logo_afgewerkt or selected_gefactureerd or selected_betaald %}
+        <div class="alert alert-info py-2">
+            <small>
+                <i class="fas fa-filter me-1"></i>
+                Filters actief: 
+                {% if selected_evenement %}
+                    Evenement: 
+                    {% for evenement in evenementen %}
+                        {% if evenement.id|string == selected_evenement %}
+                            {{ evenement.naam }}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if selected_kontrakt %}
+                    {% if selected_evenement %}, {% endif %}Kontrakt: 
+                    {% for kontrakt in kontrakten %}
+                        {% if kontrakt.id|string == selected_kontrakt %}
+                            {{ kontrakt.kontrakt }}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if selected_sponsor %}
+                    {% if selected_evenement or selected_kontrakt %}, {% endif %}Sponsor: 
+                    {% for sponsor in sponsors %}
+                        {% if sponsor.id|string == selected_sponsor %}
+                            {{ sponsor.naam }}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if selected_logo_bezorgd %}
+                    {% if selected_evenement or selected_kontrakt or selected_sponsor %}, {% endif %}Logo bezorgd: {{ selected_logo_bezorgd|title }}
+                {% endif %}
+                {% if selected_logo_afgewerkt %}
+                    {% if selected_evenement or selected_kontrakt or selected_sponsor or selected_logo_bezorgd %}, {% endif %}Logo afgewerkt: {{ selected_logo_afgewerkt|title }}
+                {% endif %}
+                {% if selected_gefactureerd %}
+                    {% if selected_evenement or selected_kontrakt or selected_sponsor or selected_logo_bezorgd or selected_logo_afgewerkt %}, {% endif %}Gefactureerd: {{ selected_gefactureerd|title }}
+                {% endif %}
+                {% if selected_betaald %}
+                    {% if selected_evenement or selected_kontrakt or selected_sponsor or selected_logo_bezorgd or selected_logo_afgewerkt or selected_gefactureerd %}, {% endif %}Betaald: {{ selected_betaald|title }}
+                {% endif %}
+            </small>
+        </div>
+        {% endif %}
+    </div>
+    <div class="d-flex gap-2">
+        {% if current_user and current_user.is_gebruiker() %}
+            <a href="{{ url_for('add_sponsoring') }}" class="btn btn-success" style="font-size: 0.875rem;">
+                <i class="fas fa-plus me-2"></i>
+                Nieuwe Sponsoring
+            </a>
+        {% endif %}
+        <a href="{{ url_for('download_logos') }}" class="btn btn-info" style="font-size: 0.875rem;">
+            <i class="fas fa-download me-2"></i>
+            Download Afgewerkte Logo's
+        </a>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.875rem;">
+                <i class="fas fa-download me-2"></i>
+                Exporteren
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ url_for('export_sponsoringen_excel', evenement=request.args.get('evenement', ''), kontrakt=request.args.get('kontrakt', ''), sponsor=request.args.get('sponsor', ''), logo_bezorgd=request.args.get('logo_bezorgd', ''), logo_afgewerkt=request.args.get('logo_afgewerkt', ''), gefactureerd=request.args.get('gefactureerd', ''), betaald=request.args.get('betaald', '')) }}">
+                    <i class="fas fa-file-excel me-2"></i>Excel
+                </a></li>
+                <li><a class="dropdown-item" href="{{ url_for('export_sponsoringen_pdf', evenement=request.args.get('evenement', ''), kontrakt=request.args.get('kontrakt', ''), sponsor=request.args.get('sponsor', ''), logo_bezorgd=request.args.get('logo_bezorgd', ''), logo_afgewerkt=request.args.get('logo_afgewerkt', ''), gefactureerd=request.args.get('gefactureerd', ''), betaald=request.args.get('betaald', '')) }}">
+                    <i class="fas fa-file-pdf me-2"></i>PDF
+                </a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        {% if sponsoringen %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>
+                            <a class="text-decoration-none" href="{{ url_for('sponsoringen', evenment=selected_evenement, evenement=selected_evenement, kontrakt=selected_kontrakt, sponsor=selected_sponsor, logo_bezorgd=selected_logo_bezorgd, logo_afgewerkt=selected_logo_afgewerkt, gefactureerd=selected_gefactureerd, betaald=selected_betaald, sort='evenement', dir='desc' if selected_sort=='evenement' and selected_dir=='asc' else 'asc') }}">
+                                Evenement
+                                {% if selected_sort == 'evenement' %}
+                                  <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
+                                {% else %}
+                                  <i class="fas fa-sort ms-1 text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-decoration-none" href="{{ url_for('sponsoringen', evenement=selected_evenement, kontrakt=selected_kontrakt, sponsor=selected_sponsor, logo_bezorgd=selected_logo_bezorgd, logo_afgewerkt=selected_logo_afgewerkt, gefactureerd=selected_gefactureerd, betaald=selected_betaald, sort='kontrakt', dir='desc' if selected_sort=='kontrakt' and selected_dir=='asc' else 'asc') }}">
+                                Kontrakt
+                                {% if selected_sort == 'kontrakt' %}
+                                  <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
+                                {% else %}
+                                  <i class="fas fa-sort ms-1 text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-decoration-none" href="{{ url_for('sponsoringen', evenement=selected_evenement, kontrakt=selected_kontrakt, sponsor=selected_sponsor, logo_bezorgd=selected_logo_bezorgd, logo_afgewerkt=selected_logo_afgewerkt, gefactureerd=selected_gefactureerd, betaald=selected_betaald, sort='sponsor', dir='desc' if selected_sort=='sponsor' and selected_dir=='asc' else 'asc') }}">
+                                Sponsor
+                                {% if selected_sort == 'sponsor' %}
+                                  <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
+                                {% else %}
+                                  <i class="fas fa-sort ms-1 text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-decoration-none" href="{{ url_for('sponsoringen', evenement=selected_evenement, kontrakt=selected_kontrakt, sponsor=selected_sponsor, logo_bezorgd=selected_logo_bezorgd, logo_afgewerkt=selected_logo_afgewerkt, gefactureerd=selected_gefactureerd, betaald=selected_betaald, sort='aangebracht', dir='desc' if selected_sort=='aangebracht' and selected_dir=='asc' else 'asc') }}">
+                                Aangebracht door
+                                {% if selected_sort == 'aangebracht' %}
+                                  <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
+                                {% else %}
+                                  <i class="fas fa-sort ms-1 text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="amount-column">
+                            <a class="text-decoration-none" href="{{ url_for('sponsoringen', evenement=selected_evenement, kontrakt=selected_kontrakt, sponsor=selected_sponsor, logo_bezorgd=selected_logo_bezorgd, logo_afgewerkt=selected_logo_afgewerkt, gefactureerd=selected_gefactureerd, betaald=selected_betaald, sort='bedrag', dir='desc' if selected_sort=='bedrag' and selected_dir=='asc' else 'asc') }}">
+                                Bedrag excl BTW
+                                {% if selected_sort == 'bedrag' %}
+                                  <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
+                                {% else %}
+                                  <i class="fas fa-sort ms-1 text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="amount-column">
+                            <a class="text-decoration-none" href="{{ url_for('sponsoringen', evenement=selected_evenement, kontrakt=selected_kontrakt, sponsor=selected_sponsor, logo_bezorgd=selected_logo_bezorgd, logo_afgewerkt=selected_logo_afgewerkt, gefactureerd=selected_gefactureerd, betaald=selected_betaald, sort='bedrag_incl', dir='desc' if selected_sort=='bedrag_incl' and selected_dir=='asc' else 'asc') }}">
+                                Bedrag incl BTW
+                                {% if selected_sort == 'bedrag_incl' %}
+                                  <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
+                                {% else %}
+                                  <i class="fas fa-sort ms-1 text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>Status</th>
+                        <th>Logo's</th>
+                        <th>Acties</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sponsoring in sponsoringen %}
+                    <tr>
+                        <td>
+                            <strong>{{ sponsoring.evenement.naam }}</strong>
+                            <br><small class="text-muted">{{ sponsoring.evenement.datum.strftime('%d/%m/%Y') }}</small>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('kontrakt_detail', id=sponsoring.kontrakt.id) }}" class="text-decoration-none">
+                                {{ sponsoring.kontrakt.kontrakt }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('sponsor_detail', id=sponsoring.sponsor.id) }}" class="text-decoration-none">
+                                {{ sponsoring.sponsor.naam }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('bestuurslid_detail', id=sponsoring.aangebracht_door.id) }}" class="text-decoration-none">
+                                {{ sponsoring.aangebracht_door.naam or sponsoring.aangebracht_door.initialen }}
+                            </a>
+                        </td>
+                        <td class="amount-column">
+                            {% set display_amount = get_display_amount(sponsoring) %}
+                            {% if display_amount > 0 %}
+                                €{{ format_european_currency(display_amount) }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="amount-column">
+                            {% if sponsoring.facturatiebedrag_incl_btw %}
+                                €{{ format_european_currency(sponsoring.facturatiebedrag_incl_btw) }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex flex-column gap-1">
+                                {% if sponsoring.betaald %}
+                                    <span class="badge bg-success">Betaald</span>
+                                {% elif sponsoring.gefactureerd %}
+                                    <span class="badge bg-warning">Gefactureerd</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">In behandeling</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                {% if sponsoring.logo_origineel %}
+                                    <a href="{{ url_for('uploaded_file', filename=sponsoring.logo_origineel) }}" target="_blank" class="text-decoration-none">
+                                        <img src="{{ url_for('uploaded_file', filename=sponsoring.logo_origineel) }}" class="thumbnail" alt="Logo origineel">
+                                    </a>
+                                {% else %}
+                                    <span class="badge bg-secondary">Geen</span>
+                                {% endif %}
+                                {% if sponsoring.logo_afgewerkt_file %}
+                                    <a href="{{ url_for('uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}" target="_blank" class="text-decoration-none">
+                                        <img src="{{ url_for('uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}" class="thumbnail" alt="Logo afgewerkt">
+                                    </a>
+                                {% else %}
+                                    <span class="badge bg-secondary">Geen</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('sponsoring_detail', id=sponsoring.id) }}" class="btn btn-sm btn-outline-primary" title="Bekijken">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if current_user and current_user.is_gebruiker() %}
+                                    <a href="{{ url_for('edit_sponsoring', id=sponsoring.id) }}" class="btn btn-sm btn-outline-warning" title="Bewerken">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                {% endif %}
+                                {% if current_user and current_user.is_beheerder() %}
+                                    <form method="POST" action="{{ url_for('delete_sponsoring', id=sponsoring.id) }}" style="display: inline;" 
+                                          onsubmit="return confirm('Weet je zeker dat je deze sponsoring wilt verwijderen?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Verwijderen">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                {% if sponsoringen %}
+                <tfoot>
+                    <tr class="table-info">
+                        <td colspan="4"><strong>Totaal:</strong></td>
+                        <td class="amount-column"><strong>€{{ format_european_currency(total_netto_bedrag) }}</strong></td>
+                        <td class="amount-column"><strong>€{{ format_european_currency(total_facturatie_bedrag) }}</strong></td>
+                        <td colspan="2"></td>
+                    </tr>
+                </tfoot>
+                {% endif %}
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-handshake fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Geen sponsoringen gevonden</h5>
+            <p class="text-muted">Voeg je eerste sponsoring toe om te beginnen.</p>
+            <a href="{{ url_for('add_sponsoring') }}" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i>
+                Nieuwe Sponsoring
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const evenementSelect = document.getElementById('evenement');
+    const kontraktSelect = document.getElementById('kontrakt');
+    
+    // Store all kontrakten data
+    const allKontrakten = [
+        {% for kontrakt in kontrakten %}
+        {
+            id: {{ kontrakt.id }},
+            name: "{{ kontrakt.kontrakt }}",
+            evenement_id: {{ kontrakt.evenement_id }}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    function updateKontrakten() {
+        const selectedEvenementId = evenementSelect.value;
+        const currentKontraktId = kontraktSelect.value;
+        
+        // Clear current options except the first one
+        kontraktSelect.innerHTML = '<option value="">Alle</option>';
+        
+        let filteredKontrakten = [];
+        
+        if (selectedEvenementId) {
+            // Filter kontrakten for selected evenement
+            filteredKontrakten = allKontrakten.filter(kontrakt => 
+                kontrakt.evenement_id == selectedEvenementId
+            );
+        } else {
+            // Show all kontrakten when no evenement is selected
+            filteredKontrakten = allKontrakten;
+        }
+        
+        // Add filtered kontrakten to dropdown
+        filteredKontrakten.forEach(kontrakt => {
+            const option = document.createElement('option');
+            option.value = kontrakt.id;
+            option.textContent = kontrakt.name;
+            kontraktSelect.appendChild(option);
+        });
+        
+        // Restore selection if it's still valid
+        if (currentKontraktId && filteredKontrakten.some(k => k.id == currentKontraktId)) {
+            kontraktSelect.value = currentKontraktId;
+        } else {
+            kontraktSelect.value = '';
+        }
+    }
+    
+    // Update kontrakten when evenement changes
+    evenementSelect.addEventListener('change', updateKontrakten);
+    
+    // Initial update
+    updateKontrakten();
+    
+    // Sponsor dropdown functionality
+    const sponsorSearch = document.getElementById('sponsor_search');
+    const sponsorId = document.getElementById('sponsor');
+    const sponsorDropdown = document.getElementById('sponsor_dropdown');
+    
+    // Show/hide sponsor dropdown
+    function toggleSponsorDropdown(show) {
+        sponsorDropdown.style.display = show ? 'block' : 'none';
+    }
+    
+    // Filter sponsors based on search term
+    function filterSponsors(searchTerm) {
+        const options = sponsorDropdown.querySelectorAll('.sponsor-option');
+        let hasVisibleOptions = false;
+        
+        options.forEach(option => {
+            const text = option.textContent.toLowerCase();
+            if (text.includes(searchTerm.toLowerCase())) {
+                option.style.display = 'block';
+                hasVisibleOptions = true;
+            } else {
+                option.style.display = 'none';
+            }
+        });
+        
+        return hasVisibleOptions;
+    }
+    
+    // Handle sponsor search input
+    sponsorSearch.addEventListener('input', function() {
+        const searchTerm = this.value;
+        if (searchTerm.length > 0) {
+            const hasResults = filterSponsors(searchTerm);
+            toggleSponsorDropdown(hasResults);
+            
+            // Update hidden input for filtering
+            sponsorId.value = searchTerm;
+        } else {
+            toggleSponsorDropdown(false);
+            sponsorId.value = '';
+        }
+    });
+    
+    // Handle sponsor focus
+    sponsorSearch.addEventListener('focus', function() {
+        if (this.value.length > 0) {
+            filterSponsors(this.value);
+        }
+        toggleSponsorDropdown(true);
+    });
+    
+    // Handle sponsor blur
+    sponsorSearch.addEventListener('blur', function() {
+        setTimeout(() => {
+            // Check if the focus moved to the dropdown
+            const activeElement = document.activeElement;
+            if (!sponsorDropdown.contains(activeElement)) {
+                toggleSponsorDropdown(false);
+                // Submit form when leaving the field
+                if (this.value.length > 0) {
+                    this.closest('form').submit();
+                }
+            }
+        }, 200);
+    });
+    
+    sponsorSearch.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            this.closest('form').submit();
+        }
+    });
+    
+    // Handle sponsor option selection
+    sponsorDropdown.addEventListener('click', function(e) {
+        e.preventDefault();
+        const option = e.target.closest('.sponsor-option');
+        if (option) {
+            sponsorSearch.value = option.dataset.name;
+            sponsorId.value = option.dataset.id;
+            toggleSponsorDropdown(false);
+            
+            // Auto-submit form when selection is made
+            if (option.dataset.id !== '') {
+                this.closest('form').submit();
+            }
+        }
+    });
+    
+    // Handle sponsor keyboard navigation
+    sponsorSearch.addEventListener('keydown', function(e) {
+        const visibleOptions = Array.from(sponsorDropdown.querySelectorAll('.sponsor-option:not([style*="display: none"])'));
+        const currentIndex = visibleOptions.findIndex(option => option.classList.contains('active'));
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const nextIndex = currentIndex < visibleOptions.length - 1 ? currentIndex + 1 : 0;
+            visibleOptions.forEach(option => option.classList.remove('active'));
+            if (visibleOptions[nextIndex]) {
+                visibleOptions[nextIndex].classList.add('active');
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prevIndex = currentIndex > 0 ? currentIndex - 1 : visibleOptions.length - 1;
+            visibleOptions.forEach(option => option.classList.remove('active'));
+            if (visibleOptions[prevIndex]) {
+                visibleOptions[prevIndex].classList.add('active');
+            }
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const activeOption = sponsorDropdown.querySelector('.sponsor-option.active');
+            if (activeOption) {
+                sponsorSearch.value = activeOption.dataset.name;
+                sponsorId.value = activeOption.dataset.id;
+                toggleSponsorDropdown(false);
+                
+                // Auto-submit form when selection is made
+                if (activeOption.dataset.id !== '') {
+                    this.closest('form').submit();
+                }
+            }
+        } else if (e.key === 'Escape') {
+            toggleSponsorDropdown(false);
+        }
+    });
+});
+</script>
+{% endblock %}

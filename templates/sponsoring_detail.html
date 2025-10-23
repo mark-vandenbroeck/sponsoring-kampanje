@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}Sponsoring Details - Sponsoring De Kampanje{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="page-title">
+            <i class="fas fa-handshake me-3"></i>
+            Sponsoring Details
+        </h1>
+        <p class="lead mb-0">{{ sponsoring.sponsor.naam }} - {{ sponsoring.evenement.naam }}</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Sponsoring Informatie
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Evenement:</strong> 
+                            <a href="{{ url_for('evenement_detail', id=sponsoring.evenement.id) }}" class="text-decoration-none">
+                                {{ sponsoring.evenement.naam }}
+                            </a>
+                        </p>
+                        <p><strong>Kontrakt:</strong> 
+                            <a href="{{ url_for('kontrakt_detail', id=sponsoring.kontrakt.id) }}" class="text-decoration-none">
+                                {{ sponsoring.kontrakt.kontrakt }}
+                            </a>
+                        </p>
+                        <p><strong>Sponsor:</strong> 
+                            <a href="{{ url_for('sponsor_detail', id=sponsoring.sponsor.id) }}" class="text-decoration-none">
+                                {{ sponsoring.sponsor.naam }}
+                            </a>
+                        </p>
+                        <p><strong>Aangebracht door:</strong> 
+                            <a href="{{ url_for('bestuurslid_detail', id=sponsoring.aangebracht_door.id) }}" class="text-decoration-none">
+                                {{ sponsoring.aangebracht_door.naam or sponsoring.aangebracht_door.initialen }}
+                            </a>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Bedrag kaarten:</strong> 
+                            {% if sponsoring.bedrag_kaarten %}
+                                €{{ format_european_currency(sponsoring.bedrag_kaarten) }}
+                            {% else %}
+                                <span class="text-muted">Niet opgegeven</span>
+                            {% endif %}
+                        </p>
+                        <p><strong>Netto bedrag excl BTW:</strong> 
+                            {% if sponsoring.netto_bedrag_excl_btw %}
+                                €{{ format_european_currency(sponsoring.netto_bedrag_excl_btw) }}
+                            {% else %}
+                                <span class="text-muted">Niet opgegeven</span>
+                            {% endif %}
+                        </p>
+                        <p><strong>Facturatiebedrag incl BTW:</strong> 
+                            {% if sponsoring.facturatiebedrag_incl_btw %}
+                                €{{ format_european_currency(sponsoring.facturatiebedrag_incl_btw) }}
+                            {% else %}
+                                <span class="text-muted">Niet opgegeven</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <p><strong>Status:</strong>
+                            <div class="d-flex gap-2">
+                                {% if sponsoring.betaald %}
+                                    <span class="badge bg-success">Betaald</span>
+                                {% elif sponsoring.gefactureerd %}
+                                    <span class="badge bg-warning">Gefactureerd</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">In behandeling</span>
+                                {% endif %}
+                            </div>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Logo Status:</strong>
+                            <div class="d-flex gap-2">
+                                {% if sponsoring.logo_bezorgd %}
+                                    <span class="badge bg-success">Bezorgd</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Niet bezorgd</span>
+                                {% endif %}
+                                {% if sponsoring.logo_afgewerkt %}
+                                    <span class="badge bg-success">Afgewerkt</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Niet afgewerkt</span>
+                                {% endif %}
+                            </div>
+                        </p>
+                    </div>
+                </div>
+                
+                {% if sponsoring.opmerkingen %}
+                <div class="mt-3">
+                    <strong>Opmerkingen:</strong>
+                    <div class="mt-2 rich-text-content">{{ sponsoring.opmerkingen|safe }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-images me-2"></i>
+                    Logo's
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Logo Origineel</h6>
+                        {% if sponsoring.logo_origineel %}
+                            <a href="{{ url_for('uploaded_file', filename=sponsoring.logo_origineel) }}" target="_blank" class="text-decoration-none">
+                                <img src="{{ url_for('uploaded_file', filename=sponsoring.logo_origineel) }}" class="img-fluid rounded" style="max-width: 200px; max-height: 150px;" alt="Logo origineel">
+                            </a>
+                            <p class="mt-2">
+                                <a href="{{ url_for('uploaded_file', filename=sponsoring.logo_origineel) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-download me-1"></i>
+                                    Download
+                                </a>
+                            </p>
+                        {% else %}
+                            <p class="text-muted">Geen logo origineel beschikbaar</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Logo Afgewerkt</h6>
+                        {% if sponsoring.logo_afgewerkt_file %}
+                            <a href="{{ url_for('uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}" target="_blank" class="text-decoration-none">
+                                <img src="{{ url_for('uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}" class="img-fluid rounded" style="max-width: 200px; max-height: 150px;" alt="Logo afgewerkt">
+                            </a>
+                            <p class="mt-2">
+                                <a href="{{ url_for('uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-download me-1"></i>
+                                    Download
+                                </a>
+                            </p>
+                        {% else %}
+                            <p class="text-muted">Geen logo afgewerkt beschikbaar</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Overzicht
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="stats-number text-primary">€{{ format_european_currency(sponsoring.bedrag_kaarten or 0) }}</div>
+                        <div class="stats-label">Bedrag kaarten</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stats-number text-success">€{{ format_european_currency(get_display_amount(sponsoring)) }}</div>
+                        <div class="stats-label">Bedrag excl BTW</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tools me-2"></i>
+                    Acties
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if current_user and current_user.is_gebruiker() %}
+                        <a href="{{ url_for('edit_sponsoring', id=sponsoring.id) }}" class="btn btn-warning">
+                            <i class="fas fa-edit me-2"></i>
+                            Bewerken
+                        </a>
+                    {% endif %}
+                    <a href="{{ back_url }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Terug naar Overzicht
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

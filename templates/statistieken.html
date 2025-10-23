@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Statistieken - Sponsoring De Kampanje{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container-fluid">
+        <h1 class="page-title">
+            <i class="fas fa-chart-pie me-3"></i>
+            Statistieken
+        </h1>
+        <p class="lead mb-0">Overzicht van sponsoringen per evenement</p>
+    </div>
+</div>
+
+{% for stats in evenement_stats %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h4 class="mb-0">
+            <i class="fas fa-calendar-alt me-2"></i>
+            {{ stats.evenement.naam }}
+            <small class="text-muted">({{ stats.evenement.datum.strftime('%d/%m/%Y') }})</small>
+        </h4>
+    </div>
+    <div class="card-body">
+        {% if stats.kontrakt_stats %}
+        <div class="row">
+            <div class="col-md-6">
+                <h5 class="mb-3">Totaal per Kontrakt</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Kontrakt</th>
+                                <th class="amount-column">Excl. BTW</th>
+                                <th class="amount-column">Incl. BTW</th>
+                                <th class="amount-column">Betaald</th>
+                                <th class="amount-column">Openstaand</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for kontrakt in stats.kontrakt_stats %}
+                            <tr>
+                                <td><strong>{{ kontrakt.kontrakt }}</strong></td>
+                                <td class="amount-column">€{{ format_european_currency(kontrakt.excl_btw) }}</td>
+                                <td class="amount-column">€{{ format_european_currency(kontrakt.incl_btw) }}</td>
+                                <td class="amount-column">€{{ format_european_currency(kontrakt.betaald) }}</td>
+                                <td class="amount-column">€{{ format_european_currency(kontrakt.openstaand) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-info">
+                                <td><strong>Totaal:</strong></td>
+                                <td class="amount-column"><strong>€{{ format_european_currency(stats.total_excl_btw) }}</strong></td>
+                                <td class="amount-column"><strong>€{{ format_european_currency(stats.total_incl_btw) }}</strong></td>
+                                <td class="amount-column"><strong>€{{ format_european_currency(stats.total_betaald) }}</strong></td>
+                                <td class="amount-column"><strong>€{{ format_european_currency(stats.total_openstaand) }}</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h5 class="mb-3">Verdeling per Kontrakt (Excl. BTW)</h5>
+                <div class="chart-container" style="position: relative; height: 300px;">
+                    <canvas id="chart-{{ stats.evenement.id }}"></canvas>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Geen sponsoringen voor dit evenement</h5>
+            <p class="text-muted">Er zijn nog geen sponsoringen geregistreerd voor dit evenement.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+
+{% if not evenement_stats %}
+<div class="card">
+    <div class="card-body text-center py-5">
+        <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">Geen evenementen gevonden</h5>
+        <p class="text-muted">Voeg evenementen en sponsoringen toe om statistieken te bekijken.</p>
+        <a href="{{ url_for('add_evenement') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>
+            Nieuw Evenement
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% for stats in evenement_stats %}
+    {% if stats.kontrakt_stats %}
+    // Chart data for {{ stats.evenement.naam }}
+    const chartData{{ stats.evenement.id }} = {
+        labels: [
+            {% for kontrakt in stats.kontrakt_stats %}
+            "{{ kontrakt.kontrakt }}"{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for kontrakt in stats.kontrakt_stats %}
+                {{ kontrakt.excl_btw }}{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ],
+            backgroundColor: [
+                '#4A90E2', '#7ED321', '#F5A623', '#E74C3C', '#9B59B6', 
+                '#1ABC9C', '#34495E', '#E67E22', '#3498DB', '#2ECC71'
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    };
+
+    const ctx{{ stats.evenement.id }} = document.getElementById('chart-{{ stats.evenement.id }}').getContext('2d');
+    new Chart(ctx{{ stats.evenement.id }}, {
+        type: 'pie',
+        data: chartData{{ stats.evenement.id }},
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: €${value.toLocaleString('nl-NL', {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    {% endif %}
+    {% endfor %}
+});
+</script>
+{% endblock %}
