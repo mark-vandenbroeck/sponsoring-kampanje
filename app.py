@@ -23,13 +23,14 @@ from psd_tools import PSDImage
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sponsoring.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data/sponsoring.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB upload limit
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
 # Ensure upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+os.makedirs('data', exist_ok=True)
 
 db = SQLAlchemy(app)
 
