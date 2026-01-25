@@ -24,20 +24,23 @@
             </div>
             <div class="card-body">
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <div class="mb-3">
                         <label for="initialen" class="form-label">Initialen *</label>
-                        <input type="text" class="form-control" id="initialen" name="initialen" required maxlength="10" value="{{ bestuurslid.initialen }}">
+                        <input type="text" class="form-control" id="initialen" name="initialen" required maxlength="10"
+                            value="{{ bestuurslid.initialen }}">
                         <div class="form-text">Korte initialen van het bestuurslid</div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="naam" class="form-label">Volledige Naam</label>
-                        <input type="text" class="form-control" id="naam" name="naam" value="{{ bestuurslid.naam or '' }}">
+                        <input type="text" class="form-control" id="naam" name="naam"
+                            value="{{ bestuurslid.naam or '' }}">
                         <div class="form-text">Volledige naam van het bestuurslid (optioneel)</div>
                     </div>
-                    
+
                     <div class="d-flex justify-content-between">
-                        <a href="{{ url_for('bestuurslid_detail', id=bestuurslid.id) }}" class="btn btn-secondary">
+                        <a href="{{ url_for('bestuursleden.detail', id=bestuurslid.id) }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left me-2"></i>
                             Terug
                         </a>

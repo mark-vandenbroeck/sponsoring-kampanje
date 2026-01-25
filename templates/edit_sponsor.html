@@ -24,93 +24,106 @@
             </div>
             <div class="card-body">
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <div class="mb-3">
                         <label for="naam" class="form-label">Naam *</label>
-                        <input type="text" class="form-control" id="naam" name="naam" value="{{ sponsor.naam }}" required>
+                        <input type="text" class="form-control" id="naam" name="naam" value="{{ sponsor.naam }}"
+                            required>
                     </div>
-                    
+
                     <h6 class="mt-4 mb-3">Adres</h6>
                     <div class="row">
                         <div class="col-md-8">
                             <div class="mb-3">
                                 <label for="straat" class="form-label">Straat</label>
-                                <input type="text" class="form-control" id="straat" name="straat" value="{{ sponsor.straat or '' }}">
+                                <input type="text" class="form-control" id="straat" name="straat"
+                                    value="{{ sponsor.straat or '' }}">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="huisnummer" class="form-label">Huisnummer</label>
-                                <input type="text" class="form-control" id="huisnummer" name="huisnummer" value="{{ sponsor.huisnummer or '' }}">
+                                <input type="text" class="form-control" id="huisnummer" name="huisnummer"
+                                    value="{{ sponsor.huisnummer or '' }}">
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="postcode" class="form-label">Postcode</label>
-                                <input type="text" class="form-control" id="postcode" name="postcode" value="{{ sponsor.postcode or '' }}">
+                                <input type="text" class="form-control" id="postcode" name="postcode"
+                                    value="{{ sponsor.postcode or '' }}">
                             </div>
                         </div>
                         <div class="col-md-8">
                             <div class="mb-3">
                                 <label for="gemeente" class="form-label">Gemeente</label>
-                                <input type="text" class="form-control" id="gemeente" name="gemeente" value="{{ sponsor.gemeente or '' }}">
+                                <input type="text" class="form-control" id="gemeente" name="gemeente"
+                                    value="{{ sponsor.gemeente or '' }}">
                             </div>
                         </div>
                     </div>
-                    
+
                     <h6 class="mt-4 mb-3">Kontakt Informatie</h6>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="kontaktpersoon" class="form-label">Kontaktpersoon</label>
-                                <input type="text" class="form-control" id="kontaktpersoon" name="kontaktpersoon" value="{{ sponsor.kontaktpersoon or '' }}">
+                                <input type="text" class="form-control" id="kontaktpersoon" name="kontaktpersoon"
+                                    value="{{ sponsor.kontaktpersoon or '' }}">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="telefoon" class="form-label">Telefoon</label>
-                                <input type="tel" class="form-control" id="telefoon" name="telefoon" value="{{ sponsor.telefoon or '' }}">
+                                <input type="tel" class="form-control" id="telefoon" name="telefoon"
+                                    value="{{ sponsor.telefoon or '' }}">
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" value="{{ sponsor.email or '' }}">
+                                <input type="email" class="form-control" id="email" name="email"
+                                    value="{{ sponsor.email or '' }}">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="btw_nummer" class="form-label">BTW-nummer</label>
-                                <input type="text" class="form-control" id="btw_nummer" name="btw_nummer" value="{{ sponsor.btw_nummer or '' }}">
+                                <input type="text" class="form-control" id="btw_nummer" name="btw_nummer"
+                                    value="{{ sponsor.btw_nummer or '' }}">
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="bestuurslid_id" class="form-label">Bestuurslid</label>
                         <select class="form-control" id="bestuurslid_id" name="bestuurslid_id">
                             <option value="">Selecteer bestuurslid (optioneel)</option>
                             {% for bestuurslid in bestuursleden %}
-                            <option value="{{ bestuurslid.id }}" {% if sponsor.bestuurslid_id == bestuurslid.id %}selected{% endif %}>
+                            <option value="{{ bestuurslid.id }}" {% if sponsor.bestuurslid_id==bestuurslid.id
+                                %}selected{% endif %}>
                                 {{ bestuurslid.naam or bestuurslid.initialen }}
                             </option>
                             {% endfor %}
                         </select>
                     </div>
-                    
+
                     <h6 class="mt-4 mb-2">Opmerkingen</h6>
                     <div class="mb-3">
-                        <input type="hidden" id="opmerkingen" name="opmerkingen" value="{{ sponsor.opmerkingen or '' }}">
-                        <div class="rich-text-editor" data-target="opmerkingen" style="min-height: 120px;">{{ sponsor.opmerkingen|safe }}</div>
+                        <input type="hidden" id="opmerkingen" name="opmerkingen"
+                            value="{{ sponsor.opmerkingen or '' }}">
+                        <div class="rich-text-editor" data-target="opmerkingen" style="min-height: 120px;">{{
+                            sponsor.opmerkingen|safe }}</div>
                     </div>
 
                     <div class="d-flex justify-content-between">
-                        <a href="{{ url_for('sponsor_detail', id=sponsor.id) }}" class="btn btn-secondary">
+                        <a href="{{ url_for('sponsors.detail', id=sponsor.id) }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left me-2"></i>
                             Annuleren
                         </a>

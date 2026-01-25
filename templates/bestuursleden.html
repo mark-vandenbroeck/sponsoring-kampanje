@@ -19,23 +19,24 @@
     </div>
     <div class="d-flex gap-2">
         {% if current_user and current_user.is_gebruiker() %}
-            <a href="{{ url_for('add_bestuurslid') }}" class="btn btn-primary">
-                <i class="fas fa-plus me-2"></i>
-                Nieuw Bestuurslid
-            </a>
+        <a href="{{ url_for('bestuursleden.add') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>
+            Nieuw Bestuurslid
+        </a>
         {% endif %}
         <div class="btn-group" role="group">
-            <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown"
+                aria-expanded="false">
                 <i class="fas fa-download me-2"></i>
                 Exporteren
             </button>
             <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{{ url_for('export_bestuursleden_excel') }}">
-                    <i class="fas fa-file-excel me-2"></i>Excel
-                </a></li>
-                <li><a class="dropdown-item" href="{{ url_for('export_bestuursleden_pdf') }}">
-                    <i class="fas fa-file-pdf me-2"></i>PDF
-                </a></li>
+                <li><a class="dropdown-item" href="{{ url_for('bestuursleden.export_excel') }}">
+                        <i class="fas fa-file-excel me-2"></i>Excel
+                    </a></li>
+                <li><a class="dropdown-item" href="{{ url_for('bestuursleden.export_pdf') }}">
+                        <i class="fas fa-file-pdf me-2"></i>PDF
+                    </a></li>
             </ul>
         </div>
     </div>
@@ -49,42 +50,46 @@
                 <thead>
                     <tr>
                         <th>
-                            <a class="text-decoration-none" href="{{ url_for('bestuursleden', sort='naam', dir='desc' if selected_sort=='naam' and selected_dir=='asc' else 'asc') }}">
+                            <a class="text-decoration-none"
+                                href="{{ url_for('bestuursleden.list', sort='naam', dir='desc' if selected_sort=='naam' and selected_dir=='asc' else 'asc') }}">
                                 Naam
                                 {% if selected_sort == 'naam' %}
-                                  <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
+                                <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
                                 {% else %}
-                                  <i class="fas fa-sort ms-1 text-muted"></i>
+                                <i class="fas fa-sort ms-1 text-muted"></i>
                                 {% endif %}
                             </a>
                         </th>
                         <th>
-                            <a class="text-decoration-none" href="{{ url_for('bestuursleden', sort='initialen', dir='desc' if selected_sort=='initialen' and selected_dir=='asc' else 'asc') }}">
+                            <a class="text-decoration-none"
+                                href="{{ url_for('bestuursleden.list', sort='initialen', dir='desc' if selected_sort=='initialen' and selected_dir=='asc' else 'asc') }}">
                                 Initialen
                                 {% if selected_sort == 'initialen' %}
-                                  <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
+                                <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
                                 {% else %}
-                                  <i class="fas fa-sort ms-1 text-muted"></i>
+                                <i class="fas fa-sort ms-1 text-muted"></i>
                                 {% endif %}
                             </a>
                         </th>
                         <th>
-                            <a class="text-decoration-none" href="{{ url_for('bestuursleden', sort='sponsors', dir='desc' if selected_sort=='sponsors' and selected_dir=='asc' else 'asc') }}">
+                            <a class="text-decoration-none"
+                                href="{{ url_for('bestuursleden.list', sort='sponsors', dir='desc' if selected_sort=='sponsors' and selected_dir=='asc' else 'asc') }}">
                                 Sponsors
                                 {% if selected_sort == 'sponsors' %}
-                                  <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
+                                <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
                                 {% else %}
-                                  <i class="fas fa-sort ms-1 text-muted"></i>
+                                <i class="fas fa-sort ms-1 text-muted"></i>
                                 {% endif %}
                             </a>
                         </th>
                         <th>
-                            <a class="text-decoration-none" href="{{ url_for('bestuursleden', sort='sponsoringen', dir='desc' if selected_sort=='sponsoringen' and selected_dir=='asc' else 'asc') }}">
+                            <a class="text-decoration-none"
+                                href="{{ url_for('bestuursleden.list', sort='sponsoringen', dir='desc' if selected_sort=='sponsoringen' and selected_dir=='asc' else 'asc') }}">
                                 Sponsoringen
                                 {% if selected_sort == 'sponsoringen' %}
-                                  <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
+                                <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
                                 {% else %}
-                                  <i class="fas fa-sort ms-1 text-muted"></i>
+                                <i class="fas fa-sort ms-1 text-muted"></i>
                                 {% endif %}
                             </a>
                         </th>
@@ -106,21 +111,26 @@
                         </td>
                         <td>
                             <div class="btn-group" role="group">
-                                <a href="{{ url_for('bestuurslid_detail', id=bestuurslid.id) }}" class="btn btn-sm btn-outline-primary" title="Bekijken">
+                                <a href="{{ url_for('bestuursleden.detail', id=bestuurslid.id) }}"
+                                    class="btn btn-sm btn-outline-primary" title="Bekijken">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 {% if current_user and current_user.is_gebruiker() %}
-                                    <a href="{{ url_for('edit_bestuurslid', id=bestuurslid.id) }}" class="btn btn-sm btn-outline-warning" title="Bewerken">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
+                                <a href="{{ url_for('bestuursleden.edit', id=bestuurslid.id) }}"
+                                    class="btn btn-sm btn-outline-warning" title="Bewerken">
+                                    <i class="fas fa-edit"></i>
+                                </a>
                                 {% endif %}
                                 {% if current_user and current_user.is_beheerder() %}
-                                    <form method="POST" action="{{ url_for('delete_bestuurslid', id=bestuurslid.id) }}" style="display: inline;" 
-                                          onsubmit="return confirm('Weet je zeker dat je bestuurslid \"{{ bestuurslid.initialen }}\" wilt verwijderen?')">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Verwijderen">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                                <form method="POST" action="{{ url_for('bestuursleden.delete', id=bestuurslid.id) }}"
+                                    style="display: inline;"
+                                    onsubmit="return confirm('Weet je zeker dat je bestuurslid \" {{
+                                    bestuurslid.initialen }}\" wilt verwijderen?')">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Verwijderen">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
                                 {% endif %}
                             </div>
                         </td>
@@ -134,7 +144,7 @@
             <i class="fas fa-users fa-3x text-muted mb-3"></i>
             <h5 class="text-muted">Geen bestuursleden gevonden</h5>
             <p class="text-muted">Voeg je eerste bestuurslid toe om te beginnen.</p>
-            <a href="{{ url_for('add_bestuurslid') }}" class="btn btn-primary">
+            <a href="{{ url_for('bestuursleden.add') }}" class="btn btn-primary">
                 <i class="fas fa-plus me-2"></i>
                 Nieuw Bestuurslid
             </a>

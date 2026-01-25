@@ -8,30 +8,35 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2><i class="fas fa-user-edit me-2"></i>Gebruiker Bewerken</h2>
-                <a href="{{ url_for('gebruikers') }}" class="btn btn-secondary">
+                <a href="{{ url_for('gebruikers.list') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-1"></i>Terug naar Gebruikers
                 </a>
             </div>
-            
+
             <div class="card">
                 <div class="card-body">
                     <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="email" class="form-label">Email Adres *</label>
-                                    <input type="email" class="form-control" id="email" name="email" 
-                                           value="{{ gebruiker.email }}" required>
-                                    <div class="form-text">Het email adres dat de gebruiker gebruikt om in te loggen.</div>
+                                    <input type="email" class="form-control" id="email" name="email"
+                                        value="{{ gebruiker.email }}" required>
+                                    <div class="form-text">Het email adres dat de gebruiker gebruikt om in te loggen.
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="rol" class="form-label">Rol *</label>
                                     <select class="form-select" id="rol" name="rol" required>
-                                        <option value="beheerder" {% if gebruiker.rol == 'beheerder' %}selected{% endif %}>Beheerder - Volledige toegang</option>
-                                        <option value="gebruiker" {% if gebruiker.rol == 'gebruiker' %}selected{% endif %}>Gebruiker - Beheer en wijzigingen</option>
-                                        <option value="lezer" {% if gebruiker.rol == 'lezer' %}selected{% endif %}>Lezer - Alleen lezen</option>
+                                        <option value="beheerder" {% if gebruiker.rol=='beheerder' %}selected{% endif
+                                            %}>Beheerder - Volledige toegang</option>
+                                        <option value="gebruiker" {% if gebruiker.rol=='gebruiker' %}selected{% endif
+                                            %}>Gebruiker - Beheer en wijzigingen</option>
+                                        <option value="lezer" {% if gebruiker.rol=='lezer' %}selected{% endif %}>Lezer -
+                                            Alleen lezen</option>
                                     </select>
                                     <div class="form-text">
                                         <strong>Beheerder:</strong> Volledige toegang inclusief gebruiker beheer<br>
@@ -41,33 +46,33 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Eerste Aanmelding</label>
-                                    <input type="text" class="form-control" 
-                                           value="{{ gebruiker.eerste_aanmelding.strftime('%d/%m/%Y %H:%M') if gebruiker.eerste_aanmelding else 'Nog niet ingelogd' }}" 
-                                           readonly>
+                                    <input type="text" class="form-control"
+                                        value="{{ gebruiker.eerste_aanmelding.strftime('%d/%m/%Y %H:%M') if gebruiker.eerste_aanmelding else 'Nog niet ingelogd' }}"
+                                        readonly>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Laatste Activiteit</label>
-                                    <input type="text" class="form-control" 
-                                           value="{{ gebruiker.laatste_activiteit.strftime('%d/%m/%Y %H:%M') if gebruiker.laatste_activiteit else 'Nog niet ingelogd' }}" 
-                                           readonly>
+                                    <input type="text" class="form-control"
+                                        value="{{ gebruiker.laatste_activiteit.strftime('%d/%m/%Y %H:%M') if gebruiker.laatste_activiteit else 'Nog niet ingelogd' }}"
+                                        readonly>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Status</label>
-                                    <input type="text" class="form-control" 
-                                           value="{% if gebruiker.password_hash %}Actief - Wachtwoord ingesteld{% else %}Wachtwoord vereist{% endif %}" 
-                                           readonly>
+                                    <input type="text" class="form-control"
+                                        value="{% if gebruiker.password_hash %}Actief - Wachtwoord ingesteld{% else %}Wachtwoord vereist{% endif %}"
+                                        readonly>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -75,30 +80,32 @@
                                     <label class="form-label">Wachtwoord</label>
                                     <div class="form-text">
                                         {% if gebruiker.password_hash %}
-                                            <span class="badge bg-success">Wachtwoord ingesteld</span><br>
-                                            <small>De gebruiker kan zijn wachtwoord wijzigen via het gebruikersmenu.</small>
+                                        <span class="badge bg-success">Wachtwoord ingesteld</span><br>
+                                        <small>De gebruiker kan zijn wachtwoord wijzigen via het gebruikersmenu.</small>
                                         {% else %}
-                                            <span class="badge bg-warning">Wachtwoord vereist</span><br>
-                                            <small>De gebruiker moet bij de eerste login een wachtwoord instellen.</small>
+                                        <span class="badge bg-warning">Wachtwoord vereist</span><br>
+                                        <small>De gebruiker moet bij de eerste login een wachtwoord instellen.</small>
                                         {% endif %}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="d-flex justify-content-between">
                             <div>
-                                <a href="{{ url_for('gebruikers') }}" class="btn btn-secondary">
+                                <a href="{{ url_for('gebruikers.list') }}" class="btn btn-secondary">
                                     <i class="fas fa-times me-1"></i>Annuleren
                                 </a>
                                 {% if gebruiker.password_hash %}
-                                    <form method="POST" action="{{ url_for('gebruiker_wachtwoord_reset', user_id=gebruiker.id) }}" 
-                                          style="display: inline;" 
-                                          onsubmit="return confirm('Weet je zeker dat je het wachtwoord van {{ gebruiker.email }} wilt resetten?')">
-                                        <button type="submit" class="btn btn-warning">
-                                            <i class="fas fa-key me-1"></i>Wachtwoord Resetten
-                                        </button>
-                                    </form>
+                                <form method="POST"
+                                    action="{{ url_for('gebruikers.reset_password', user_id=gebruiker.id) }}"
+                                    style="display: inline;"
+                                    onsubmit="return confirm('Weet je zeker dat je het wachtwoord van {{ gebruiker.email }} wilt resetten?')">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="fas fa-key me-1"></i>Wachtwoord Resetten
+                                    </button>
+                                </form>
                                 {% endif %}
                             </div>
                             <button type="submit" class="btn btn-primary">

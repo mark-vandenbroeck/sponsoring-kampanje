@@ -57,7 +57,7 @@
                             <h6 class="mb-1">{{ evenement.naam }}</h6>
                             <small class="text-muted">{{ evenement.datum.strftime('%d/%m/%Y') }} - {{ evenement.locatie }}</small>
                         </div>
-                        <a href="{{ url_for('evenement_detail', id=evenement.id) }}" class="btn btn-sm btn-outline-primary">
+                        <a href="{{ url_for('evenementen.detail', id=evenement.id) }}" class="btn btn-sm btn-outline-primary">
                             Bekijk
                         </a>
                     </div>
@@ -66,7 +66,7 @@
                     <p class="text-muted">Geen evenementen gevonden.</p>
                 {% endif %}
                 <div class="text-center mt-3">
-                    <a href="{{ url_for('evenementen') }}" class="btn btn-primary">
+                    <a href="{{ url_for('evenementen.list') }}" class="btn btn-primary">
                         Alle Evenementen
                     </a>
                 </div>
@@ -90,7 +90,7 @@
                             <h6 class="mb-1">{{ sponsoring.sponsor.naam }}</h6>
                             <small class="text-muted">{{ sponsoring.evenement.naam }} - {{ sponsoring.kontrakt.kontrakt }}</small>
                         </div>
-                        <a href="{{ url_for('sponsoring_detail', id=sponsoring.id) }}" class="btn btn-sm btn-outline-success">
+                        <a href="{{ url_for('sponsoringen.detail', id=sponsoring.id) }}" class="btn btn-sm btn-outline-success">
                             Bekijk
                         </a>
                     </div>
@@ -99,7 +99,7 @@
                     <p class="text-muted">Geen sponsoringen gevonden.</p>
                 {% endif %}
                 <div class="text-center mt-3">
-                    <a href="{{ url_for('sponsoringen') }}" class="btn btn-success">
+                    <a href="{{ url_for('sponsoringen.list') }}" class="btn btn-success">
                         Alle Sponsoringen
                     </a>
                 </div>
@@ -120,25 +120,25 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3">
-                        <a href="{{ url_for('add_evenement') }}" class="btn btn-primary w-100 mb-3">
+                        <a href="{{ url_for('evenementen.add') }}" class="btn btn-primary w-100 mb-3">
                             <i class="fas fa-plus me-2"></i>
                             Nieuw Evenement
                         </a>
                     </div>
                     <div class="col-md-3">
-                        <a href="{{ url_for('add_sponsoring') }}" class="btn btn-success w-100 mb-3">
+                        <a href="{{ url_for('sponsoringen.add') }}" class="btn btn-success w-100 mb-3">
                             <i class="fas fa-plus me-2"></i>
                             Nieuwe Sponsoring
                         </a>
                     </div>
                     <div class="col-md-3">
-                        <a href="{{ url_for('add_sponsor') }}" class="btn btn-info w-100 mb-3">
+                        <a href="{{ url_for('sponsors.add') }}" class="btn btn-info w-100 mb-3">
                             <i class="fas fa-plus me-2"></i>
                             Nieuwe Sponsor
                         </a>
                     </div>
                     <div class="col-md-3">
-                        <a href="{{ url_for('add_kontrakt') }}" class="btn btn-warning w-100 mb-3">
+                        <a href="{{ url_for('kontrakten.add') }}" class="btn btn-warning w-100 mb-3">
                             <i class="fas fa-plus me-2"></i>
                             Nieuw Kontrakt
                         </a>

@@ -24,38 +24,40 @@
             </div>
             <div class="card-body">
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <div class="mb-3">
                         <label for="evenement_id" class="form-label">Evenement *</label>
                         <select class="form-control" id="evenement_id" name="evenement_id" required>
                             <option value="">Selecteer evenement</option>
                             {% for evenement in evenementen %}
-                            <option value="{{ evenement.id }}" {% if request.args.get('evenement_id') == evenement.id|string %}selected{% endif %}>
+                            <option value="{{ evenement.id }}" {% if
+                                request.args.get('evenement_id')==evenement.id|string %}selected{% endif %}>
                                 {{ evenement.naam }} ({{ evenement.datum.strftime('%d/%m/%Y') }})
                             </option>
                             {% endfor %}
                         </select>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="kontrakt" class="form-label">Kontrakt Naam *</label>
                         <input type="text" class="form-control" id="kontrakt" name="kontrakt" required>
                         <div class="form-text">Naam van het kontrakt type</div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="bedrag" class="form-label">Bedrag *</label>
                         <input type="number" step="0.01" class="form-control" id="bedrag" name="bedrag" required>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="tegenprestatie" class="form-label">Tegenprestatie</label>
                         <div class="rich-text-editor" data-target="tegenprestatie"></div>
                         <input type="hidden" id="tegenprestatie" name="tegenprestatie">
                         <div class="form-text">Beschrijving van wat de sponsor krijgt in ruil</div>
                     </div>
-                    
+
                     <div class="d-flex justify-content-between">
-                        <a href="{{ url_for('kontrakten') }}" class="btn btn-secondary">
+                        <a href="{{ url_for('kontrakten.list') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left me-2"></i>
                             Terug
                         </a>

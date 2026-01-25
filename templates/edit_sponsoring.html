@@ -24,13 +24,15 @@
             </div>
             <div class="card-body">
                 <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="evenement_id" class="form-label">Evenement</label>
                                 <select class="form-control" id="evenement_id" name="evenement_id" disabled>
                                     <option value="{{ sponsoring.evenement.id }}" selected>
-                                        {{ sponsoring.evenement.naam }} ({{ sponsoring.evenement.datum.strftime('%d/%m/%Y') }})
+                                        {{ sponsoring.evenement.naam }} ({{
+                                        sponsoring.evenement.datum.strftime('%d/%m/%Y') }})
                                     </option>
                                 </select>
                                 <div class="form-text">Evenement kan niet worden gewijzigd</div>
@@ -41,7 +43,8 @@
                                 <label for="kontrakt_id" class="form-label">Kontrakt *</label>
                                 <select class="form-control" id="kontrakt_id" name="kontrakt_id" required>
                                     {% for kontrakt in kontrakten %}
-                                    <option value="{{ kontrakt.id }}" {% if sponsoring.kontrakt_id == kontrakt.id %}selected{% endif %}>
+                                    <option value="{{ kontrakt.id }}" {% if sponsoring.kontrakt_id==kontrakt.id
+                                        %}selected{% endif %}>
                                         {{ kontrakt.kontrakt }} - €{{ format_european_currency(kontrakt.bedrag) }}
                                     </option>
                                     {% endfor %}
@@ -49,76 +52,96 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="sponsor_id" class="form-label">Sponsor *</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" id="sponsor_search" placeholder="Type om te zoeken..." autocomplete="off" value="{{ sponsoring.sponsor.naam if sponsoring.sponsor else '' }}">
-                                    <input type="hidden" id="sponsor_id" name="sponsor_id" value="{{ sponsoring.sponsor_id }}" required>
-                                    <button type="button" class="btn btn-outline-success" id="addNewSponsorBtn" title="Nieuwe sponsor toevoegen">
+                                    <input type="text" class="form-control" id="sponsor_search"
+                                        placeholder="Type om te zoeken..." autocomplete="off"
+                                        value="{{ sponsoring.sponsor.naam if sponsoring.sponsor else '' }}">
+                                    <input type="hidden" id="sponsor_id" name="sponsor_id"
+                                        value="{{ sponsoring.sponsor_id }}" required>
+                                    <button type="button" class="btn btn-outline-success" id="addNewSponsorBtn"
+                                        title="Nieuwe sponsor toevoegen">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                 </div>
-                                <div id="sponsor_dropdown" class="dropdown-menu w-100" style="display: none; max-height: 200px; overflow-y: auto;">
+                                <div id="sponsor_dropdown" class="dropdown-menu w-100"
+                                    style="display: none; max-height: 200px; overflow-y: auto;">
                                     {% for sponsor in sponsors|sort(attribute='naam') %}
-                                    <a href="#" class="dropdown-item sponsor-option" data-id="{{ sponsor.id }}" data-name="{{ sponsor.naam }}">
+                                    <a href="#" class="dropdown-item sponsor-option" data-id="{{ sponsor.id }}"
+                                        data-name="{{ sponsor.naam }}">
                                         {{ sponsor.naam }}
                                     </a>
                                     {% endfor %}
                                 </div>
-                                <small class="form-text text-muted">Type om te zoeken of klik op + voor nieuwe sponsor</small>
+                                <small class="form-text text-muted">Type om te zoeken of klik op + voor nieuwe
+                                    sponsor</small>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="aangebracht_door_id" class="form-label">Aangebracht door *</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" id="bestuurslid_search" placeholder="Type om te zoeken..." autocomplete="off" value="{{ sponsoring.aangebracht_door.naam or sponsoring.aangebracht_door.initialen if sponsoring.aangebracht_door else '' }}">
-                                    <input type="hidden" id="aangebracht_door_id" name="aangebracht_door_id" value="{{ sponsoring.aangebracht_door_id }}" required>
-                                    <button type="button" class="btn btn-outline-success" id="addNewBestuurslidBtn" title="Nieuwe bestuurslid toevoegen">
+                                    <input type="text" class="form-control" id="bestuurslid_search"
+                                        placeholder="Type om te zoeken..." autocomplete="off"
+                                        value="{{ sponsoring.aangebracht_door.naam or sponsoring.aangebracht_door.initialen if sponsoring.aangebracht_door else '' }}">
+                                    <input type="hidden" id="aangebracht_door_id" name="aangebracht_door_id"
+                                        value="{{ sponsoring.aangebracht_door_id }}" required>
+                                    <button type="button" class="btn btn-outline-success" id="addNewBestuurslidBtn"
+                                        title="Nieuwe bestuurslid toevoegen">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                 </div>
-                                <div id="bestuurslid_dropdown" class="dropdown-menu w-100" style="display: none; max-height: 200px; overflow-y: auto;">
+                                <div id="bestuurslid_dropdown" class="dropdown-menu w-100"
+                                    style="display: none; max-height: 200px; overflow-y: auto;">
                                     {% for bestuurslid in bestuursleden %}
-                                    <a href="#" class="dropdown-item bestuurslid-option" data-id="{{ bestuurslid.id }}" data-name="{{ bestuurslid.naam or bestuurslid.initialen }}">
+                                    <a href="#" class="dropdown-item bestuurslid-option" data-id="{{ bestuurslid.id }}"
+                                        data-name="{{ bestuurslid.naam or bestuurslid.initialen }}">
                                         {{ bestuurslid.naam or bestuurslid.initialen }}
                                     </a>
                                     {% endfor %}
                                 </div>
-                                <small class="form-text text-muted">Type om te zoeken of klik op + voor nieuwe bestuurslid</small>
+                                <small class="form-text text-muted">Type om te zoeken of klik op + voor nieuwe
+                                    bestuurslid</small>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="bedrag_kaarten" class="form-label">Bedrag kaarten</label>
-                                <input type="number" step="0.01" class="form-control" id="bedrag_kaarten" name="bedrag_kaarten" value="{{ sponsoring.bedrag_kaarten or '' }}">
+                                <input type="number" step="0.01" class="form-control" id="bedrag_kaarten"
+                                    name="bedrag_kaarten" value="{{ sponsoring.bedrag_kaarten or '' }}">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="netto_bedrag_excl_btw" class="form-label">Netto bedrag excl BTW</label>
-                                <input type="number" step="0.01" class="form-control" id="netto_bedrag_excl_btw" name="netto_bedrag_excl_btw" value="{{ sponsoring.netto_bedrag_excl_btw or '' }}">
+                                <input type="number" step="0.01" class="form-control" id="netto_bedrag_excl_btw"
+                                    name="netto_bedrag_excl_btw" value="{{ sponsoring.netto_bedrag_excl_btw or '' }}">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="facturatiebedrag_incl_btw" class="form-label">Facturatiebedrag incl BTW</label>
-                                <input type="number" step="0.01" class="form-control" id="facturatiebedrag_incl_btw" name="facturatiebedrag_incl_btw" value="{{ sponsoring.facturatiebedrag_incl_btw or '' }}">
+                                <label for="facturatiebedrag_incl_btw" class="form-label">Facturatiebedrag incl
+                                    BTW</label>
+                                <input type="number" step="0.01" class="form-control" id="facturatiebedrag_incl_btw"
+                                    name="facturatiebedrag_incl_btw"
+                                    value="{{ sponsoring.facturatiebedrag_incl_btw or '' }}">
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="gefactureerd" name="gefactureerd" {% if sponsoring.gefactureerd %}checked{% endif %}>
+                                    <input class="form-check-input" type="checkbox" id="gefactureerd"
+                                        name="gefactureerd" {% if sponsoring.gefactureerd %}checked{% endif %}>
                                     <label class="form-check-label" for="gefactureerd">
                                         Gefactureerd
                                     </label>
@@ -128,7 +151,8 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="betaald" name="betaald" {% if sponsoring.betaald %}checked{% endif %}>
+                                    <input class="form-check-input" type="checkbox" id="betaald" name="betaald" {% if
+                                        sponsoring.betaald %}checked{% endif %}>
                                     <label class="form-check-label" for="betaald">
                                         Betaald
                                     </label>
@@ -136,27 +160,33 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="opmerkingen" class="form-label">Opmerkingen</label>
                         <div class="rich-text-editor" data-target="opmerkingen"></div>
-                        <input type="hidden" id="opmerkingen" name="opmerkingen" value="{{ sponsoring.opmerkingen or '' }}">
+                        <input type="hidden" id="opmerkingen" name="opmerkingen"
+                            value="{{ sponsoring.opmerkingen or '' }}">
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="logo_origineel" class="form-label">Logo Origineel</label>
                                 <input type="file" class="form-control" id="logo_origineel" name="logo_origineel">
-                                <div class="form-text">Upload het originele logo van de sponsor (alle bestandstypen toegestaan)</div>
+                                <div class="form-text">Upload het originele logo van de sponsor (alle bestandstypen
+                                    toegestaan)</div>
                                 {% if sponsoring.logo_origineel %}
                                 <div class="mt-2">
                                     <small class="text-muted">Huidig logo:</small>
                                     {% set thumbnail = get_thumbnail_path(sponsoring.logo_origineel) %}
                                     {% if thumbnail %}
-                                        <img src="{{ url_for('uploaded_file', filename=thumbnail) }}" class="img-fluid rounded" style="max-width: 300px; max-height: 200px;" alt="Huidig logo origineel (PDF)">
+                                    <img src="{{ url_for('main.uploaded_file', filename=thumbnail) }}"
+                                        class="img-fluid rounded" style="max-width: 300px; max-height: 200px;"
+                                        alt="Huidig logo origineel (PDF)">
                                     {% else %}
-                                        <img src="{{ url_for('uploaded_file', filename=sponsoring.logo_origineel) }}" class="img-fluid rounded" style="max-width: 300px; max-height: 200px;" alt="Huidig logo origineel">
+                                    <img src="{{ url_for('main.uploaded_file', filename=sponsoring.logo_origineel) }}"
+                                        class="img-fluid rounded" style="max-width: 300px; max-height: 200px;"
+                                        alt="Huidig logo origineel">
                                     {% endif %}
                                 </div>
                                 {% endif %}
@@ -166,24 +196,29 @@
                             <div class="mb-3">
                                 <label for="logo_afgewerkt" class="form-label">Logo Afgewerkt</label>
                                 <input type="file" class="form-control" id="logo_afgewerkt" name="logo_afgewerkt">
-                                <div class="form-text">Upload het afgewerkte logo klaar voor drukwerk (alle bestandstypen toegestaan)</div>
+                                <div class="form-text">Upload het afgewerkte logo klaar voor drukwerk (alle
+                                    bestandstypen toegestaan)</div>
                                 {% if sponsoring.logo_afgewerkt_file %}
                                 <div class="mt-2">
                                     <small class="text-muted">Huidig logo:</small>
                                     {% set thumbnail = get_thumbnail_path(sponsoring.logo_afgewerkt_file) %}
                                     {% if thumbnail %}
-                                        <img src="{{ url_for('uploaded_file', filename=thumbnail) }}" class="img-fluid rounded" style="max-width: 300px; max-height: 200px;" alt="Huidig logo afgewerkt (PDF)">
+                                    <img src="{{ url_for('main.uploaded_file', filename=thumbnail) }}"
+                                        class="img-fluid rounded" style="max-width: 300px; max-height: 200px;"
+                                        alt="Huidig logo afgewerkt (PDF)">
                                     {% else %}
-                                        <img src="{{ url_for('uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}" class="img-fluid rounded" style="max-width: 300px; max-height: 200px;" alt="Huidig logo afgewerkt">
+                                    <img src="{{ url_for('main.uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}"
+                                        class="img-fluid rounded" style="max-width: 300px; max-height: 200px;"
+                                        alt="Huidig logo afgewerkt">
                                     {% endif %}
                                 </div>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="d-flex justify-content-between">
-                        <a href="{{ url_for('sponsoring_detail', id=sponsoring.id) }}" class="btn btn-secondary">
+                        <a href="{{ url_for('sponsoringen.detail', id=sponsoring.id) }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left me-2"></i>
                             Annuleren
                         </a>
@@ -199,7 +234,8 @@
 </div>
 
 <!-- Modal voor nieuwe bestuurslid -->
-<div class="modal fade" id="newBestuurslidModal" tabindex="-1" aria-labelledby="newBestuurslidModalLabel" aria-hidden="true">
+<div class="modal fade" id="newBestuurslidModal" tabindex="-1" aria-labelledby="newBestuurslidModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -210,9 +246,11 @@
             </div>
             <div class="modal-body">
                 <form id="newBestuurslidForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                     <div class="mb-3">
                         <label for="new_bestuurslid_initialen" class="form-label">Initialen *</label>
-                        <input type="text" class="form-control" id="new_bestuurslid_initialen" name="initialen" required>
+                        <input type="text" class="form-control" id="new_bestuurslid_initialen" name="initialen"
+                            required>
                     </div>
                     <div class="mb-3">
                         <label for="new_bestuurslid_naam" class="form-label">Naam (optioneel)</label>
@@ -229,398 +267,6 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize the rich text editor with existing content
-    const opmerkingenEditor = document.querySelector('.rich-text-editor[data-target="opmerkingen"]');
-    const opmerkingenInput = document.getElementById('opmerkingen');
-    
-    if (opmerkingenEditor && opmerkingenInput) {
-        const quill = new Quill(opmerkingenEditor, {
-            theme: 'snow',
-            modules: {
-                toolbar: [
-                    ['bold', 'italic', 'underline'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    ['link'],
-                    ['clean']
-                ]
-            }
-        });
-        
-        // Set initial content
-        if (opmerkingenInput.value) {
-            quill.root.innerHTML = opmerkingenInput.value;
-        }
-        
-        // Sync with hidden input
-        quill.on('text-change', function() {
-            opmerkingenInput.value = quill.root.innerHTML;
-        });
-    }
-    
-    // Auto-set logo status when files are uploaded
-    document.getElementById('logo_origineel').addEventListener('change', function() {
-        if (this.files.length > 0) {
-            // Logo bezorgd will be automatically set to true in the backend
-        }
-    });
-
-    document.getElementById('logo_afgewerkt').addEventListener('change', function() {
-        if (this.files.length > 0) {
-            // Logo afgewerkt will be automatically set to true in the backend
-        }
-    });
-    
-    // Initialize searchable sponsor dropdown
-    const sponsorSearch = document.getElementById('sponsor_search');
-    const sponsorId = document.getElementById('sponsor_id');
-    const sponsorDropdown = document.getElementById('sponsor_dropdown');
-    const addNewSponsorBtn = document.getElementById('addNewSponsorBtn');
-    const newSponsorModal = new bootstrap.Modal(document.getElementById('newSponsorModal'));
-    const saveNewSponsorBtn = document.getElementById('saveNewSponsorBtn');
-    
-    // Bestuurslid elements
-    const bestuurslidSearch = document.getElementById('bestuurslid_search');
-    const bestuurslidId = document.getElementById('aangebracht_door_id');
-    const bestuurslidDropdown = document.getElementById('bestuurslid_dropdown');
-    const addNewBestuurslidBtn = document.getElementById('addNewBestuurslidBtn');
-    const newBestuurslidModal = new bootstrap.Modal(document.getElementById('newBestuurslidModal'));
-    const saveNewBestuurslidBtn = document.getElementById('saveNewBestuurslidBtn');
-    
-    // Show/hide dropdown
-    function toggleDropdown(show) {
-        sponsorDropdown.style.display = show ? 'block' : 'none';
-    }
-    
-    // Filter sponsors based on search term
-    function filterSponsors(searchTerm) {
-        const options = sponsorDropdown.querySelectorAll('.sponsor-option');
-        let hasVisibleOptions = false;
-        
-        options.forEach(option => {
-            const text = option.textContent.toLowerCase();
-            if (text.includes(searchTerm.toLowerCase())) {
-                option.style.display = 'block';
-                hasVisibleOptions = true;
-            } else {
-                option.style.display = 'none';
-            }
-        });
-        
-        return hasVisibleOptions;
-    }
-    
-    // Handle search input
-    sponsorSearch.addEventListener('input', function() {
-        const searchTerm = this.value;
-        if (searchTerm.length > 0) {
-            const hasResults = filterSponsors(searchTerm);
-            toggleDropdown(hasResults);
-        } else {
-            toggleDropdown(false);
-        }
-    });
-    
-    // Handle focus
-    sponsorSearch.addEventListener('focus', function() {
-        if (this.value.length > 0) {
-            filterSponsors(this.value);
-        }
-        toggleDropdown(true);
-    });
-    
-    // Handle blur (with delay to allow clicks)
-    sponsorSearch.addEventListener('blur', function() {
-        setTimeout(() => {
-            toggleDropdown(false);
-        }, 200);
-    });
-    
-    // Handle option selection
-    sponsorDropdown.addEventListener('click', function(e) {
-        e.preventDefault();
-        const option = e.target.closest('.sponsor-option');
-        if (option) {
-            sponsorSearch.value = option.dataset.name;
-            sponsorId.value = option.dataset.id;
-            toggleDropdown(false);
-        }
-    });
-    
-    // Handle keyboard navigation
-    sponsorSearch.addEventListener('keydown', function(e) {
-        const visibleOptions = Array.from(sponsorDropdown.querySelectorAll('.sponsor-option:not([style*="display: none"])'));
-        const currentIndex = visibleOptions.findIndex(option => option.classList.contains('active'));
-        
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            const nextIndex = currentIndex < visibleOptions.length - 1 ? currentIndex + 1 : 0;
-            visibleOptions.forEach(option => option.classList.remove('active'));
-            if (visibleOptions[nextIndex]) {
-                visibleOptions[nextIndex].classList.add('active');
-            }
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            const prevIndex = currentIndex > 0 ? currentIndex - 1 : visibleOptions.length - 1;
-            visibleOptions.forEach(option => option.classList.remove('active'));
-            if (visibleOptions[prevIndex]) {
-                visibleOptions[prevIndex].classList.add('active');
-            }
-        } else if (e.key === 'Enter') {
-            e.preventDefault();
-            const activeOption = sponsorDropdown.querySelector('.sponsor-option.active');
-            if (activeOption) {
-                sponsorSearch.value = activeOption.dataset.name;
-                sponsorId.value = activeOption.dataset.id;
-                toggleDropdown(false);
-            }
-        } else if (e.key === 'Escape') {
-            toggleDropdown(false);
-        }
-    });
-    
-    // Bestuurslid dropdown functionality
-    function toggleBestuurslidDropdown(show) {
-        bestuurslidDropdown.style.display = show ? 'block' : 'none';
-    }
-    
-    function filterBestuursleden(searchTerm) {
-        const options = bestuurslidDropdown.querySelectorAll('.bestuurslid-option');
-        let hasVisibleOptions = false;
-        
-        options.forEach(option => {
-            const text = option.textContent.toLowerCase();
-            if (text.includes(searchTerm.toLowerCase())) {
-                option.style.display = 'block';
-                hasVisibleOptions = true;
-            } else {
-                option.style.display = 'none';
-            }
-        });
-        
-        return hasVisibleOptions;
-    }
-    
-    // Handle bestuurslid search input
-    bestuurslidSearch.addEventListener('input', function() {
-        const searchTerm = this.value;
-        if (searchTerm.length > 0) {
-            const hasResults = filterBestuursleden(searchTerm);
-            toggleBestuurslidDropdown(hasResults);
-        } else {
-            toggleBestuurslidDropdown(false);
-        }
-    });
-    
-    // Handle bestuurslid focus
-    bestuurslidSearch.addEventListener('focus', function() {
-        if (this.value.length > 0) {
-            filterBestuursleden(this.value);
-        }
-        toggleBestuurslidDropdown(true);
-    });
-    
-    // Handle bestuurslid blur
-    bestuurslidSearch.addEventListener('blur', function() {
-        setTimeout(() => {
-            toggleBestuurslidDropdown(false);
-        }, 200);
-    });
-    
-    // Handle bestuurslid option selection
-    bestuurslidDropdown.addEventListener('click', function(e) {
-        e.preventDefault();
-        const option = e.target.closest('.bestuurslid-option');
-        if (option) {
-            bestuurslidSearch.value = option.dataset.name;
-            bestuurslidId.value = option.dataset.id;
-            toggleBestuurslidDropdown(false);
-        }
-    });
-    
-    // Handle bestuurslid keyboard navigation
-    bestuurslidSearch.addEventListener('keydown', function(e) {
-        const visibleOptions = Array.from(bestuurslidDropdown.querySelectorAll('.bestuurslid-option:not([style*="display: none"])'));
-        const currentIndex = visibleOptions.findIndex(option => option.classList.contains('active'));
-        
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            const nextIndex = currentIndex < visibleOptions.length - 1 ? currentIndex + 1 : 0;
-            visibleOptions.forEach(option => option.classList.remove('active'));
-            if (visibleOptions[nextIndex]) {
-                visibleOptions[nextIndex].classList.add('active');
-            }
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            const prevIndex = currentIndex > 0 ? currentIndex - 1 : visibleOptions.length - 1;
-            visibleOptions.forEach(option => option.classList.remove('active'));
-            if (visibleOptions[prevIndex]) {
-                visibleOptions[prevIndex].classList.add('active');
-            }
-        } else if (e.key === 'Enter') {
-            e.preventDefault();
-            const activeOption = bestuurslidDropdown.querySelector('.bestuurslid-option.active');
-            if (activeOption) {
-                bestuurslidSearch.value = activeOption.dataset.name;
-                bestuurslidId.value = activeOption.dataset.id;
-                toggleBestuurslidDropdown(false);
-            }
-        } else if (e.key === 'Escape') {
-            toggleBestuurslidDropdown(false);
-        }
-    });
-    
-    // Open modal for new sponsor
-    addNewSponsorBtn.addEventListener('click', function() {
-        newSponsorModal.show();
-    });
-    
-    // Open modal for new bestuurslid
-    addNewBestuurslidBtn.addEventListener('click', function() {
-        newBestuurslidModal.show();
-    });
-    
-    // Save new sponsor
-    saveNewSponsorBtn.addEventListener('click', function() {
-        const form = document.getElementById('newSponsorForm');
-        const formData = new FormData(form);
-        
-        // Create new sponsor via AJAX
-        fetch('{{ url_for("add_sponsor_ajax") }}', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Add new sponsor to dropdown
-                const newOption = document.createElement('a');
-                newOption.href = '#';
-                newOption.className = 'dropdown-item sponsor-option';
-                newOption.dataset.id = data.sponsor_id;
-                newOption.dataset.name = data.sponsor_name;
-                newOption.textContent = data.sponsor_name;
-                sponsorDropdown.appendChild(newOption);
-                
-                // Select the new sponsor
-                sponsorSearch.value = data.sponsor_name;
-                sponsorId.value = data.sponsor_id;
-                
-                // Close modal and reset form
-                newSponsorModal.hide();
-                form.reset();
-                
-                // Show success message
-                alert('Nieuwe sponsor succesvol toegevoegd!');
-            } else {
-                alert('Fout bij het toevoegen van sponsor: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Er is een fout opgetreden bij het opslaan van de sponsor.');
-        });
-    });
-    // Save new bestuurslid
-    saveNewBestuurslidBtn.addEventListener('click', function() {
-        const form = document.getElementById('newBestuurslidForm');
-        const formData = new FormData(form);
-        
-        // Create new bestuurslid via AJAX
-        fetch('{{ url_for("add_bestuurslid_ajax") }}', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Add new bestuurslid to dropdown
-                const newOption = document.createElement('a');
-                newOption.href = '#';
-                newOption.className = 'dropdown-item bestuurslid-option';
-                newOption.dataset.id = data.bestuurslid_id;
-                newOption.dataset.name = data.bestuurslid_name;
-                newOption.textContent = data.bestuurslid_name;
-                bestuurslidDropdown.appendChild(newOption);
-                
-                // Select the new bestuurslid
-                bestuurslidSearch.value = data.bestuurslid_name;
-                bestuurslidId.value = data.bestuurslid_id;
-                
-                // Close modal and reset form
-                newBestuurslidModal.hide();
-                form.reset();
-                
-                // Show success message
-                alert('Nieuwe bestuurslid succesvol toegevoegd!');
-            } else {
-                alert('Fout bij het toevoegen van bestuurslid: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Er is een fout opgetreden bij het opslaan van de bestuurslid.');
-        });
-    });
-
-    // Auto-calculate facturatiebedrag incl BTW
-    function calculateFacturatiebedrag() {
-        const bedragKaarten = parseFloat(document.getElementById('bedrag_kaarten').value) || 0;
-        const nettoBedragExclBtw = parseFloat(document.getElementById('netto_bedrag_excl_btw').value) || 0;
-        
-        // Calculate total excl BTW (sum of both amounts)
-        const totalExclBtw = bedragKaarten + nettoBedragExclBtw;
-        
-        // Calculate incl BTW (add 21% BTW)
-        const totalInclBtw = totalExclBtw * 1.21;
-        
-        // Only update if the field is empty or if user hasn't manually entered a value
-        const facturatiebedragField = document.getElementById('facturatiebedrag_incl_btw');
-        if (!facturatiebedragField.value || facturatiebedragField.dataset.autoCalculated === 'true') {
-            facturatiebedragField.value = totalInclBtw.toFixed(2);
-            facturatiebedragField.dataset.autoCalculated = 'true';
-        }
-    }
-
-    // Add event listeners for auto-calculation
-    document.getElementById('bedrag_kaarten').addEventListener('input', calculateFacturatiebedrag);
-    document.getElementById('netto_bedrag_excl_btw').addEventListener('input', calculateFacturatiebedrag);
-
-    // Mark field as manually edited when user types
-    document.getElementById('facturatiebedrag_incl_btw').addEventListener('input', function() {
-        this.dataset.autoCalculated = 'false';
-    });
-
-    // Initialize rich text editor for sponsor modal
-    const sponsorOpmerkingenEditor = document.querySelector('#newSponsorModal .rich-text-editor[data-target="new_sponsor_opmerkingen"]');
-    const sponsorOpmerkingenInput = document.getElementById('new_sponsor_opmerkingen');
-    
-    if (sponsorOpmerkingenEditor && sponsorOpmerkingenInput) {
-        const sponsorQuill = new Quill(sponsorOpmerkingenEditor, {
-            theme: 'snow',
-            modules: {
-                toolbar: [
-                    ['bold', 'italic', 'underline'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    ['link'],
-                    ['clean']
-                ]
-            }
-        });
-        
-        // Sync with hidden input
-        sponsorQuill.on('text-change', function() {
-            sponsorOpmerkingenInput.value = sponsorQuill.root.innerHTML;
-        });
-    }
-
-});
-</script>
-{% endblock %}
 
 <!-- Modal voor nieuwe sponsor -->
 <div class="modal fade" id="newSponsorModal" tabindex="-1" aria-labelledby="newSponsorModalLabel" aria-hidden="true">
@@ -634,6 +280,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <div class="modal-body">
                 <form id="newSponsorForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -644,7 +291,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="new_sponsor_kontaktpersoon" class="form-label">Kontaktpersoon</label>
-                                <input type="text" class="form-control" id="new_sponsor_kontaktpersoon" name="kontaktpersoon">
+                                <input type="text" class="form-control" id="new_sponsor_kontaktpersoon"
+                                    name="kontaktpersoon">
                             </div>
                         </div>
                     </div>
@@ -727,3 +375,396 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
 </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize the rich text editor with existing content
+        const opmerkingenEditor = document.querySelector('.rich-text-editor[data-target="opmerkingen"]');
+        const opmerkingenInput = document.getElementById('opmerkingen');
+
+        if (opmerkingenEditor && opmerkingenInput) {
+            const quill = new Quill(opmerkingenEditor, {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                        ['link'],
+                        ['clean']
+                    ]
+                }
+            });
+
+            // Set initial content
+            if (opmerkingenInput.value) {
+                quill.root.innerHTML = opmerkingenInput.value;
+            }
+
+            // Sync with hidden input
+            quill.on('text-change', function () {
+                opmerkingenInput.value = quill.root.innerHTML;
+            });
+        }
+
+        // Auto-set logo status when files are uploaded
+        document.getElementById('logo_origineel').addEventListener('change', function () {
+            if (this.files.length > 0) {
+                // Logo bezorgd will be automatically set to true in the backend
+            }
+        });
+
+        document.getElementById('logo_afgewerkt').addEventListener('change', function () {
+            if (this.files.length > 0) {
+                // Logo afgewerkt will be automatically set to true in the backend
+            }
+        });
+
+        // Initialize searchable sponsor dropdown
+        const sponsorSearch = document.getElementById('sponsor_search');
+        const sponsorId = document.getElementById('sponsor_id');
+        const sponsorDropdown = document.getElementById('sponsor_dropdown');
+        const addNewSponsorBtn = document.getElementById('addNewSponsorBtn');
+        const newSponsorModal = new bootstrap.Modal(document.getElementById('newSponsorModal'));
+        const saveNewSponsorBtn = document.getElementById('saveNewSponsorBtn');
+
+        // Bestuurslid elements
+        const bestuurslidSearch = document.getElementById('bestuurslid_search');
+        const bestuurslidId = document.getElementById('aangebracht_door_id');
+        const bestuurslidDropdown = document.getElementById('bestuurslid_dropdown');
+        const addNewBestuurslidBtn = document.getElementById('addNewBestuurslidBtn');
+        const newBestuurslidModal = new bootstrap.Modal(document.getElementById('newBestuurslidModal'));
+        const saveNewBestuurslidBtn = document.getElementById('saveNewBestuurslidBtn');
+
+        // Show/hide dropdown
+        function toggleDropdown(show) {
+            sponsorDropdown.style.display = show ? 'block' : 'none';
+        }
+
+        // Filter sponsors based on search term
+        function filterSponsors(searchTerm) {
+            const options = sponsorDropdown.querySelectorAll('.sponsor-option');
+            let hasVisibleOptions = false;
+
+            options.forEach(option => {
+                const text = option.textContent.toLowerCase();
+                if (text.includes(searchTerm.toLowerCase())) {
+                    option.style.display = 'block';
+                    hasVisibleOptions = true;
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+
+            return hasVisibleOptions;
+        }
+
+        // Handle search input
+        sponsorSearch.addEventListener('input', function () {
+            const searchTerm = this.value;
+            if (searchTerm.length > 0) {
+                const hasResults = filterSponsors(searchTerm);
+                toggleDropdown(hasResults);
+            } else {
+                toggleDropdown(false);
+            }
+        });
+
+        // Handle focus
+        sponsorSearch.addEventListener('focus', function () {
+            if (this.value.length > 0) {
+                filterSponsors(this.value);
+            }
+            toggleDropdown(true);
+        });
+
+        // Handle blur (with delay to allow clicks)
+        sponsorSearch.addEventListener('blur', function () {
+            setTimeout(() => {
+                toggleDropdown(false);
+            }, 200);
+        });
+
+        // Handle option selection
+        sponsorDropdown.addEventListener('click', function (e) {
+            e.preventDefault();
+            const option = e.target.closest('.sponsor-option');
+            if (option) {
+                sponsorSearch.value = option.dataset.name;
+                sponsorId.value = option.dataset.id;
+                toggleDropdown(false);
+            }
+        });
+
+        // Handle keyboard navigation
+        sponsorSearch.addEventListener('keydown', function (e) {
+            const visibleOptions = Array.from(sponsorDropdown.querySelectorAll('.sponsor-option:not([style*="display: none"])'));
+            const currentIndex = visibleOptions.findIndex(option => option.classList.contains('active'));
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const nextIndex = currentIndex < visibleOptions.length - 1 ? currentIndex + 1 : 0;
+                visibleOptions.forEach(option => option.classList.remove('active'));
+                if (visibleOptions[nextIndex]) {
+                    visibleOptions[nextIndex].classList.add('active');
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prevIndex = currentIndex > 0 ? currentIndex - 1 : visibleOptions.length - 1;
+                visibleOptions.forEach(option => option.classList.remove('active'));
+                if (visibleOptions[prevIndex]) {
+                    visibleOptions[prevIndex].classList.add('active');
+                }
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const activeOption = sponsorDropdown.querySelector('.sponsor-option.active');
+                if (activeOption) {
+                    sponsorSearch.value = activeOption.dataset.name;
+                    sponsorId.value = activeOption.dataset.id;
+                    toggleDropdown(false);
+                }
+            } else if (e.key === 'Escape') {
+                toggleDropdown(false);
+            }
+        });
+
+        // Bestuurslid dropdown functionality
+        function toggleBestuurslidDropdown(show) {
+            bestuurslidDropdown.style.display = show ? 'block' : 'none';
+        }
+
+        function filterBestuursleden(searchTerm) {
+            const options = bestuurslidDropdown.querySelectorAll('.bestuurslid-option');
+            let hasVisibleOptions = false;
+
+            options.forEach(option => {
+                const text = option.textContent.toLowerCase();
+                if (text.includes(searchTerm.toLowerCase())) {
+                    option.style.display = 'block';
+                    hasVisibleOptions = true;
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+
+            return hasVisibleOptions;
+        }
+
+        // Handle bestuurslid search input
+        bestuurslidSearch.addEventListener('input', function () {
+            const searchTerm = this.value;
+            if (searchTerm.length > 0) {
+                const hasResults = filterBestuursleden(searchTerm);
+                toggleBestuurslidDropdown(hasResults);
+            } else {
+                toggleBestuurslidDropdown(false);
+            }
+        });
+
+        // Handle bestuurslid focus
+        bestuurslidSearch.addEventListener('focus', function () {
+            if (this.value.length > 0) {
+                filterBestuursleden(this.value);
+            }
+            toggleBestuurslidDropdown(true);
+        });
+
+        // Handle bestuurslid blur
+        bestuurslidSearch.addEventListener('blur', function () {
+            setTimeout(() => {
+                toggleBestuurslidDropdown(false);
+            }, 200);
+        });
+
+        // Handle bestuurslid option selection
+        bestuurslidDropdown.addEventListener('click', function (e) {
+            e.preventDefault();
+            const option = e.target.closest('.bestuurslid-option');
+            if (option) {
+                bestuurslidSearch.value = option.dataset.name;
+                bestuurslidId.value = option.dataset.id;
+                toggleBestuurslidDropdown(false);
+            }
+        });
+
+        // Handle bestuurslid keyboard navigation
+        bestuurslidSearch.addEventListener('keydown', function (e) {
+            const visibleOptions = Array.from(bestuurslidDropdown.querySelectorAll('.bestuurslid-option:not([style*="display: none"])'));
+            const currentIndex = visibleOptions.findIndex(option => option.classList.contains('active'));
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const nextIndex = currentIndex < visibleOptions.length - 1 ? currentIndex + 1 : 0;
+                visibleOptions.forEach(option => option.classList.remove('active'));
+                if (visibleOptions[nextIndex]) {
+                    visibleOptions[nextIndex].classList.add('active');
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prevIndex = currentIndex > 0 ? currentIndex - 1 : visibleOptions.length - 1;
+                visibleOptions.forEach(option => option.classList.remove('active'));
+                if (visibleOptions[prevIndex]) {
+                    visibleOptions[prevIndex].classList.add('active');
+                }
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const activeOption = bestuurslidDropdown.querySelector('.bestuurslid-option.active');
+                if (activeOption) {
+                    bestuurslidSearch.value = activeOption.dataset.name;
+                    bestuurslidId.value = activeOption.dataset.id;
+                    toggleBestuurslidDropdown(false);
+                }
+            } else if (e.key === 'Escape') {
+                toggleBestuurslidDropdown(false);
+            }
+        });
+
+        // Open modal for new sponsor
+        addNewSponsorBtn.addEventListener('click', function () {
+            newSponsorModal.show();
+        });
+
+        // Open modal for new bestuurslid
+        addNewBestuurslidBtn.addEventListener('click', function () {
+            newBestuurslidModal.show();
+        });
+
+        // Save new sponsor
+        saveNewSponsorBtn.addEventListener('click', function () {
+            const form = document.getElementById('newSponsorForm');
+            const formData = new FormData(form);
+
+            // Create new sponsor via AJAX
+            fetch('{{ url_for("sponsors.add_ajax") }}', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Add new sponsor to dropdown
+                        const newOption = document.createElement('a');
+                        newOption.href = '#';
+                        newOption.className = 'dropdown-item sponsor-option';
+                        newOption.dataset.id = data.sponsor_id;
+                        newOption.dataset.name = data.sponsor_name;
+                        newOption.textContent = data.sponsor_name;
+                        sponsorDropdown.appendChild(newOption);
+
+                        // Select the new sponsor
+                        sponsorSearch.value = data.sponsor_name;
+                        sponsorId.value = data.sponsor_id;
+
+                        // Close modal and reset form
+                        newSponsorModal.hide();
+                        form.reset();
+
+                        // Show success message
+                        alert('Nieuwe sponsor succesvol toegevoegd!');
+                    } else {
+                        alert('Fout bij het toevoegen van sponsor: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Er is een fout opgetreden bij het opslaan van de sponsor.');
+                });
+        });
+        // Save new bestuurslid
+        saveNewBestuurslidBtn.addEventListener('click', function () {
+            const form = document.getElementById('newBestuurslidForm');
+            const formData = new FormData(form);
+
+            // Create new bestuurslid via AJAX
+            fetch('{{ url_for("bestuursleden.add_ajax") }}', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Add new bestuurslid to dropdown
+                        const newOption = document.createElement('a');
+                        newOption.href = '#';
+                        newOption.className = 'dropdown-item bestuurslid-option';
+                        newOption.dataset.id = data.bestuurslid_id;
+                        newOption.dataset.name = data.bestuurslid_name;
+                        newOption.textContent = data.bestuurslid_name;
+                        bestuurslidDropdown.appendChild(newOption);
+
+                        // Select the new bestuurslid
+                        bestuurslidSearch.value = data.bestuurslid_name;
+                        bestuurslidId.value = data.bestuurslid_id;
+
+                        // Close modal and reset form
+                        newBestuurslidModal.hide();
+                        form.reset();
+
+                        // Show success message
+                        alert('Nieuwe bestuurslid succesvol toegevoegd!');
+                    } else {
+                        alert('Fout bij het toevoegen van bestuurslid: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Er is een fout opgetreden bij het opslaan van de bestuurslid.');
+                });
+        });
+
+        // Auto-calculate facturatiebedrag incl BTW
+        function calculateFacturatiebedrag() {
+            const bedragKaarten = parseFloat(document.getElementById('bedrag_kaarten').value) || 0;
+            const nettoBedragExclBtw = parseFloat(document.getElementById('netto_bedrag_excl_btw').value) || 0;
+
+            // Calculate total excl BTW (sum of both amounts)
+            const totalExclBtw = bedragKaarten + nettoBedragExclBtw;
+
+            // Calculate incl BTW (add 21% BTW)
+            const totalInclBtw = totalExclBtw * 1.21;
+
+            // Only update if the field is empty or if user hasn't manually entered a value
+            const facturatiebedragField = document.getElementById('facturatiebedrag_incl_btw');
+            if (!facturatiebedragField.value || facturatiebedragField.dataset.autoCalculated === 'true') {
+                facturatiebedragField.value = totalInclBtw.toFixed(2);
+                facturatiebedragField.dataset.autoCalculated = 'true';
+            }
+        }
+
+        // Add event listeners for auto-calculation
+        document.getElementById('bedrag_kaarten').addEventListener('input', calculateFacturatiebedrag);
+        document.getElementById('netto_bedrag_excl_btw').addEventListener('input', calculateFacturatiebedrag);
+
+        // Mark field as manually edited when user types
+        document.getElementById('facturatiebedrag_incl_btw').addEventListener('input', function () {
+            this.dataset.autoCalculated = 'false';
+        });
+
+        // Initialize rich text editor for sponsor modal
+        const sponsorOpmerkingenEditor = document.querySelector('#newSponsorModal .rich-text-editor[data-target="new_sponsor_opmerkingen"]');
+        const sponsorOpmerkingenInput = document.getElementById('new_sponsor_opmerkingen');
+
+        if (sponsorOpmerkingenEditor && sponsorOpmerkingenInput) {
+            const sponsorQuill = new Quill(sponsorOpmerkingenEditor, {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                        ['link'],
+                        ['clean']
+                    ]
+                }
+            });
+
+            // Sync with hidden input
+            sponsorQuill.on('text-change', function () {
+                sponsorOpmerkingenInput.value = sponsorQuill.root.innerHTML;
+            });
+        }
+
+    });
+</script>
+{% endblock %}

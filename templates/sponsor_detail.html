@@ -50,8 +50,9 @@
                         </p>
                         {% endif %}
                         {% if sponsor.bestuurslid %}
-                        <p><strong>Bestuurslid:</strong> 
-                            <a href="{{ url_for('bestuurslid_detail', id=sponsor.bestuurslid.id) }}" class="text-decoration-none">
+                        <p><strong>Bestuurslid:</strong>
+                            <a href="{{ url_for('bestuursleden.detail', id=sponsor.bestuurslid.id) }}"
+                                class="text-decoration-none">
                                 {{ sponsor.bestuurslid.naam or sponsor.bestuurslid.initialen }}
                             </a>
                         </p>
@@ -60,7 +61,7 @@
                 </div>
             </div>
         </div>
-        
+
         {% if sponsor.opmerkingen %}
         <div class="card mb-4">
             <div class="card-header">
@@ -99,28 +100,33 @@
                             {% for sponsoring in sponsor.sponsoringen %}
                             <tr>
                                 <td>
-                                    <a href="{{ url_for('evenement_detail', id=sponsoring.evenement.id) }}" class="text-decoration-none">
+                                    <a href="{{ url_for('evenementen.detail', id=sponsoring.evenement.id) }}"
+                                        class="text-decoration-none">
                                         {{ sponsoring.evenement.naam }}
                                     </a>
-                                    <br><small class="text-muted">{{ sponsoring.evenement.datum.strftime('%d/%m/%Y') }}</small>
+                                    <br><small class="text-muted">{{ sponsoring.evenement.datum.strftime('%d/%m/%Y')
+                                        }}</small>
                                 </td>
                                 <td>
-                                    <a href="{{ url_for('kontrakt_detail', id=sponsoring.kontrakt.id) }}" class="text-decoration-none">
+                                    <a href="{{ url_for('kontrakten.detail', id=sponsoring.kontrakt.id) }}"
+                                        class="text-decoration-none">
                                         {{ sponsoring.kontrakt.kontrakt }}
                                     </a>
                                 </td>
-                                <td class="amount-column">€{{ format_european_currency(sponsoring.facturatiebedrag_incl_btw or 0) }}</td>
+                                <td class="amount-column">€{{
+                                    format_european_currency(sponsoring.facturatiebedrag_incl_btw or 0) }}</td>
                                 <td>
                                     {% if sponsoring.betaald %}
-                                        <span class="badge bg-success">Betaald</span>
+                                    <span class="badge bg-success">Betaald</span>
                                     {% elif sponsoring.gefactureerd %}
-                                        <span class="badge bg-warning">Gefactureerd</span>
+                                    <span class="badge bg-warning">Gefactureerd</span>
                                     {% else %}
-                                        <span class="badge bg-secondary">In behandeling</span>
+                                    <span class="badge bg-secondary">In behandeling</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{{ url_for('sponsoring_detail', id=sponsoring.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ url_for('sponsoringen.detail', id=sponsoring.id) }}"
+                                        class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 </td>
@@ -131,7 +137,8 @@
                         <tfoot>
                             <tr class="table-info">
                                 <td colspan="2"><strong>Totaal:</strong></td>
-                                <td class="amount-column"><strong>€{{ format_european_currency(total_bedrag) }}</strong></td>
+                                <td class="amount-column"><strong>€{{ format_european_currency(total_bedrag) }}</strong>
+                                </td>
                                 <td colspan="2"></td>
                             </tr>
                         </tfoot>
@@ -144,7 +151,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-4">
         <div class="card">
             <div class="card-header">
@@ -160,8 +167,7 @@
                         <div class="stats-label">Sponsoringen</div>
                     </div>
                 </div>
-                
-                {% set total_bedrag = sponsor.sponsoringen|sum(attribute='facturatiebedrag_incl_btw') %}
+
                 {% if total_bedrag %}
                 <hr>
                 <div class="text-center">
@@ -171,7 +177,7 @@
                 {% endif %}
             </div>
         </div>
-        
+
         <div class="card mt-3">
             <div class="card-header">
                 <h5 class="mb-0">
@@ -182,16 +188,16 @@
             <div class="card-body">
                 <div class="d-grid gap-2">
                     {% if current_user and current_user.is_gebruiker() %}
-                        <a href="{{ url_for('edit_sponsor', id=sponsor.id) }}" class="btn btn-warning">
-                            <i class="fas fa-edit me-2"></i>
-                            Bewerken
-                        </a>
-                        <a href="{{ url_for('add_sponsoring') }}?sponsor_id={{ sponsor.id }}" class="btn btn-success">
-                            <i class="fas fa-plus me-2"></i>
-                            Nieuwe Sponsoring
-                        </a>
+                    <a href="{{ url_for('sponsors.edit', id=sponsor.id) }}" class="btn btn-warning">
+                        <i class="fas fa-edit me-2"></i>
+                        Bewerken
+                    </a>
+                    <a href="{{ url_for('sponsoringen.add') }}?sponsor_id={{ sponsor.id }}" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>
+                        Nieuwe Sponsoring
+                    </a>
                     {% endif %}
-                    <a href="{{ url_for('sponsors') }}" class="btn btn-secondary">
+                    <a href="{{ url_for('sponsors.list') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-2"></i>
                         Terug naar Overzicht
                     </a>

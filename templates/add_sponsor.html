@@ -24,11 +24,12 @@
             </div>
             <div class="card-body">
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <div class="mb-3">
                         <label for="naam" class="form-label">Naam *</label>
                         <input type="text" class="form-control" id="naam" name="naam" required>
                     </div>
-                    
+
                     <h6 class="mt-4 mb-3">Adres</h6>
                     <div class="row">
                         <div class="col-md-8">
@@ -44,7 +45,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-4">
                             <div class="mb-3">
@@ -59,7 +60,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <h6 class="mt-4 mb-3">Kontakt Informatie</h6>
                     <div class="row">
                         <div class="col-md-6">
@@ -75,7 +76,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -90,7 +91,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="bestuurslid_id" class="form-label">Bestuurslid</label>
                         <select class="form-control" id="bestuurslid_id" name="bestuurslid_id">
@@ -102,7 +103,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    
+
                     <h6 class="mt-4 mb-2">Opmerkingen</h6>
                     <div class="mb-3">
                         <input type="hidden" id="opmerkingen" name="opmerkingen">
@@ -110,7 +111,7 @@
                     </div>
 
                     <div class="d-flex justify-content-between">
-                        <a href="{{ url_for('sponsors') }}" class="btn btn-secondary">
+                        <a href="{{ url_for('sponsors.list') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left me-2"></i>
                             Terug
                         </a>

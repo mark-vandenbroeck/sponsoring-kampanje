@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1cm;
+        }
+
+        body {
+            font-family: Helvetica, sans-serif;
+            font-size: 10px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .amount {
+            text-align: right;
+        }
+
+        .status-paid {
+            color: green;
+        }
+
+        .status-invoiced {
+            color: orange;
+        }
+
+        .status-pending {
+            color: red;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 8px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Sponsoring Overzicht</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Evenement</th>
+                <th>Sponsor</th>
+                <th>Kontrakt</th>
+                <th>Bedrag (B+K)</th>
+                <th>Status</th>
+                <th>Logo Origineel</th>
+                <th>Logo Afgewerkt</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in sponsorings %}
+            <tr>
+                <td>{{ s.evenement.naam }}</td>
+                <td>{{ s.sponsor.naam }}</td>
+                <td>{{ s.kontrakt.kontrakt }}</td>
+                <td class="amount">€ {{ get_display_amount(s) }}</td>
+                <td>
+                    {% if s.betaald %}
+                    <span class="status-paid">Betaald</span>
+                    {% elif s.gefactureerd %}
+                    <span class="status-invoiced">Gefactureerd</span>
+                    {% else %}
+                    <span class="status-pending">In behandeling</span>
+                    {% endif %}
+                </td>
+                <td>{{ "Ja" if s.logo_origineel else "Nee" }}</td>
+                <td>{{ "Ja" if s.logo_afgewerkt_file else "Nee" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Gegenereerd op: {{ current_date }}
+    </div>
+</body>
+
+</html>
