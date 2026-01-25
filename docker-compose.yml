@@ -14,7 +14,7 @@ services:
       - ./config:/app/config:ro
     environment:
       - FLASK_ENV=production
-      - FLASK_APP=app.py
+      - FLASK_APP=run.py
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5100/"]

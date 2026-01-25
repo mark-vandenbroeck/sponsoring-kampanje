@@ -26,7 +26,7 @@ RUN mkdir -p static/uploads
 RUN mkdir -p data
 
 # Set environment variables
-ENV FLASK_APP=app.py
+ENV FLASK_APP=run.py
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
 
@@ -42,4 +42,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:5100/ || exit 1
 
 # Run the application
-CMD ["python", "app.py"]
+CMD ["python", "run.py"]

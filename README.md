@@ -60,7 +60,7 @@ pip install -r requirements.txt
 
 3. **Start de applicatie:**
 ```bash
-python app.py
+python run.py
 ```
 
 4. **Open je browser:**
@@ -681,10 +681,21 @@ cp backup/sponsoring-20240101.db instance/sponsoring.db
 
 ### Backend
 - **Framework**: Flask met SQLAlchemy ORM
-- **Database**: SQLite (productie-ready)
+- **Architectuur**: Modulaire Blueprint structuur (`app/routes/`)
+  - `auth`: Authenticatie routes
+  - `evenementen`: Evenement beheer
+  - `kontrakten`: Kontrakt beheer
+  - `sponsors`: Sponsor beheer
+  - `bestuursleden`: Bestuurslid beheer
+  - `sponsoringen`: Sponsoring transacties en exports
+- **Database**: SQLite (productie-ready) in `data/sponsoring.db`
 - **Authentication**: Werkzeug security met password hashing
 - **File handling**: Secure filename generation met UUID
-- **Export**: openpyxl (Excel) en reportlab (PDF)
+- **Export**: 
+  - `pandas` & `openpyxl` (Excel)
+  - `xhtml2pdf` (PDF)
+  - `zipfile` (Logo downloads)
+- **Testing**: `pytest` unit test suite
 
 ### Frontend
 - **CSS Framework**: Bootstrap 5 met custom CSS
