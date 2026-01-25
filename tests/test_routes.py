@@ -55,3 +55,16 @@ def test_export_access(auth_client):
     resp = auth_client.get('/sponsoringen/export/excel')
     assert resp.status_code == 200
     assert resp.content_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+def test_rate_limit(client, app):
+    """Test rate limiting on login endpoint."""
+    # Enable rate limiting for this test
+    app.config['RATELIMIT_ENABLED'] = True
+    
+    # Attempt login 6 times (limit is 5)
+    for _ in range(5):
+        client.post('/login', data={'email': 'bad@example.com', 'password': 'wrong'})
+        
+    # The 6th attempt should fail
+    resp = client.post('/login', data={'email': 'bad@example.com', 'password': 'wrong'})
+    assert resp.status_code == 429

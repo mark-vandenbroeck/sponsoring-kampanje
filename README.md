@@ -709,7 +709,8 @@ cp backup/sponsoring-20240101.db instance/sponsoring.db
 - **Authorization**: Role-based access control (RBAC)
 - **File uploads**: Secure filename generation
 - **Input validation**: Server-side validation
-- **CSRF protection**: Flask-WTF (indien geconfigureerd)
+- **CSRF protection**: Flask-WTF
+- **Rate Limiting**: Flask-Limiter bescherming tegen brute-force attacks (5 pogingen/minuut op login)
 
 ## Gebruik
 

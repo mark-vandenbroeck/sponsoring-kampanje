@@ -29,6 +29,9 @@ def create_app(config_name='default'):
     db.init_app(app)
     csrf.init_app(app)
     
+    from app.extensions import limiter
+    limiter.init_app(app)
+    
     # Register blueprints
     register_blueprints(app)
     

@@ -2,10 +2,12 @@ from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from app.models import db, Gebruiker, Evenement, Sponsoring, Sponsor, Bestuurslid
 from app.utils import login_required
+from app.extensions import limiter
 
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 def login():
     if request.method == 'POST':
         email = request.form['email']
