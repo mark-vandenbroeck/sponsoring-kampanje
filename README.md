@@ -121,6 +121,7 @@ Bij de eerste start wordt automatisch:
 
 1. **Dockerfile is al aanwezig** in de repository met geoptimaliseerde configuratie:
    - Python 3.11-slim base image
+   - **Gunicorn** als productieserver (4 workers)
    - Security hardened (non-root user)
    - Health checks geïntegreerd
    - Alle dependencies geïnstalleerd
