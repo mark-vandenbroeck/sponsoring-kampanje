@@ -128,16 +128,24 @@
                     <div class="col-md-6">
                         <h6>Logo Origineel</h6>
                         {% if sponsoring.logo_origineel %}
+                        {% set ext = sponsoring.logo_origineel.split('.')[-1].lower() %}
+                        {% set is_image = ext in ['jpg', 'jpeg', 'png', 'gif', 'webp'] %}
+                        {% set thumbnail = get_thumbnail_path(sponsoring.logo_origineel) %}
+
                         <a href="{{ url_for('main.uploaded_file', filename=sponsoring.logo_origineel) }}"
                             target="_blank" class="text-decoration-none">
-                            {% set thumbnail = get_thumbnail_path(sponsoring.logo_origineel) %}
                             {% if thumbnail %}
                             <img src="{{ url_for('main.uploaded_file', filename=thumbnail) }}" class="img-fluid rounded"
-                                style="max-width: 200px; max-height: 150px;" alt="Logo origineel (PDF)">
-                            {% else %}
+                                style="max-width: 200px; max-height: 150px;" alt="Logo origineel (Thumbnail)">
+                            {% elif is_image %}
                             <img src="{{ url_for('main.uploaded_file', filename=sponsoring.logo_origineel) }}"
                                 class="img-fluid rounded" style="max-width: 200px; max-height: 150px;"
                                 alt="Logo origineel">
+                            {% else %}
+                            <div class="text-center p-3 border rounded bg-light">
+                                <i class="fas fa-file-alt fa-3x text-secondary"></i>
+                                <p class="mt-2 text-muted small">{{ sponsoring.logo_origineel }}</p>
+                            </div>
                             {% endif %}
                         </a>
                         <p class="mt-2">
@@ -154,16 +162,24 @@
                     <div class="col-md-6">
                         <h6>Logo Afgewerkt</h6>
                         {% if sponsoring.logo_afgewerkt_file %}
+                        {% set ext = sponsoring.logo_afgewerkt_file.split('.')[-1].lower() %}
+                        {% set is_image = ext in ['jpg', 'jpeg', 'png', 'gif', 'webp'] %}
+                        {% set thumbnail = get_thumbnail_path(sponsoring.logo_afgewerkt_file) %}
+
                         <a href="{{ url_for('main.uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}"
                             target="_blank" class="text-decoration-none">
-                            {% set thumbnail = get_thumbnail_path(sponsoring.logo_afgewerkt_file) %}
                             {% if thumbnail %}
                             <img src="{{ url_for('main.uploaded_file', filename=thumbnail) }}" class="img-fluid rounded"
-                                style="max-width: 200px; max-height: 150px;" alt="Logo afgewerkt (PDF)">
-                            {% else %}
+                                style="max-width: 200px; max-height: 150px;" alt="Logo afgewerkt (Thumbnail)">
+                            {% elif is_image %}
                             <img src="{{ url_for('main.uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}"
                                 class="img-fluid rounded" style="max-width: 200px; max-height: 150px;"
                                 alt="Logo afgewerkt">
+                            {% else %}
+                            <div class="text-center p-3 border rounded bg-light">
+                                <i class="fas fa-file-archive fa-3x text-success"></i>
+                                <p class="mt-2 text-muted small">{{ sponsoring.logo_afgewerkt_file }}</p>
+                            </div>
                             {% endif %}
                         </a>
                         <p class="mt-2">

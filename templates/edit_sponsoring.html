@@ -178,15 +178,23 @@
                                 {% if sponsoring.logo_origineel %}
                                 <div class="mt-2">
                                     <small class="text-muted">Huidig logo:</small>
+                                    {% set ext = sponsoring.logo_origineel.split('.')[-1].lower() %}
+                                    {% set is_image = ext in ['jpg', 'jpeg', 'png', 'gif', 'webp'] %}
                                     {% set thumbnail = get_thumbnail_path(sponsoring.logo_origineel) %}
+
                                     {% if thumbnail %}
                                     <img src="{{ url_for('main.uploaded_file', filename=thumbnail) }}"
                                         class="img-fluid rounded" style="max-width: 300px; max-height: 200px;"
-                                        alt="Huidig logo origineel (PDF)">
-                                    {% else %}
+                                        alt="Huidig logo origineel (Thumbnail)">
+                                    {% elif is_image %}
                                     <img src="{{ url_for('main.uploaded_file', filename=sponsoring.logo_origineel) }}"
                                         class="img-fluid rounded" style="max-width: 300px; max-height: 200px;"
                                         alt="Huidig logo origineel">
+                                    {% else %}
+                                    <div class="text-center p-3 border rounded bg-light" style="max-width: 300px;">
+                                        <i class="fas fa-file-alt fa-3x text-secondary"></i>
+                                        <p class="mt-2 text-muted small mb-0">{{ sponsoring.logo_origineel }}</p>
+                                    </div>
                                     {% endif %}
                                 </div>
                                 {% endif %}
@@ -201,15 +209,23 @@
                                 {% if sponsoring.logo_afgewerkt_file %}
                                 <div class="mt-2">
                                     <small class="text-muted">Huidig logo:</small>
+                                    {% set ext = sponsoring.logo_afgewerkt_file.split('.')[-1].lower() %}
+                                    {% set is_image = ext in ['jpg', 'jpeg', 'png', 'gif', 'webp'] %}
                                     {% set thumbnail = get_thumbnail_path(sponsoring.logo_afgewerkt_file) %}
+
                                     {% if thumbnail %}
                                     <img src="{{ url_for('main.uploaded_file', filename=thumbnail) }}"
                                         class="img-fluid rounded" style="max-width: 300px; max-height: 200px;"
-                                        alt="Huidig logo afgewerkt (PDF)">
-                                    {% else %}
+                                        alt="Huidig logo afgewerkt (Thumbnail)">
+                                    {% elif is_image %}
                                     <img src="{{ url_for('main.uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}"
                                         class="img-fluid rounded" style="max-width: 300px; max-height: 200px;"
                                         alt="Huidig logo afgewerkt">
+                                    {% else %}
+                                    <div class="text-center p-3 border rounded bg-light" style="max-width: 300px;">
+                                        <i class="fas fa-file-archive fa-3x text-success"></i>
+                                        <p class="mt-2 text-muted small mb-0">{{ sponsoring.logo_afgewerkt_file }}</p>
+                                    </div>
                                     {% endif %}
                                 </div>
                                 {% endif %}
