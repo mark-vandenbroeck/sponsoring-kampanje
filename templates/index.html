@@ -35,7 +35,7 @@
     <div class="col-md-3">
         <div class="stats-card">
             <div class="stats-number">{{ bestuursleden_count }}</div>
-            <div class="stats-label">Bestuursleden</div>
+            <div class="stats-label">Aanbrengers</div>
         </div>
     </div>
 </div>
@@ -51,19 +51,21 @@
             </div>
             <div class="card-body">
                 {% if recente_evenementen %}
-                    {% for evenement in recente_evenementen %}
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <h6 class="mb-1">{{ evenement.naam }}</h6>
-                            <small class="text-muted">{{ evenement.datum.strftime('%d/%m/%Y') }} - {{ evenement.locatie }}</small>
-                        </div>
-                        <a href="{{ url_for('evenementen.detail', id=evenement.id) }}" class="btn btn-sm btn-outline-primary">
-                            Bekijk
-                        </a>
+                {% for evenement in recente_evenementen %}
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="mb-1">{{ evenement.naam }}</h6>
+                        <small class="text-muted">{{ evenement.datum.strftime('%d/%m/%Y') }} - {{ evenement.locatie
+                            }}</small>
                     </div>
-                    {% endfor %}
+                    <a href="{{ url_for('evenementen.detail', id=evenement.id) }}"
+                        class="btn btn-sm btn-outline-primary">
+                        Bekijk
+                    </a>
+                </div>
+                {% endfor %}
                 {% else %}
-                    <p class="text-muted">Geen evenementen gevonden.</p>
+                <p class="text-muted">Geen evenementen gevonden.</p>
                 {% endif %}
                 <div class="text-center mt-3">
                     <a href="{{ url_for('evenementen.list') }}" class="btn btn-primary">
@@ -73,7 +75,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-6">
         <div class="card">
             <div class="card-header bg-success text-white">
@@ -84,19 +86,21 @@
             </div>
             <div class="card-body">
                 {% if recente_sponsoringen %}
-                    {% for sponsoring in recente_sponsoringen %}
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <h6 class="mb-1">{{ sponsoring.sponsor.naam }}</h6>
-                            <small class="text-muted">{{ sponsoring.evenement.naam }} - {{ sponsoring.kontrakt.kontrakt }}</small>
-                        </div>
-                        <a href="{{ url_for('sponsoringen.detail', id=sponsoring.id) }}" class="btn btn-sm btn-outline-success">
-                            Bekijk
-                        </a>
+                {% for sponsoring in recente_sponsoringen %}
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="mb-1">{{ sponsoring.sponsor.naam }}</h6>
+                        <small class="text-muted">{{ sponsoring.evenement.naam }} - {{ sponsoring.kontrakt.kontrakt
+                            }}</small>
                     </div>
-                    {% endfor %}
+                    <a href="{{ url_for('sponsoringen.detail', id=sponsoring.id) }}"
+                        class="btn btn-sm btn-outline-success">
+                        Bekijk
+                    </a>
+                </div>
+                {% endfor %}
                 {% else %}
-                    <p class="text-muted">Geen sponsoringen gevonden.</p>
+                <p class="text-muted">Geen sponsoringen gevonden.</p>
                 {% endif %}
                 <div class="text-center mt-3">
                     <a href="{{ url_for('sponsoringen.list') }}" class="btn btn-success">

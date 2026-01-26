@@ -9,7 +9,7 @@
             <i class="fas fa-user me-3"></i>
             {{ bestuurslid.naam or bestuurslid.initialen }}
         </h1>
-        <p class="lead mb-0">Bestuurslid Details</p>
+        <p class="lead mb-0">Aanbrenger Details</p>
     </div>
 </div>
 
@@ -19,23 +19,26 @@
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="fas fa-info-circle me-2"></i>
-                    Bestuurslid Informatie
+                    Aanbrenger Informatie
                 </h5>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
                         <p><strong>Naam:</strong> {{ bestuurslid.naam or 'Niet opgegeven' }}</p>
-                        <p><strong>Initialen:</strong> <span class="badge bg-primary">{{ bestuurslid.initialen }}</span></p>
+                        <p><strong>Initialen:</strong> <span class="badge bg-primary">{{ bestuurslid.initialen }}</span>
+                        </p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Sponsors:</strong> <span class="badge bg-info">{{ bestuurslid.sponsors|length }}</span></p>
-                        <p><strong>Sponsoringen:</strong> <span class="badge bg-success">{{ bestuurslid.sponsoringen|length }}</span></p>
+                        <p><strong>Sponsors:</strong> <span class="badge bg-info">{{ bestuurslid.sponsors|length
+                                }}</span></p>
+                        <p><strong>Sponsoringen:</strong> <span class="badge bg-success">{{
+                                bestuurslid.sponsoringen|length }}</span></p>
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0">
@@ -59,14 +62,16 @@
                             {% for sponsor in bestuurslid.sponsors %}
                             <tr>
                                 <td>
-                                    <a href="{{ url_for('sponsors.detail', id=sponsor.id) }}" class="text-decoration-none">
+                                    <a href="{{ url_for('sponsors.detail', id=sponsor.id) }}"
+                                        class="text-decoration-none">
                                         {{ sponsor.naam }}
                                     </a>
                                 </td>
                                 <td>{{ sponsor.kontaktpersoon or '-' }}</td>
                                 <td>{{ sponsor.telefoon or '-' }}</td>
                                 <td>
-                                    <a href="{{ url_for('sponsors.detail', id=sponsor.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ url_for('sponsors.detail', id=sponsor.id) }}"
+                                        class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 </td>
@@ -76,11 +81,11 @@
                     </table>
                 </div>
                 {% else %}
-                <p class="text-muted">Geen sponsors gekoppeld aan dit bestuurslid.</p>
+                <p class="text-muted">Geen sponsors gekoppeld aan deze aanbrenger.</p>
                 {% endif %}
             </div>
         </div>
-        
+
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">
@@ -106,33 +111,39 @@
                             {% for sponsoring in bestuurslid.sponsoringen %}
                             <tr>
                                 <td>
-                                    <a href="{{ url_for('evenementen.detail', id=sponsoring.evenement.id) }}" class="text-decoration-none">
+                                    <a href="{{ url_for('evenementen.detail', id=sponsoring.evenement.id) }}"
+                                        class="text-decoration-none">
                                         {{ sponsoring.evenement.naam }}
                                     </a>
-                                    <br><small class="text-muted">{{ sponsoring.evenement.datum.strftime('%d/%m/%Y') }}</small>
+                                    <br><small class="text-muted">{{ sponsoring.evenement.datum.strftime('%d/%m/%Y')
+                                        }}</small>
                                 </td>
                                 <td>
-                                    <a href="{{ url_for('sponsors.detail', id=sponsoring.sponsor.id) }}" class="text-decoration-none">
+                                    <a href="{{ url_for('sponsors.detail', id=sponsoring.sponsor.id) }}"
+                                        class="text-decoration-none">
                                         {{ sponsoring.sponsor.naam }}
                                     </a>
                                 </td>
                                 <td>
-                                    <a href="{{ url_for('kontrakten.detail', id=sponsoring.kontrakt.id) }}" class="text-decoration-none">
+                                    <a href="{{ url_for('kontrakten.detail', id=sponsoring.kontrakt.id) }}"
+                                        class="text-decoration-none">
                                         {{ sponsoring.kontrakt.kontrakt }}
                                     </a>
                                 </td>
-                                <td class="amount-column">€{{ format_european_currency(sponsoring.facturatiebedrag_incl_btw or 0) }}</td>
+                                <td class="amount-column">€{{
+                                    format_european_currency(sponsoring.facturatiebedrag_incl_btw or 0) }}</td>
                                 <td>
                                     {% if sponsoring.betaald %}
-                                        <span class="badge bg-success">Betaald</span>
+                                    <span class="badge bg-success">Betaald</span>
                                     {% elif sponsoring.gefactureerd %}
-                                        <span class="badge bg-warning">Gefactureerd</span>
+                                    <span class="badge bg-warning">Gefactureerd</span>
                                     {% else %}
-                                        <span class="badge bg-secondary">In behandeling</span>
+                                    <span class="badge bg-secondary">In behandeling</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{{ url_for('sponsoringen.detail', id=sponsoring.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ url_for('sponsoringen.detail', id=sponsoring.id) }}"
+                                        class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 </td>
@@ -143,7 +154,8 @@
                         <tfoot>
                             <tr class="table-info">
                                 <td colspan="3"><strong>Totaal:</strong></td>
-                                <td class="amount-column"><strong>€{{ format_european_currency(total_opgehaald) }}</strong></td>
+                                <td class="amount-column"><strong>€{{ format_european_currency(total_opgehaald)
+                                        }}</strong></td>
                                 <td colspan="2"></td>
                             </tr>
                         </tfoot>
@@ -151,12 +163,12 @@
                     </table>
                 </div>
                 {% else %}
-                <p class="text-muted">Geen sponsoringen voor dit bestuurslid.</p>
+                <p class="text-muted">Geen sponsoringen voor deze aanbrenger.</p>
                 {% endif %}
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-4">
         <div class="card">
             <div class="card-header">
@@ -176,7 +188,7 @@
                         <div class="stats-label">Sponsoringen</div>
                     </div>
                 </div>
-                
+
                 {% if total_opgehaald %}
                 <hr>
                 <div class="text-center">
@@ -186,7 +198,7 @@
                 {% endif %}
             </div>
         </div>
-        
+
         <div class="card mt-3">
             <div class="card-header">
                 <h5 class="mb-0">
@@ -197,14 +209,14 @@
             <div class="card-body">
                 <div class="d-grid gap-2">
                     {% if current_user and current_user.is_gebruiker() %}
-                        <a href="{{ url_for('bestuursleden.edit', id=bestuurslid.id) }}" class="btn btn-warning">
-                            <i class="fas fa-edit me-2"></i>
-                            Bewerken
-                        </a>
-                        <a href="{{ url_for('sponsors.add') }}?bestuurslid_id={{ bestuurslid.id }}" class="btn btn-primary">
-                            <i class="fas fa-plus me-2"></i>
-                            Nieuwe Sponsor
-                        </a>
+                    <a href="{{ url_for('bestuursleden.edit', id=bestuurslid.id) }}" class="btn btn-warning">
+                        <i class="fas fa-edit me-2"></i>
+                        Bewerken
+                    </a>
+                    <a href="{{ url_for('sponsors.add') }}?bestuurslid_id={{ bestuurslid.id }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>
+                        Nieuwe Sponsor
+                    </a>
                     {% endif %}
                     <a href="{{ url_for('bestuursleden.list') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-2"></i>

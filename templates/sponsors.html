@@ -89,7 +89,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <label for="bestuurslid_search" class="form-label small">Bestuurslid</label>
+                <label for="bestuurslid_search" class="form-label small">Aanbrenger</label>
                 <div class="position-relative">
                     <input type="text" class="form-control form-control-sm" id="bestuurslid_search"
                         placeholder="Type om te zoeken..." autocomplete="off"
@@ -115,7 +115,7 @@
                     <button type="submit" class="btn btn-sm btn-primary">
                         <i class="fas fa-filter"></i>
                     </button>
-                    <a href="{{ url_for('sponsors.list') }}" class="btn btn-sm btn-outline-secondary">
+                    <a href="{{ url_for('sponsors.list', reset=1) }}" class="btn btn-sm btn-outline-secondary">
                         <i class="fas fa-times"></i>
                     </a>
                 </div>
@@ -136,7 +136,7 @@
                 {% endif %}
                 {% if selected_bestuurslid %}
                 {% if selected_naam or selected_kontaktpersoon %} | {% endif %}
-                Bestuurslid:
+                Aanbrenger:
                 {% for bestuurslid in bestuursleden %}
                 {% if bestuurslid.id|string == selected_bestuurslid %}
                 {{ bestuurslid.naam or bestuurslid.initialen }}
@@ -203,7 +203,7 @@
                         <th>
                             <a class="text-decoration-none"
                                 href="{{ url_for('sponsors.list', bestuurslid=selected_bestuurslid, naam=selected_naam, kontaktpersoon=selected_kontaktpersoon, sort='bestuurslid', dir='desc' if selected_sort=='bestuurslid' and selected_dir=='asc' else 'asc') }}">
-                                Bestuurslid
+                                Aanbrenger
                                 {% if selected_sort == 'bestuurslid' %}
                                 <i class="fas fa-sort-{{ 'up' if selected_dir=='asc' else 'down' }} ms-1"></i>
                                 {% else %}
@@ -264,9 +264,9 @@
                                 {% endif %}
                                 {% if current_user and current_user.is_beheerder() %}
                                 <form method="POST" action="{{ url_for('sponsors.delete', id=sponsor.id) }}"
-                                    style="display: inline;" onsubmit="return confirm('Weet je zeker dat je sponsor \"
-                                    {{ sponsor.naam }}\" wilt verwijderen?')">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    style="display: inline;"
+                                    onsubmit="return confirm('Weet je zeker dat je sponsor &quot;{{ sponsor.naam }}&quot; wilt verwijderen?')">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Verwijderen">
                                         <i class="fas fa-trash"></i>
                                     </button>

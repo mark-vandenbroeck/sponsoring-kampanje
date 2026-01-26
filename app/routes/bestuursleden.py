@@ -23,7 +23,7 @@ def add():
         )
         db.session.add(bestuurslid)
         db.session.commit()
-        flash(f'Bestuurslid "{bestuurslid.naam or bestuurslid.initialen}" succesvol toegevoegd!', 'success')
+        flash(f'Aanbrenger "{bestuurslid.naam or bestuurslid.initialen}" succesvol toegevoegd!', 'success')
         return redirect(url_for('bestuursleden.detail', id=bestuurslid.id))
     
     return render_template('add_bestuurslid.html')
@@ -76,7 +76,7 @@ def edit(id):
         bestuurslid.initialen = request.form['initialen']
         bestuurslid.naam = request.form['naam'] if request.form['naam'] else None
         db.session.commit()
-        flash('Bestuurslid succesvol bijgewerkt!', 'success')
+        flash('Aanbrenger succesvol bijgewerkt!', 'success')
         return redirect(url_for('bestuursleden.detail', id=bestuurslid.id))
     return render_template('edit_bestuurslid.html', bestuurslid=bestuurslid)
 
@@ -89,20 +89,20 @@ def delete(id):
     naam = bestuurslid.naam or bestuurslid.initialen
     
     if bestuurslid.sponsoringen:
-        flash(f'Bestuurslid "{naam}" kan niet worden verwijderd omdat er nog sponsoringen aan gekoppeld zijn.', 'error')
+        flash(f'Aanbrenger "{naam}" kan niet worden verwijderd omdat er nog sponsoringen aan gekoppeld zijn.', 'error')
         return redirect(url_for('bestuursleden.list'))
     
     if bestuurslid.sponsors:
-        flash(f'Bestuurslid "{naam}" kan niet worden verwijderd omdat er nog sponsors aan gekoppeld zijn.', 'error')
+        flash(f'Aanbrenger "{naam}" kan niet worden verwijderd omdat er nog sponsors aan gekoppeld zijn.', 'error')
         return redirect(url_for('bestuursleden.list'))
     
     try:
         db.session.delete(bestuurslid)
         db.session.commit()
-        flash(f'Bestuurslid "{naam}" succesvol verwijderd.', 'success')
+        flash(f'Aanbrenger "{naam}" succesvol verwijderd.', 'success')
     except Exception as e:
         db.session.rollback()
-        flash(f'Fout bij het verwijderen van bestuurslid: {str(e)}', 'error')
+        flash(f'Fout bij het verwijderen van aanbrenger: {str(e)}', 'error')
         
     return redirect(url_for('bestuursleden.list'))
 
@@ -132,10 +132,10 @@ def export_excel():
     
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Bestuursleden')
+        df.to_excel(writer, index=False, sheet_name='Aanbrengers')
         
         # Adjust column widths
-        worksheet = writer.sheets['Bestuursleden']
+        worksheet = writer.sheets['Aanbrengers']
         for idx, col in enumerate(df.columns):
             max_len = max(
                 df[col].astype(str).map(len).max(),

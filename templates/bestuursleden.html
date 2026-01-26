@@ -1,27 +1,27 @@
 {% extends "base.html" %}
 
-{% block title %}Bestuursleden - Sponsoring De Kampanje{% endblock %}
+{% block title %}Aanbrengers - Sponsoring De Kampanje{% endblock %}
 
 {% block content %}
 <div class="page-header">
     <div class="container">
         <h1 class="page-title">
             <i class="fas fa-users me-3"></i>
-            Bestuursleden
+            Aanbrengers
         </h1>
-        <p class="lead mb-0">Beheer alle bestuursleden</p>
+        <p class="lead mb-0">Beheer alle aanbrengers</p>
     </div>
 </div>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h4>Alle Bestuursleden ({{ bestuursleden|length }})</h4>
+        <h4>Alle Aanbrengers ({{ bestuursleden|length }})</h4>
     </div>
     <div class="d-flex gap-2">
         {% if current_user and current_user.is_gebruiker() %}
         <a href="{{ url_for('bestuursleden.add') }}" class="btn btn-primary">
             <i class="fas fa-plus me-2"></i>
-            Nieuw Bestuurslid
+            Nieuwe Aanbrenger
         </a>
         {% endif %}
         <div class="btn-group" role="group">
@@ -124,9 +124,9 @@
                                 {% if current_user and current_user.is_beheerder() %}
                                 <form method="POST" action="{{ url_for('bestuursleden.delete', id=bestuurslid.id) }}"
                                     style="display: inline;"
-                                    onsubmit="return confirm('Weet je zeker dat je bestuurslid \" {{
+                                    onsubmit="return confirm('Weet je zeker dat je aanbrenger \" {{
                                     bestuurslid.initialen }}\" wilt verwijderen?')">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Verwijderen">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -142,11 +142,11 @@
         {% else %}
         <div class="text-center py-5">
             <i class="fas fa-users fa-3x text-muted mb-3"></i>
-            <h5 class="text-muted">Geen bestuursleden gevonden</h5>
-            <p class="text-muted">Voeg je eerste bestuurslid toe om te beginnen.</p>
+            <h5 class="text-muted">Geen aanbrengers gevonden</h5>
+            <p class="text-muted">Voeg je eerste aanbrenger toe om te beginnen.</p>
             <a href="{{ url_for('bestuursleden.add') }}" class="btn btn-primary">
                 <i class="fas fa-plus me-2"></i>
-                Nieuw Bestuurslid
+                Nieuwe Aanbrenger
             </a>
         </div>
         {% endif %}

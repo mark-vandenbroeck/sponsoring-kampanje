@@ -74,3 +74,4 @@ backup/
 # Temporary files
 tmp/
 temp/
+*.pid

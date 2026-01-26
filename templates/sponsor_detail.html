@@ -50,7 +50,7 @@
                         </p>
                         {% endif %}
                         {% if sponsor.bestuurslid %}
-                        <p><strong>Bestuurslid:</strong>
+                        <p><strong>Aanbrenger:</strong>
                             <a href="{{ url_for('bestuursleden.detail', id=sponsor.bestuurslid.id) }}"
                                 class="text-decoration-none">
                                 {{ sponsor.bestuurslid.naam or sponsor.bestuurslid.initialen }}

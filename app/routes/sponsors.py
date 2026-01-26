@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from app.utils import login_required, gebruiker_required, beheerder_required
 from app.models import Evenement, Kontrakt, Sponsor, Bestuurslid, Sponsoring
 
@@ -7,9 +7,28 @@ sponsors_bp = Blueprint('sponsors', __name__)
 @sponsors_bp.route('/')
 @login_required
 def list():
-    from flask import request
-    
-    # Get filter parameters
+    # Define keys to persist
+    filter_keys = ['naam', 'kontaktpersoon', 'bestuurslid']
+
+    # Handle reset
+    if request.args.get('reset'):
+        if 'sponsor_filters' in session:
+            session.pop('sponsor_filters')
+        return redirect(url_for('sponsors.list'))
+
+    # Check if request has any relevant args
+    has_filter_args = any(key in request.args for key in filter_keys)
+
+    if has_filter_args:
+        # Save to session
+        filters = {k: request.args.get(k) for k in filter_keys if request.args.get(k) is not None}
+        session['sponsor_filters'] = filters
+    else:
+        # No args provided, try to load from session
+        if 'sponsor_filters' in session:
+            return redirect(url_for('sponsors.list', **session['sponsor_filters']))
+            
+    # Get filter parameters (now prioritized from request args, which might be populated from session via redirect)
     naam_filter = request.args.get('naam', '')
     kontaktpersoon_filter = request.args.get('kontaktpersoon', '')
     bestuurslid_filter = request.args.get('bestuurslid', '')
@@ -25,22 +44,24 @@ def list():
         query = query.filter(Sponsor.kontaktpersoon.ilike(f'%{kontaktpersoon_filter}%'))
     
     if bestuurslid_filter:
-        query = query.filter_by(bestuurslid_id=int(bestuurslid_filter))
+        try:
+            query = query.filter_by(bestuurslid_id=int(bestuurslid_filter))
+        except ValueError:
+            pass # Ignore invalid bestuurslid_id
     
     sponsors = query.all()
     all_sponsors = Sponsor.query.all()
     bestuursleden = Bestuurslid.query.all()
     
     return render_template('sponsors.html', sponsors=sponsors, all_sponsors=all_sponsors, 
-                         bestuursleden=bestuursleden, selected_naam=naam_filter, 
-                         selected_kontaktpersoon=kontaktpersoon_filter, 
-                         selected_bestuurslid=bestuurslid_filter, 
-                         selected_sort='naam', selected_dir='asc')
+                           bestuursleden=bestuursleden, selected_naam=naam_filter, 
+                           selected_kontaktpersoon=kontaktpersoon_filter, 
+                           selected_bestuurslid=bestuurslid_filter,
+                           selected_sort='naam', selected_dir='asc')
 
 @sponsors_bp.route('/add', methods=['GET', 'POST'])
 @gebruiker_required
 def add():
-    from flask import request
     from app.models import db
     
     if request.method == 'POST':
@@ -185,7 +206,7 @@ def export_excel():
             'Gemeente': s.gemeente,
             'BTW Nummer': s.btw_nummer,
             'Opmerkingen': s.opmerkingen,
-            'Bestuurslid': s.bestuurslid.naam if s.bestuurslid else ''
+            'Aanbrenger': s.bestuurslid.naam if s.bestuurslid else ''
         })
     
     df = pd.DataFrame(data)

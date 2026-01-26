@@ -91,7 +91,7 @@
                                     <input type="hidden" id="aangebracht_door_id" name="aangebracht_door_id"
                                         value="{{ sponsoring.aangebracht_door_id }}" required>
                                     <button type="button" class="btn btn-outline-success" id="addNewBestuurslidBtn"
-                                        title="Nieuwe bestuurslid toevoegen">
+                                        title="Nieuwe aanbrenger toevoegen">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                 </div>
@@ -105,7 +105,7 @@
                                     {% endfor %}
                                 </div>
                                 <small class="form-text text-muted">Type om te zoeken of klik op + voor nieuwe
-                                    bestuurslid</small>
+                                    aanbrenger</small>
                             </div>
                         </div>
                     </div>
@@ -256,7 +256,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="newBestuurslidModalLabel">
-                    <i class="fas fa-plus me-2"></i>Nieuwe Bestuurslid
+                    <i class="fas fa-plus me-2"></i>Nieuwe Aanbrenger
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -363,9 +363,9 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="new_sponsor_bestuurslid" class="form-label">Bestuurslid</label>
+                                <label for="new_sponsor_bestuurslid" class="form-label">Aanbrenger</label>
                                 <select class="form-control" id="new_sponsor_bestuurslid" name="bestuurslid_id">
-                                    <option value="">Selecteer bestuurslid</option>
+                                    <option value="">Selecteer aanbrenger</option>
                                     {% for bestuurslid in bestuursleden %}
                                     <option value="{{ bestuurslid.id }}">
                                         {{ bestuurslid.naam or bestuurslid.initialen }}

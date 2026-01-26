@@ -24,7 +24,7 @@
             </div>
             <div class="card-body">
                 <form method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                     <div class="mb-3">
                         <label for="naam" class="form-label">Naam *</label>
                         <input type="text" class="form-control" id="naam" name="naam" value="{{ sponsor.naam }}"
@@ -102,9 +102,9 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="bestuurslid_id" class="form-label">Bestuurslid</label>
+                        <label for="bestuurslid_id" class="form-label">Aanbrenger</label>
                         <select class="form-control" id="bestuurslid_id" name="bestuurslid_id">
-                            <option value="">Selecteer bestuurslid (optioneel)</option>
+                            <option value="">Selecteer aanbrenger (optioneel)</option>
                             {% for bestuurslid in bestuursleden %}
                             <option value="{{ bestuurslid.id }}" {% if sponsor.bestuurslid_id==bestuurslid.id
                                 %}selected{% endif %}>
