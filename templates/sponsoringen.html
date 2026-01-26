@@ -326,32 +326,53 @@
                                 {% if sponsoring.logo_origineel %}
                                 <a href="{{ url_for('main.uploaded_file', filename=sponsoring.logo_origineel) }}"
                                     target="_blank" class="text-decoration-none">
+                                    {% set ext = sponsoring.logo_origineel.split('.')[-1].lower() %}
+                                    {% set is_image = ext in ['jpg', 'jpeg', 'png', 'gif', 'webp'] %}
                                     {% set thumbnail = get_thumbnail_path(sponsoring.logo_origineel) %}
+
                                     {% if thumbnail %}
                                     <img src="{{ url_for('main.uploaded_file', filename=thumbnail) }}" class="thumbnail"
-                                        alt="Logo origineel (PDF)">
-                                    {% else %}
+                                        alt="Logo origineel (Thumbnail)">
+                                    {% elif is_image %}
                                     <img src="{{ url_for('main.uploaded_file', filename=sponsoring.logo_origineel) }}"
                                         class="thumbnail" alt="Logo origineel">
+                                    {% else %}
+                                    <span
+                                        class="badge bg-light text-secondary border d-flex align-items-center justify-content-center"
+                                        style="width: 40px; height: 40px;" title="{{ sponsoring.logo_origineel }}">
+                                        <i class="fas fa-file-alt fa-lg"></i>
+                                    </span>
                                     {% endif %}
                                 </a>
                                 {% else %}
-                                <span class="badge bg-secondary">Geen</span>
+                                <span class="badge bg-secondary d-flex align-items-center justify-content-center"
+                                    style="width: 40px; height: 40px;">Geen</span>
                                 {% endif %}
+
                                 {% if sponsoring.logo_afgewerkt_file %}
                                 <a href="{{ url_for('main.uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}"
                                     target="_blank" class="text-decoration-none">
+                                    {% set ext = sponsoring.logo_afgewerkt_file.split('.')[-1].lower() %}
+                                    {% set is_image = ext in ['jpg', 'jpeg', 'png', 'gif', 'webp'] %}
                                     {% set thumbnail = get_thumbnail_path(sponsoring.logo_afgewerkt_file) %}
+
                                     {% if thumbnail %}
                                     <img src="{{ url_for('main.uploaded_file', filename=thumbnail) }}" class="thumbnail"
-                                        alt="Logo afgewerkt (PDF)">
-                                    {% else %}
+                                        alt="Logo afgewerkt (Thumbnail)">
+                                    {% elif is_image %}
                                     <img src="{{ url_for('main.uploaded_file', filename=sponsoring.logo_afgewerkt_file) }}"
                                         class="thumbnail" alt="Logo afgewerkt">
+                                    {% else %}
+                                    <span
+                                        class="badge bg-light text-success border d-flex align-items-center justify-content-center"
+                                        style="width: 40px; height: 40px;" title="{{ sponsoring.logo_afgewerkt_file }}">
+                                        <i class="fas fa-file-archive fa-lg"></i>
+                                    </span>
                                     {% endif %}
                                 </a>
                                 {% else %}
-                                <span class="badge bg-secondary">Geen</span>
+                                <span class="badge bg-secondary d-flex align-items-center justify-content-center"
+                                    style="width: 40px; height: 40px;">Geen</span>
                                 {% endif %}
                             </div>
                         </td>
