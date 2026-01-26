@@ -410,7 +410,7 @@
             <a class="navbar-brand"
                 href="{{ url_for('auth.dashboard') if session.user_id else url_for('main.index') }}">
                 <i class="fas fa-handshake me-2"></i>
-                Sponsoring De Kampanje
+                Sponsoring
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -469,7 +469,7 @@
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                             data-bs-toggle="dropdown">
                             <i class="fas fa-user me-1"></i>
-                            {{ session.user_email or 'Gebruiker' }}
+                            {{ session.user_email.split('@')[0] if session.user_email else 'Gebruiker' }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ url_for('auth.change_password') }}">

@@ -726,7 +726,7 @@ cp backup/sponsoring-20240101.db instance/sponsoring.db
 4. **Bestuursleden**: Voeg bestuursleden toe (voor contacten)
 5. **Sponsoringen**: Track alle sponsoringen met bedragen en status
 6. **Logo's**: Upload en beheer originele en afgewerkte logo's
-7. **Export**: Genereer Excel/PDF rapporten
+7. **Export**: Genereer Excel/PDF rapporten van alle overzichten (Sponsoringen, Evenementen, Kontrakten, Sponsors, Bestuursleden)
 
 ### Rollen & Rechten
 - **Beheerder**: Volledige toegang + gebruikersbeheer + verwijderen

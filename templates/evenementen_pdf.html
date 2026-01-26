@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1cm;
+        }
+
+        body {
+            font-family: Helvetica, sans-serif;
+            font-size: 10px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 8px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Evenementen Overzicht</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Naam</th>
+                <th>Datum</th>
+                <th>Locatie</th>
+                <th>Omschrijving</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in evenementen %}
+            <tr>
+                <td>{{ e.evenementcode }}</td>
+                <td>{{ e.naam }}</td>
+                <td>{{ e.datum.strftime('%d/%m/%Y') }}</td>
+                <td>{{ e.locatie }}</td>
+                <td>{{ e.omschrijving }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="footer">
+        Gegenereerd op: {{ current_date }}
+    </div>
+</body>
+
+</html>

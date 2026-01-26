@@ -98,7 +98,7 @@
                     <button type="submit" class="btn btn-primary btn-sm">
                         <i class="fas fa-search"></i>
                     </button>
-                    <a href="{{ url_for('sponsoringen.list') }}" class="btn btn-secondary btn-sm">
+                    <a href="{{ url_for('sponsoringen.list', reset=1) }}" class="btn btn-secondary btn-sm">
                         <i class="fas fa-times"></i>
                     </a>
                 </div>
@@ -167,7 +167,8 @@
             Nieuwe Sponsoring
         </a>
         {% endif %}
-        <a href="{{ url_for('sponsoringen.download_logos') }}" class="btn btn-info" style="font-size: 0.875rem;">
+        <a href="{{ url_for('sponsoringen.download_logos', evenement=request.args.get('evenement', ''), kontrakt=request.args.get('kontrakt', ''), sponsor=request.args.get('sponsor', ''), logo_bezorgd=request.args.get('logo_bezorgd', ''), logo_afgewerkt=request.args.get('logo_afgewerkt', ''), gefactureerd=request.args.get('gefactureerd', ''), betaald=request.args.get('betaald', '')) }}"
+            class="btn btn-info" style="font-size: 0.875rem;">
             <i class="fas fa-download me-2"></i>
             Download Afgewerkte Logo's
         </a>

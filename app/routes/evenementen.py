@@ -109,14 +109,70 @@ def delete(id):
 @evenementen_bp.route('/export/excel')
 @login_required
 def export_excel():
-    flash('Deze functie is nog niet geïmplementeerd in de nieuwe modulaire structuur.', 'warning')
-    return redirect(url_for('evenementen.list'))
+    import pandas as pd
+    import io
+    from flask import send_file
+    
+    evenementen = Evenement.query.order_by(Evenement.datum.desc()).all()
+    
+    data = []
+    for e in evenementen:
+        data.append({
+            'Code': e.evenementcode,
+            'Naam': e.naam,
+            'Datum': e.datum.strftime('%d/%m/%Y'),
+            'Locatie': e.locatie,
+            'Omschrijving': e.omschrijving
+        })
+    
+    df = pd.DataFrame(data)
+    
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Evenementen')
+        
+        # Adjust column widths
+        worksheet = writer.sheets['Evenementen']
+        for idx, col in enumerate(df.columns):
+            max_len = max(
+                df[col].astype(str).map(len).max(),
+                len(str(col))
+            ) + 2
+            worksheet.column_dimensions[chr(65 + idx)].width = max_len
+            
+    output.seek(0)
+    
+    return send_file(
+        output,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name='evenementen_export.xlsx'
+    )
 
 @evenementen_bp.route('/export/pdf')
 @login_required
 def export_pdf():
-    flash('Deze functie is nog niet geïmplementeerd in de nieuwe modulaire structuur.', 'warning')
-    return redirect(url_for('evenementen.list'))
+    from xhtml2pdf import pisa
+    import io
+    from flask import make_response
+    from datetime import datetime
+    
+    evenementen = Evenement.query.order_by(Evenement.datum.desc()).all()
+    
+    html = render_template('evenementen_pdf.html',
+                         evenementen=evenementen,
+                         current_date=datetime.now().strftime('%d/%m/%Y %H:%M'))
+                         
+    result = io.BytesIO()
+    pdf = pisa.pisaDocument(io.BytesIO(html.encode("UTF-8")), result)
+    
+    if not pdf.err:
+        response = make_response(result.getvalue())
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = 'attachment; filename=evenementen_overzicht.pdf'
+        return response
+    
+    return "Error generating PDF", 500
 
 @evenementen_bp.route('/api/kontrakten/<int:evenement_id>')
 @login_required

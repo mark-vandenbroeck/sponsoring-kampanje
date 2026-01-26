@@ -47,14 +47,23 @@ def test_evenementen_access(auth_client):
 
 def test_export_access(auth_client):
     """Test availability of export routes."""
-    # Note: These might return redirects or data depending on DB state, 
-    # but initially we check valid status code (200 is fine if it renders or downloads)
-    # Actually export routes return a file download or 200
+    export_routes = [
+        ('/sponsoringen/export/excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
+        ('/sponsoringen/export/pdf', 'application/pdf'),
+        ('/evenementen/export/excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
+        ('/evenementen/export/pdf', 'application/pdf'),
+        ('/kontrakten/export/excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
+        ('/kontrakten/export/pdf', 'application/pdf'),
+        ('/sponsors/export/excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
+        ('/sponsors/export/pdf', 'application/pdf'),
+        ('/bestuursleden/export/excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
+        ('/bestuursleden/export/pdf', 'application/pdf'),
+    ]
     
-    # Verify routes exist and don't 404
-    resp = auth_client.get('/sponsoringen/export/excel')
-    assert resp.status_code == 200
-    assert resp.content_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    for route, expected_type in export_routes:
+        resp = auth_client.get(route)
+        assert resp.status_code == 200, f"Route {route} returned {resp.status_code}"
+        assert resp.content_type == expected_type, f"Route {route} has wrong content type"
 
 def test_rate_limit(client, app):
     """Test rate limiting on login endpoint."""

@@ -127,9 +127,11 @@
                         <td>
                             <strong>{{ evenement.naam }}</strong>
                             {% if evenement.omschrijving %}
-                            <br><small class="text-muted rich-text-content"
-                                style="max-height: 60px; overflow: hidden;">{{ evenement.omschrijving[:100]|safe }}{% if
-                                evenement.omschrijving|length > 100 %}...{% endif %}</small>
+                            <br>
+                            <div class="text-muted rich-text-content small"
+                                style="max-height: 60px; overflow: hidden; display: block; margin-top: 5px;">{{
+                                evenement.omschrijving[:100]|safe }}{% if
+                                evenement.omschrijving|length > 100 %}...{% endif %}</div>
                             {% endif %}
                         </td>
                         <td>{{ evenement.datum.strftime('%d/%m/%Y') }}</td>
@@ -155,10 +157,8 @@
                                 {% if current_user and current_user.is_beheerder() %}
                                 <form method="POST" action="{{ url_for('evenementen.delete', id=evenement.id) }}"
                                     style="display: inline;"
-                                    onsubmit="return confirm('Weet je zeker dat je het evenement \" {{ evenement.naam
-                                    }}\" wilt verwijderen? Dit zal ook alle gerelateerde kontrakten en sponsoringen
-                                    verwijderen!')">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    onsubmit="return confirm('Weet je zeker dat je het evenement &quot;{{ evenement.naam }}&quot; wilt verwijderen? Dit zal ook alle gerelateerde kontrakten en sponsoringen verwijderen!')">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Verwijderen">
                                         <i class="fas fa-trash"></i>
                                     </button>

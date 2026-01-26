@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1cm;
+        }
+
+        body {
+            font-family: Helvetica, sans-serif;
+            font-size: 9px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 4px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 style="text-align: center; color: #2c3e50;">Sponsors Overzicht</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 20%;">Naam</th>
+                <th style="width: 15%;">Contact</th>
+                <th style="width: 20%;">Email</th>
+                <th style="width: 10%;">Telefoon</th>
+                <th style="width: 23%;">Adres</th>
+                <th style="width: 10%;">BTW</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in sponsors %}
+            <tr>
+                <td style="width: 20%;">{{ s.naam }}</td>
+                <td style="width: 15%;">{{ s.kontaktpersoon or '' }}</td>
+                <td style="width: 20%;">
+                    <div style="word-wrap: break-word; word-break: break-all; width: 100%;">
+                        {{ s.email or '' }}
+                    </div>
+                </td>
+                <td style="width: 10%;">{{ s.telefoon or '' }}</td>
+                <td style="width: 23%;">
+                    {{ s.straat or '' }} {{ s.huisnummer or '' }}<br>
+                    {{ s.postcode or '' }} {{ s.gemeente or '' }}
+                </td>
+                <td style="width: 10%;">{{ s.btw_nummer or '' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="position: fixed; bottom: 0; width: 100%; text-align: center; font-size: 8px; color: #666;">
+        Gegenereerd op: {{ current_date }}
+    </div>
+</body>
+
+</html>

@@ -166,11 +166,73 @@ def delete(id):
 @sponsors_bp.route('/export/excel')
 @login_required
 def export_excel():
-    flash('Deze functie is nog niet geïmplementeerd in de nieuwe modulaire structuur.', 'warning')
-    return redirect(url_for('sponsors.list'))
+    import pandas as pd
+    import io
+    from flask import send_file
+    
+    sponsors = Sponsor.query.order_by(Sponsor.naam).all()
+    
+    data = []
+    for s in sponsors:
+        data.append({
+            'Naam': s.naam,
+            'Contactpersoon': s.kontaktpersoon,
+            'Email': s.email,
+            'Telefoon': s.telefoon,
+            'Straat': s.straat,
+            'Huisnummer': s.huisnummer,
+            'Postcode': s.postcode,
+            'Gemeente': s.gemeente,
+            'BTW Nummer': s.btw_nummer,
+            'Opmerkingen': s.opmerkingen,
+            'Bestuurslid': s.bestuurslid.naam if s.bestuurslid else ''
+        })
+    
+    df = pd.DataFrame(data)
+    
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sponsors')
+        
+        # Adjust column widths
+        worksheet = writer.sheets['Sponsors']
+        for idx, col in enumerate(df.columns):
+            max_len = max(
+                df[col].astype(str).map(len).max(),
+                len(str(col))
+            ) + 2
+            worksheet.column_dimensions[chr(65 + idx)].width = max_len
+            
+    output.seek(0)
+    
+    return send_file(
+        output,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name='sponsors_export.xlsx'
+    )
 
 @sponsors_bp.route('/export/pdf')
 @login_required
 def export_pdf():
-    flash('Deze functie is nog niet geïmplementeerd in de nieuwe modulaire structuur.', 'warning')
-    return redirect(url_for('sponsors.list'))
+    from xhtml2pdf import pisa
+    import io
+    from flask import make_response
+    from datetime import datetime
+    
+    sponsors = Sponsor.query.order_by(Sponsor.naam).all()
+    
+    html = render_template('sponsors_pdf.html',
+                         sponsors=sponsors,
+                         current_date=datetime.now().strftime('%d/%m/%Y %H:%M'))
+                         
+    result = io.BytesIO()
+    pdf = pisa.pisaDocument(io.BytesIO(html.encode("UTF-8")), result)
+    
+    if not pdf.err:
+        response = make_response(result.getvalue())
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = 'attachment; filename=sponsors_overzicht.pdf'
+        return response
+    
+    return "Error generating PDF", 500
