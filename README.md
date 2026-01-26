@@ -15,7 +15,7 @@ Een moderne Python Flask applicatie voor het beheren van evenement sponsoringen 
 ### Geavanceerde Features
 - **Authenticatie & Autorisatie**: Volledig gebruikerssysteem met rollen (Beheerder, Gebruiker, Lezer)
 - **Rolgebaseerde toegang**: Verschillende rechten per gebruikerstype
-- **Geavanceerde filtering**: Filter op evenement, kontrakt, sponsor, bestuurslid, status
+- **Geavanceerde filtering**: Filter op evenement, kontrakt, sponsor, aanbrenger, status
 - **Smart defaults**: Automatische selectie van het meest recente evenement als default filter
 - **Export functionaliteit**: Excel en PDF export voor alle overzichten
 - **Rich text editing**: WYSIWYG editor voor vrije tekstvelden
@@ -641,7 +641,7 @@ cp backup/sponsoring-20240101.db instance/sponsoring.db
 - Locatie
 - Omschrijving
 
-### Bestuurslid
+### Aanbrenger
 - Initialen
 - Naam (optioneel)
 
@@ -659,14 +659,14 @@ cp backup/sponsoring-20240101.db instance/sponsoring.db
 - Telefoon
 - Email
 - BTW-nummer
-- Bestuurslid (foreign key)
+- Aanbrenger (foreign key)
 - Opmerkingen (rich text)
 
 ### Sponsoring
 - Evenement (foreign key)
 - Kontrakt (foreign key)
 - Sponsor (foreign key)
-- Aangebracht door (foreign key naar bestuurslid)
+- Aangebracht door (foreign key naar aanbrenger)
 - Bedrag kaarten
 - Netto bedrag excl BTW
 - Facturatiebedrag incl BTW
@@ -687,7 +687,7 @@ cp backup/sponsoring-20240101.db instance/sponsoring.db
   - `evenementen`: Evenement beheer
   - `kontrakten`: Kontrakt beheer
   - `sponsors`: Sponsor beheer
-  - `bestuursleden`: Bestuurslid beheer
+  - `bestuursleden`: Aanbrenger beheer
   - `sponsoringen`: Sponsoring transacties en exports
 - **Database**: SQLite (productie-ready) in `data/sponsoring.db`
 - **Authentication**: Werkzeug security met password hashing
@@ -724,10 +724,10 @@ cp backup/sponsoring-20240101.db instance/sponsoring.db
 1. **Evenementen**: Voeg evenementen toe met datum en details
 2. **Kontrakten**: Definieer kontrakt types per evenement
 3. **Sponsors**: Registreer sponsor informatie
-4. **Bestuursleden**: Voeg bestuursleden toe (voor contacten)
+4. **Aanbrengers**: Voeg aanbrengers toe (voor contacten)
 5. **Sponsoringen**: Track alle sponsoringen met bedragen en status
 6. **Logo's**: Upload en beheer originele en afgewerkte logo's
-7. **Export**: Genereer Excel/PDF rapporten van alle overzichten (Sponsoringen, Evenementen, Kontrakten, Sponsors, Bestuursleden)
+7. **Export**: Genereer Excel/PDF rapporten van alle overzichten (Sponsoringen, Evenementen, Kontrakten, Sponsors, Aanbrengers)
 
 ### Rollen & Rechten
 - **Beheerder**: Volledige toegang + gebruikersbeheer + verwijderen
@@ -917,6 +917,18 @@ docker start sponsoring-app
 # Remove container
 docker rm sponsoring-app
 ```
+
+### Helper Scripts
+
+Er zijn handige scripts beschikbaar om de applicatie te beheren:
+
+#### Lokaal (Direct)
+- `./start.sh`: Start de applicatie (Gunicorn) op de achtergrond.
+- `./stop.sh`: Stop de applicatie.
+
+#### Docker
+- `./start_docker.sh`: Bouw en start de Docker container.
+- `./stop_docker.sh`: Stop en verwijder de Docker container.
 
 ## Licentie
 
