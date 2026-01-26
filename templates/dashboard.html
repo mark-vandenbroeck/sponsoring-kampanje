@@ -30,7 +30,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-md-3">
             <div class="card bg-success text-white">
                 <div class="card-body">
@@ -46,7 +46,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-md-3">
             <div class="card bg-info text-white">
                 <div class="card-body">
@@ -62,7 +62,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-md-3">
             <div class="card bg-warning text-white">
                 <div class="card-body">
@@ -79,7 +79,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="row mt-4">
         <div class="col-12">
             <div class="card">
@@ -110,11 +110,24 @@
                             </a>
                         </div>
                         <div class="col-md-3">
-                            <a href="{{ url_for('evenementen.statistieken') }}" class="btn btn-outline-secondary w-100 mb-2">
+                            <a href="{{ url_for('evenementen.statistieken') }}"
+                                class="btn btn-outline-secondary w-100 mb-2">
                                 <i class="fas fa-chart-pie me-2"></i>
                                 Statistieken
                             </a>
                         </div>
+
+                        {% if current_user.rol == 'beheerder' %}
+                        <div class="col-md-3">
+                            <form action="{{ url_for('auth.backup_database') }}" method="post"
+                                onsubmit="return confirm('Wil je een backup maken van de database?');">
+                                <button type="submit" class="btn btn-outline-danger w-100 mb-2">
+                                    <i class="fas fa-database me-2"></i>
+                                    Backup Database
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

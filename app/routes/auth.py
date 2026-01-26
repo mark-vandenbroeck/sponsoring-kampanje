@@ -123,3 +123,52 @@ def set_password():
         return redirect(url_for('auth.dashboard'))
     
     return render_template('set_password.html')
+
+@auth_bp.route('/backup-database', methods=['POST'])
+@login_required
+def backup_database():
+    import os
+    import sqlite3
+    from flask import current_app
+    
+    user = Gebruiker.query.get(session['user_id'])
+    if user.rol != 'beheerder':
+        flash('Geen toegang.', 'error')
+        return redirect(url_for('auth.dashboard'))
+    
+    try:
+        # Determine paths
+        db_uri = current_app.config['SQLALCHEMY_DATABASE_URI']
+        if db_uri.startswith('sqlite:///'):
+            db_path = db_uri.replace('sqlite:///', '')
+        else:
+             flash('Backup alleen ondersteund voor SQLite.', 'error')
+             return redirect(url_for('auth.dashboard'))
+        
+        # Handle relative/absolute paths
+        # If relative, it's usually relative to the project root (CWD in run.py)
+        if not os.path.isabs(db_path):
+            # If running from run.py, CWD is project root.
+            db_path = os.path.abspath(db_path)
+            
+        backup_dir = os.path.join(os.path.dirname(db_path), 'backups')
+        if not os.path.exists(backup_dir):
+            os.makedirs(backup_dir)
+            
+        timestamp = datetime.now().strftime('%Y%m%d')
+        backup_filename = f'sponsoring-{timestamp}.db'
+        backup_path = os.path.join(backup_dir, backup_filename)
+        
+        # Perform online backup
+        src = sqlite3.connect(db_path)
+        dst = sqlite3.connect(backup_path)
+        with dst:
+            src.backup(dst)
+        dst.close()
+        src.close()
+        
+        flash(f'Backup succesvol gemaakt: {backup_filename}', 'success')
+    except Exception as e:
+        flash(f'Fout bij maken backup: {str(e)}', 'error')
+        
+    return redirect(url_for('auth.dashboard'))
