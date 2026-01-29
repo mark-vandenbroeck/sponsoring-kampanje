@@ -27,7 +27,7 @@ docker build -t $IMAGE_NAME .
 echo "🚀 Starting container..."
 docker run -d -p $PORT:$PORT \
   -v "$(pwd)/data:/app/data" \
-  -v "$(pwd)/data/uploads:/app/static/uploads" \
+  -v "$(pwd)/static/uploads:/app/static/uploads" \
   --name $APP_NAME \
   $IMAGE_NAME
 

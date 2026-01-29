@@ -88,7 +88,7 @@ mkdir -p data
 # Start container
 docker run -d -p 5100:5100 \
   -v $(pwd)/data:/app/data \
-  -v $(pwd)/data/uploads:/app/static/uploads \
+  -v $(pwd)/static/uploads:/app/static/uploads \
   --name sponsoring-app \
   sponsoring-kampanje
 ```
@@ -151,7 +151,7 @@ docker build -t sponsoring-kampanje .
 # Run met database en uploads persistence
 docker run -d -p 5100:5100 \
   -v $(pwd)/data:/app/data \
-  -v $(pwd)/data/uploads:/app/static/uploads \
+  -v $(pwd)/static/uploads:/app/static/uploads \
   --name sponsoring-app \
   sponsoring-kampanje
 ```
