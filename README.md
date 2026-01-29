@@ -21,8 +21,10 @@ Een moderne Python Flask applicatie voor het beheren van evenement sponsoringen 
 - **Rich text editing**: WYSIWYG editor voor vrije tekstvelden
 - **Responsive design**: Werkt perfect op desktop, tablet en mobiel
 - **Modern UI**: Strakke interface met levendige maar zachte kleuren
-- **Dashboard met statistieken**: Direct inzicht in opgehaalde bedragen en openstaande facturen
+- **Dashboard met statistieken**: Direct inzicht in opgehaalde bedragen, openstaande facturen en per-event visualisaties
 - **Audit Log**: Volledige historie van alle wijzigingen (wie, wat, wanneer) met filters en zoekfunctie
+- **Uitgebreide Handleiding**: Geïntegreerde gebruikershandleiding met navigatie en zoekfunctie
+- **Interactieve Tabellen**: Sorteerbare kolommen en geavanceerde filtering voor alle overzichten
 - **File management**: Veilige bestandsuploads met thumbnails en zip downloads
 - **Design file support**: Volledige ondersteuning voor professionele design bestanden (AI, PSD, EPS, SVG, PDF)
 

@@ -12,25 +12,64 @@ def list():
     # Get filter parameter
     evenement_filter = request.args.get('evenement', '')
     
+    # Sort parameters
+    sort = request.args.get('sort', 'evenement')
+    direction = request.args.get('dir', 'asc')
+    
     # If no evenement filter is provided, default to the most recent event
-    if not evenement_filter:
+    # NOTE: Disabling this auto-filter if we are explicitly sorting, or maybe just keep logic?
+    # User might want to see sorted list of ALL contracts.
+    # The original logic forces specific event view by default.
+    # Let's keep existing logic: if no filter, default to latest event. 
+    # BUT if user clicked "Kontrakten" in menu, they expect that. 
+    # If they click sort, they might want to sort WITHIN that event. 
+    # If they want ALL contracts sorted, they need to clear filter.
+    if not evenement_filter and not request.args.get('show_all'): # Add a flag if we ever want to show all
         latest_evenement = Evenement.query.order_by(Evenement.datum.desc()).first()
         if latest_evenement:
             evenement_filter = str(latest_evenement.id)
     
-    # Query kontrakten
+    query = Kontrakt.query
+    
+    # Apply filters
     if evenement_filter:
-        kontrakten = Kontrakt.query.filter_by(evenement_id=int(evenement_filter)).all()
-    else:
-        kontrakten = Kontrakt.query.all()
+        query = query.filter_by(evenement_id=int(evenement_filter))
+        
+    # Apply sorting
+    if sort == 'evenement':
+        query = query.join(Evenement)
+        if direction == 'desc':
+            query = query.order_by(Evenement.datum.desc())
+        else:
+            query = query.order_by(Evenement.datum.asc())
+            
+    elif sort == 'kontrakt':
+        if direction == 'desc':
+            query = query.order_by(Kontrakt.kontrakt.desc())
+        else:
+            query = query.order_by(Kontrakt.kontrakt.asc())
+            
+    elif sort == 'bedrag':
+        if direction == 'desc':
+            query = query.order_by(Kontrakt.bedrag.desc())
+        else:
+            query = query.order_by(Kontrakt.bedrag.asc())
+            
+    elif sort == 'tegenprestatie':
+        if direction == 'desc':
+            query = query.order_by(Kontrakt.tegenprestatie.desc())
+        else:
+            query = query.order_by(Kontrakt.tegenprestatie.asc())
+            
+    kontrakten = query.all()
     
     # Calculate total bedrag
     total_bedrag = sum(k.bedrag for k in kontrakten if k.bedrag is not None)
     
     evenementen = Evenement.query.order_by(Evenement.datum.desc()).all()
     return render_template('kontrakten.html', kontrakten=kontrakten, evenementen=evenementen, 
-                         selected_evenement=evenement_filter, selected_sort='evenement', 
-                         selected_dir='asc', total_bedrag=total_bedrag)
+                         selected_evenement=evenement_filter, selected_sort=sort, 
+                         selected_dir=direction, total_bedrag=total_bedrag)
 
 @kontrakten_bp.route('/add', methods=['GET', 'POST'])
 @gebruiker_required

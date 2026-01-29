@@ -7,8 +7,41 @@ evenementen_bp = Blueprint('evenementen', __name__)
 @evenementen_bp.route('/')
 @login_required
 def list():
-    evenementen = Evenement.query.order_by(Evenement.datum.desc()).all()
-    return render_template('evenementen.html', evenementen=evenementen, selected_sort='datum', selected_dir='desc')
+    from flask import request
+    
+    # Sort parameters
+    sort = request.args.get('sort', 'datum')
+    direction = request.args.get('dir', 'desc') # Default descending date
+    
+    query = Evenement.query
+    
+    # Apply sorting
+    if sort == 'evenementcode':
+        if direction == 'desc':
+            query = query.order_by(Evenement.evenementcode.desc())
+        else:
+            query = query.order_by(Evenement.evenementcode.asc())
+            
+    elif sort == 'naam':
+        if direction == 'desc':
+            query = query.order_by(Evenement.naam.desc())
+        else:
+            query = query.order_by(Evenement.naam.asc())
+            
+    elif sort == 'datum':
+        if direction == 'desc':
+            query = query.order_by(Evenement.datum.desc())
+        else:
+            query = query.order_by(Evenement.datum.asc())
+            
+    elif sort == 'locatie':
+        if direction == 'desc':
+            query = query.order_by(Evenement.locatie.desc())
+        else:
+            query = query.order_by(Evenement.locatie.asc())
+            
+    evenementen = query.all()
+    return render_template('evenementen.html', evenementen=evenementen, selected_sort=sort, selected_dir=direction)
 
 @evenementen_bp.route('/add', methods=['GET', 'POST'])
 @gebruiker_required
@@ -198,6 +231,13 @@ def statistieken():
         total_betaald = 0
         total_openstaand = 0
         
+        # Per-event status counts
+        status_counts = {
+            'completed': 0, # Betaald
+            'invoiced': 0,  # Gefactureerd maar niet betaald
+            'pending': 0    # Nog te factureren
+        }
+        
         for kontrakt in evenement.kontrakten:
             # Calculate totals for this kontrakt
             kontrakt_excl_btw = 0
@@ -206,6 +246,14 @@ def statistieken():
             kontrakt_openstaand = 0
             
             for sponsoring in kontrakt.sponsoringen:
+                # Update per-event status counts
+                if sponsoring.betaald:
+                    status_counts['completed'] += 1
+                elif sponsoring.gefactureerd:
+                    status_counts['invoiced'] += 1
+                else:
+                    status_counts['pending'] += 1
+
                 # Use fallback logic for excl BTW
                 display_amount = get_display_amount(sponsoring)
                 kontrakt_excl_btw += display_amount
@@ -235,6 +283,7 @@ def statistieken():
         evenement_stats.append({
             'evenement': evenement,
             'kontrakt_stats': kontrakt_stats,
+            'status_counts': status_counts,
             'total_excl_btw': total_excl_btw,
             'total_incl_btw': total_incl_btw,
             'total_betaald': total_betaald,

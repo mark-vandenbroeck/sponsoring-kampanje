@@ -25,7 +25,7 @@
     <div class="card-body">
         {% if stats.kontrakt_stats %}
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-12 mb-4">
                 <h5 class="mb-3">Totaal per Kontrakt</h5>
                 <div class="table-responsive">
                     <table class="table table-sm table-striped">
@@ -61,10 +61,18 @@
                     </table>
                 </div>
             </div>
+        </div>
+        <div class="row">
             <div class="col-md-6">
                 <h5 class="mb-3">Verdeling per Kontrakt (Excl. BTW)</h5>
                 <div class="chart-container" style="position: relative; height: 300px;">
                     <canvas id="chart-{{ stats.evenement.id }}"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h5 class="mb-3">Status Overzicht</h5>
+                <div class="chart-container" style="position: relative; height: 300px;">
+                    <canvas id="statusChart-{{ stats.evenement.id }}"></canvas>
                 </div>
             </div>
         </div>
@@ -97,62 +105,119 @@
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    {% for stats in evenement_stats %}
-    {% if stats.kontrakt_stats %}
-    // Chart data for {{ stats.evenement.naam }}
-    const chartData{{ stats.evenement.id }} = {
-        labels: [
-            {% for kontrakt in stats.kontrakt_stats %}
-            "{{ kontrakt.kontrakt }}"{% if not loop.last %},{% endif %}
-            {% endfor %}
-        ],
-        datasets: [{
-            data: [
+    document.addEventListener('DOMContentLoaded', function () {
+        {% for stats in evenement_stats %}
+        {% if stats.kontrakt_stats %}
+        // --- Contract Distribution Chart for {{ stats.evenement.naam }} ---
+        const chartData{{ stats.evenement.id }} = {
+            labels: [
                 {% for kontrakt in stats.kontrakt_stats %}
-                {{ kontrakt.excl_btw }}{% if not loop.last %},{% endif %}
+                "{{ kontrakt.kontrakt }}"{% if not loop.last %}, {% endif %}
                 {% endfor %}
             ],
-            backgroundColor: [
-                '#4A90E2', '#7ED321', '#F5A623', '#E74C3C', '#9B59B6', 
-                '#1ABC9C', '#34495E', '#E67E22', '#3498DB', '#2ECC71'
-            ],
-            borderWidth: 2,
-            borderColor: '#fff'
-        }]
-    };
+            datasets: [{
+                data: [
+                    {% for kontrakt in stats.kontrakt_stats %}
+                    {{ kontrakt.excl_btw }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                ],
+                backgroundColor: [
+                    '#4A90E2', '#7ED321', '#F5A623', '#E74C3C', '#9B59B6',
+                    '#1ABC9C', '#34495E', '#E67E22', '#3498DB', '#2ECC71'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        };
 
-    const ctx{{ stats.evenement.id }} = document.getElementById('chart-{{ stats.evenement.id }}').getContext('2d');
-    new Chart(ctx{{ stats.evenement.id }}, {
-        type: 'pie',
-        data: chartData{{ stats.evenement.id }},
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 20,
-                        usePointStyle: true
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const label = context.label || '';
-                            const value = context.parsed;
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((value / total) * 100).toFixed(1);
-                            return `${label}: €${value.toLocaleString('nl-NL', {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${percentage}%)`;
+        const ctx{{ stats.evenement.id }} = document.getElementById('chart-{{ stats.evenement.id }}').getContext('2d');
+        new Chart(ctx{{ stats.evenement.id }}, {
+            type: 'pie',
+            data: chartData{{ stats.evenement.id }},
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 10,
+                            usePointStyle: true,
+                            font: { size: 11 }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Inkomsten (Excl. BTW)'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${label}: €${value.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${percentage}%)`;
+                            }
                         }
                     }
                 }
             }
-        }
+        });
+
+        // --- Status Overview Chart for {{ stats.evenement.naam }} ---
+        const statusCtx{{ stats.evenement.id }} = document.getElementById('statusChart-{{ stats.evenement.id }}').getContext('2d');
+        new Chart(statusCtx{{ stats.evenement.id }}, {
+            type: 'pie',
+            data: {
+                labels: ['Betaald', 'Gefactureerd', 'Nog te factureren'],
+                datasets: [{
+                    data: [
+                        {{ stats.status_counts.completed }}, 
+                        {{ stats.status_counts.invoiced }}, 
+                        {{ stats.status_counts.pending }}
+                    ],
+                    backgroundColor: [
+                        '#2ECC71', // Green for Paid
+                        '#3498DB', // Blue for Invoiced
+                        '#F1C40F'  // Yellow/Orange for Pending
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 10,
+                            usePointStyle: true,
+                            font: { size: 11 }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Status Sponsoringen'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${label}: ${value} sponsors (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        {% endif %}
+        {% endfor %}
     });
-    {% endif %}
-    {% endfor %}
-});
 </script>
 {% endblock %}

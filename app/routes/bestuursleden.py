@@ -7,8 +7,31 @@ bestuursleden_bp = Blueprint('bestuursleden', __name__)
 @bestuursleden_bp.route('/')
 @login_required
 def list():
-    bestuursleden = Bestuurslid.query.all()
-    return render_template('bestuursleden.html', bestuursleden=bestuursleden, selected_sort='naam', selected_dir='asc')
+    from flask import request
+    
+    # Sort parameters
+    sort = request.args.get('sort', 'naam')
+    direction = request.args.get('dir', 'asc')
+    
+    query = Bestuurslid.query
+    
+    if sort == 'naam':
+        if direction == 'desc':
+            query = query.order_by(Bestuurslid.naam.desc())
+        else:
+            query = query.order_by(Bestuurslid.naam.asc())
+    elif sort == 'initialen':
+        if direction == 'desc':
+            query = query.order_by(Bestuurslid.initialen.desc())
+        else:
+            query = query.order_by(Bestuurslid.initialen.asc())
+            
+    bestuursleden = query.all()
+    
+    # Handle sorting by calculated fields (e.g. Total Amount) in Python if needed
+    # (Not strictly requested but good for consistency if the UI has it)
+    
+    return render_template('bestuursleden.html', bestuursleden=bestuursleden, selected_sort=sort, selected_dir=direction)
 
 @bestuursleden_bp.route('/add', methods=['GET', 'POST'])
 @gebruiker_required

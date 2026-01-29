@@ -58,7 +58,33 @@ def list():
             )
         )
             
-    pagination = query.order_by(AuditLog.timestamp.desc()).paginate(
+    # Sort parameters
+    sort = request.args.get('sort', 'timestamp')
+    direction = request.args.get('dir', 'desc')
+
+    # Apply sorting
+    if sort == 'action':
+        if direction == 'desc':
+            query = query.order_by(AuditLog.action.desc())
+        else:
+            query = query.order_by(AuditLog.action.asc())
+    elif sort == 'target_type':
+        if direction == 'desc':
+            query = query.order_by(AuditLog.target_type.desc())
+        else:
+            query = query.order_by(AuditLog.target_type.asc())
+    elif sort == 'user_name':
+        if direction == 'desc':
+            query = query.order_by(AuditLog.user_name.desc())
+        else:
+            query = query.order_by(AuditLog.user_name.asc())
+    else: # Default timestamp
+        if direction == 'asc':
+            query = query.order_by(AuditLog.timestamp.asc())
+        else:
+            query = query.order_by(AuditLog.timestamp.desc())
+
+    pagination = query.paginate(
         page=page, per_page=50, error_out=False
     )
     
@@ -67,4 +93,6 @@ def list():
     return render_template('audit_list.html', 
                          logs=pagination.items, 
                          pagination=pagination,
-                         target_types=target_types)
+                         target_types=target_types,
+                         selected_sort=sort,
+                         selected_dir=direction)

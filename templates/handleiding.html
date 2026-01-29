@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Handleiding - Sponsoring De Kampanje{% endblock %}
+
+{% block content %}
+<style>
+    /* Compact Manual Styles */
+    .manual-content h1 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .manual-content h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 0.25rem;
+    }
+
+    .manual-content h5 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-top: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .manual-content p,
+    .manual-content li {
+        font-size: 0.85rem;
+        line-height: 1.4;
+        margin-bottom: 0.5rem;
+    }
+
+    .manual-content ul,
+    .manual-content ol {
+        margin-bottom: 0.5rem;
+        padding-left: 1.2rem;
+    }
+
+    .manual-content .alert {
+        padding: 0.5rem 0.75rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .manual-content hr {
+        margin: 1rem 0;
+    }
+
+    /* Compact Sidebar */
+    .manual-sidebar .card-header {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .manual-sidebar .list-group-item {
+        padding: 0.35rem 0.75rem;
+        font-size: 0.85rem;
+    }
+</style>
+
+<div class="row justify-content-center">
+    <!-- Sidebar Navigation -->
+    <div class="col-md-3 mb-4 manual-sidebar">
+        <div class="card shadow-sm sticky-top" style="top: 20px;">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-book me-2"></i>Inhoudsopgave
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="#inleiding" class="list-group-item list-group-item-action">Inleiding</a>
+                <a href="#dashboard" class="list-group-item list-group-item-action">Dashboard</a>
+                <a href="#evenementen" class="list-group-item list-group-item-action">Evenementen</a>
+                <a href="#kontrakten" class="list-group-item list-group-item-action">Kontrakten</a>
+                <a href="#sponsors" class="list-group-item list-group-item-action">Sponsors</a>
+                <a href="#aanbrengers" class="list-group-item list-group-item-action">Aanbrengers</a>
+                <a href="#sponsoringen" class="list-group-item list-group-item-action">Sponsoringen</a>
+                <a href="#statistieken" class="list-group-item list-group-item-action">Statistieken</a>
+                {% if current_user.is_beheerder() %}
+                <a href="#beheer" class="list-group-item list-group-item-action list-group-item-warning">Beheer &
+                    Audit</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-9 manual-content">
+        <div class="card shadow-sm">
+            <div class="card-body p-3">
+                <h1 class="mb-4 text-primary"><i class="fas fa-info-circle me-3"></i>Handleiding Sponsoring</h1>
+                <p class="lead">Welkom bij de handleiding van de Sponsoring applicatie van De Kampanje. Deze gids helpt
+                    je wegwijs te maken in het beheren van sponsors, evenementen en contracten.</p>
+                <hr>
+
+                <section id="inleiding" class="mb-5">
+                    <h3>1. Inleiding</h3>
+                    <p>Deze applicatie is ontworpen om het volledige sponsorproces te stroomlijnen. De kern van het
+                        systeem draait om drie elementen:</p>
+                    <ul>
+                        <li><strong>Sponsors</strong>: De bedrijven of personen die sponsoren.</li>
+                        <li><strong>Evenementen</strong>: De activiteiten waarvoor gesponsord wordt (bv. een concert of
+                            eetfestijn).</li>
+                        <li><strong>Sponsoringen</strong>: De koppeling tussen een sponsor en een evenement via een
+                            contract.</li>
+                    </ul>
+                </section>
+
+                <section id="dashboard" class="mb-5">
+                    <h3>2. Dashboard <i class="fas fa-home text-muted ms-2"></i></h3>
+                    <p>Na het inloggen kom je op het dashboard. Hier zie je in één oogopslag:</p>
+                    <ul>
+                        <li><strong>Totaal Sponsors</strong>: Het aantal unieke sponsors in de database.</li>
+                        <li><strong>Lopende Evenementen</strong>: Evenementen die in de toekomst plaatsvinden.</li>
+                        <li><strong>Openstaande Taken</strong>: Bijvoorbeeld logo's die nog moeten worden aangeleverd.
+                        </li>
+                    </ul>
+                </section>
+
+                <section id="evenementen" class="mb-5">
+                    <h3>3. Evenementen <i class="fas fa-calendar-alt text-muted ms-2"></i></h3>
+                    <p>Hier beheer je alle evenementen. Een evenement is de basis voor elke sponsoring.</p>
+                    <div class="alert alert-light border">
+                        <strong>Acties:</strong>
+                        <ul>
+                            <li><strong>Toevoegen</strong>: Klik op "Nieuw Evenement" en vul de details in (Naam, Datum,
+                                Locatie).</li>
+                            <li><strong>Details</strong>: Klik op een evenement om de financiële status en gekoppelde
+                                contracten te zien.</li>
+                            <li><strong>Export</strong>: Download een lijst van evenementen naar Excel of PDF via de
+                                exportknoppen.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section id="kontrakten" class="mb-5">
+                    <h3>4. Kontrakten <i class="fas fa-file-contract text-muted ms-2"></i></h3>
+                    <p>Kontrakten definiëren de "pakketten" die sponsors kunnen kopen (bv. "Goud", "Zilver", "Logo op
+                        affiche").</p>
+                    <p>Elk contract is gekoppeld aan een specifiek evenement. Je kunt dus voor "Evenement A" andere
+                        prijzen hanteren dan voor "Evenement B".</p>
+                </section>
+
+                <section id="sponsors" class="mb-5">
+                    <h3>5. Sponsors <i class="fas fa-building text-muted ms-2"></i></h3>
+                    <p>De centrale database van alle sponsors.</p>
+                    <ul>
+                        <li><strong>Zoeken</strong>: Gebruik de zoekbalk of filters om snel een sponsor te vinden.</li>
+                        <li><strong>Sorteren</strong>: Klik op de kolomkoppen (Naam, Contactpersoon) om de lijst te
+                            sorteren.</li>
+                        <li><strong>Detailpagina</strong>: Toont alle contactgegevens en de historiek van sponsoringen
+                            van dit bedrijf.</li>
+                    </ul>
+                </section>
+
+                <section id="aanbrengers" class="mb-5">
+                    <h3>6. Aanbrengers <i class="fas fa-users text-muted ms-2"></i></h3>
+                    <p>Aanbrengers (voorheen bestuursleden) zijn de personen binnen De Kampanje die sponsors werven.</p>
+                    <p>Bij elke sponsoring wordt geregistreerd wie de sponsor heeft aangebracht. Dit is handig voor
+                        interne opvolging.</p>
+                </section>
+
+                <section id="sponsoringen" class="mb-5">
+                    <h3>7. Sponsoringen <i class="fas fa-handshake text-muted ms-2"></i></h3>
+                    <p>Dit is het belangrijkste scherm. Hier wordt alles samengebracht.</p>
+
+                    <h5>Een nieuwe sponsoring toevoegen:</h5>
+                    <ol>
+                        <li>Kies het <strong>Evenement</strong>.</li>
+                        <li>Kies de <strong>Sponsor</strong> (of maak direct een nieuwe aan).</li>
+                        <li>Kies het <strong>Contract</strong> (pakket).</li>
+                        <li>Selecteer de <strong>Aanbrenger</strong>.</li>
+                    </ol>
+
+                    <h5>Status Opvolging:</h5>
+                    <p>Je kunt per sponsoring de status bijhouden:</p>
+                    <ul>
+                        <li><span class="badge bg-secondary">Logo Bezorgd</span>: Is het logo ontvangen?</li>
+                        <li><span class="badge bg-info">Gefactureerd</span>: Is de factuur verstuurd?</li>
+                        <li><span class="badge bg-success">Betaald</span>: Is het geld ontvangen?</li>
+                    </ul>
+                    <p><strong>Tip:</strong> Gebruik de filters bovenaan de lijst om bijvoorbeeld alle "Nog niet
+                        betaalde" sponsoringen te zien.</p>
+                </section>
+
+                <section id="statistieken" class="mb-5">
+                    <h3>8. Statistieken <i class="fas fa-chart-pie text-muted ms-2"></i></h3>
+                    <p>Visueel overzicht van de resultaten.</p>
+                    <ul>
+                        <li><strong>Taartdiagrammen</strong>: Tonen de verdeling Betaald vs. Nog te factureren per
+                            evenement.</li>
+                        <li><strong>Totalen</strong>: Inkomsten per contracttype.</li>
+                    </ul>
+                </section>
+
+                {% if current_user.is_beheerder() %}
+                <section id="beheer" class="mb-5">
+                    <h3>9. Beheer & Audit <i class="fas fa-shield-alt text-muted ms-2"></i></h3>
+                    <div class="alert alert-warning">
+                        <strong>Let op:</strong> Deze sectie is alleen zichtbaar voor beheerders.
+                    </div>
+
+                    <h5>Audit Log</h5>
+                    <p>Het systeem houdt automatisch bij wie welke wijziging heeft gedaan. </p>
+                    <ul>
+                        <li><strong>Create</strong>: Nieuwe items aangemaakt.</li>
+                        <li><strong>Update</strong>: Wijzigingen (tijdstip, oude waarde vs. nieuwe waarde).</li>
+                        <li><strong>Delete</strong>: Verwijderde items.</li>
+                    </ul>
+
+                    <h5>Gebruikersbeheer</h5>
+                    <p>Beheerders kunnen nieuwe gebruikers aanmaken en hun rechten (Gebruiker of Beheerder) instellen.
+                    </p>
+                    <ul>
+                        <li><strong>Gebruiker</strong>: Kan alles bekijken en bewerken, maar geen gegevens verwijderen.
+                        </li>
+                        <li><strong>Beheerder</strong>: Kan ook gegevens verwijderen en gebruikers beheren.</li>
+                    </ul>
+                </section>
+                {% endif %}
+
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('main.index') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-arrow-left me-2"></i>Terug naar Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Smooth scrolling for sidebar links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+</script>
+{% endblock %}

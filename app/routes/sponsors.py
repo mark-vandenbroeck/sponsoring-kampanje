@@ -33,6 +33,10 @@ def list():
     kontaktpersoon_filter = request.args.get('kontaktpersoon', '')
     bestuurslid_filter = request.args.get('bestuurslid', '')
     
+    # Sort parameters
+    sort = request.args.get('sort', 'naam')
+    direction = request.args.get('dir', 'asc')
+    
     # Start with all sponsors
     query = Sponsor.query
     
@@ -48,6 +52,48 @@ def list():
             query = query.filter_by(bestuurslid_id=int(bestuurslid_filter))
         except ValueError:
             pass # Ignore invalid bestuurslid_id
+
+    # Apply sorting
+    if sort == 'naam':
+        if direction == 'desc':
+            query = query.order_by(Sponsor.naam.desc())
+        else:
+            query = query.order_by(Sponsor.naam.asc())
+            
+    elif sort == 'kontaktpersoon':
+        if direction == 'desc':
+            query = query.order_by(Sponsor.kontaktpersoon.desc())
+        else:
+            query = query.order_by(Sponsor.kontaktpersoon.asc())
+            
+    elif sort == 'telefoon':
+        if direction == 'desc':
+            query = query.order_by(Sponsor.telefoon.desc())
+        else:
+            query = query.order_by(Sponsor.telefoon.asc())
+            
+    elif sort == 'email':
+        if direction == 'desc':
+            query = query.order_by(Sponsor.email.desc())
+        else:
+            query = query.order_by(Sponsor.email.asc())
+            
+    elif sort == 'bestuurslid':
+        query = query.join(Bestuurslid)
+        if direction == 'desc':
+            query = query.order_by(Bestuurslid.naam.desc())
+        else:
+            query = query.order_by(Bestuurslid.naam.asc())
+            
+    elif sort == 'sponsoringen':
+        # Sort by number of sponsorships
+        from sqlalchemy import func
+        subquery = db.session.query(Sponsoring.sponsor_id, func.count('*').label('count')).group_by(Sponsoring.sponsor_id).subquery()
+        query = query.outerjoin(subquery, Sponsor.id == subquery.c.sponsor_id)
+        if direction == 'desc':
+            query = query.order_by(subquery.c.count.desc())
+        else:
+            query = query.order_by(subquery.c.count.asc())
     
     sponsors = query.all()
     all_sponsors = Sponsor.query.all()
@@ -57,7 +103,7 @@ def list():
                            bestuursleden=bestuursleden, selected_naam=naam_filter, 
                            selected_kontaktpersoon=kontaktpersoon_filter, 
                            selected_bestuurslid=bestuurslid_filter,
-                           selected_sort='naam', selected_dir='asc')
+                           selected_sort=sort, selected_dir=direction)
 
 @sponsors_bp.route('/add', methods=['GET', 'POST'])
 @gebruiker_required

@@ -22,3 +22,10 @@ def uploaded_file(filename):
         current_app.config['UPLOAD_FOLDER']
     )
     return send_from_directory(upload_folder, filename)
+
+@main_bp.route('/handleiding')
+@login_required
+def handleiding():
+    """Show user manual"""
+    from flask import render_template
+    return render_template('handleiding.html')

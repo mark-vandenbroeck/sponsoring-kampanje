@@ -7,8 +7,27 @@ gebruikers_bp = Blueprint('gebruikers', __name__)
 @gebruikers_bp.route('/')
 @beheerder_required
 def list():
-    gebruikers = Gebruiker.query.order_by(Gebruiker.email).all()
-    return render_template('gebruikers.html', gebruikers=gebruikers)
+    from flask import request
+    
+    # Sort parameters
+    sort = request.args.get('sort', 'email')
+    direction = request.args.get('dir', 'asc')
+    
+    query = Gebruiker.query
+    
+    if sort == 'email':
+        if direction == 'desc':
+            query = query.order_by(Gebruiker.email.desc())
+        else:
+            query = query.order_by(Gebruiker.email.asc())
+    elif sort == 'rol':
+        if direction == 'desc':
+            query = query.order_by(Gebruiker.rol.desc())
+        else:
+            query = query.order_by(Gebruiker.rol.asc())
+            
+    gebruikers = query.all()
+    return render_template('gebruikers.html', gebruikers=gebruikers, selected_sort=sort, selected_dir=direction)
 
 @gebruikers_bp.route('/toevoegen', methods=['GET', 'POST'])
 @beheerder_required
