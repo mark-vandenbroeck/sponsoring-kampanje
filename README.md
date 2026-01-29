@@ -21,6 +21,8 @@ Een moderne Python Flask applicatie voor het beheren van evenement sponsoringen 
 - **Rich text editing**: WYSIWYG editor voor vrije tekstvelden
 - **Responsive design**: Werkt perfect op desktop, tablet en mobiel
 - **Modern UI**: Strakke interface met levendige maar zachte kleuren
+- **Dashboard met statistieken**: Direct inzicht in opgehaalde bedragen en openstaande facturen
+- **Audit Log**: Volledige historie van alle wijzigingen (wie, wat, wanneer) met filters en zoekfunctie
 - **File management**: Veilige bestandsuploads met thumbnails en zip downloads
 - **Design file support**: Volledige ondersteuning voor professionele design bestanden (AI, PSD, EPS, SVG, PDF)
 
@@ -694,6 +696,21 @@ cp backup/sponsoring-20240101.db instance/sponsoring.db
 - Logo is afgewerkt (boolean)
 - Logo origineel (file)
 - Logo afgewerkt (file)
+
+### Audit Log
+Het systeem houdt automatisch een log bij van alle wijzingen:
+- **Tracked Events**: Create, Update, Delete
+- **Tracked Entities**: Sponsor, Sponsoring, Evenement, Kontrakt, Gebruiker, Aanbrenger
+- **Details**: 
+  - Tijdstip
+  - Uitvoerder (Gebruiker)
+  - Actie type
+  - Target (met link naar detailpagina)
+  - Inhoudelijke wijzigingen (Oud -> Nieuw)
+- **Features**:
+  - Filteren op Actie, Target en Datum
+  - Vrij zoeken op inhoud
+  - Alleen zichtbaar voor beheerders
 
 ## Technische Details
 

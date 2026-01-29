@@ -60,5 +60,9 @@ def create_app(config_name='default'):
     # Create tables
     with app.app_context():
         db.create_all()
+        
+        # Register audit listeners
+        from app.audit import register_audit_listeners
+        register_audit_listeners(app, db)
     
     return app

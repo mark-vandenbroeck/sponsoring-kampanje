@@ -6,6 +6,7 @@ from .kontrakten import kontrakten_bp
 from .sponsors import sponsors_bp
 from .bestuursleden import bestuursleden_bp
 from .sponsoringen import sponsoringen_bp
+from .audit import audit_bp
 
 def register_blueprints(app):
     """Register all blueprints with the app"""
@@ -22,3 +23,4 @@ def register_blueprints(app):
     app.register_blueprint(sponsors_bp, url_prefix='/sponsors')
     app.register_blueprint(bestuursleden_bp, url_prefix='/bestuursleden')
     app.register_blueprint(sponsoringen_bp, url_prefix='/sponsoringen')
+    app.register_blueprint(audit_bp)  # Url prefix is defined in blueprint
