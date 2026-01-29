@@ -309,11 +309,48 @@ def delete(id):
 def export_excel():
     import pandas as pd
     import io
-    from flask import send_file
+    from flask import send_file, session, request
     from app.utils import get_display_amount
     
-    # Query all sponsorings with related data
-    sponsorings = Sponsoring.query.join(Evenement).join(Sponsor).join(Kontrakt, Sponsoring.kontrakt_id == Kontrakt.id).order_by(Evenement.datum.desc(), Sponsor.naam).all()
+    # Retrieve filters: check request.args first (URL), then session
+    session_filters = session.get('sponsoring_filters', {})
+    
+    def get_filter(key):
+        # Priority: URL arg -> Session -> None
+        return request.args.get(key) or session_filters.get(key)
+    
+    # Start with all sponsoringen
+    query = Sponsoring.query
+    
+    # Apply filters
+    if get_filter('evenement'):
+        query = query.filter_by(evenement_id=int(get_filter('evenement')))
+    
+    if get_filter('kontrakt'):
+        query = query.filter_by(kontrakt_id=int(get_filter('kontrakt')))
+    
+    if get_filter('sponsor'):
+        try:
+            query = query.filter_by(sponsor_id=int(get_filter('sponsor')))
+        except ValueError:
+            pass
+            
+    if get_filter('logo_bezorgd'):
+        query = query.filter_by(logo_bezorgd=(get_filter('logo_bezorgd') == 'ja'))
+        
+    if get_filter('logo_afgewerkt'):
+        query = query.filter_by(logo_afgewerkt=(get_filter('logo_afgewerkt') == 'ja'))
+        
+    if get_filter('gefactureerd'):
+        query = query.filter_by(gefactureerd=(get_filter('gefactureerd') == 'ja'))
+        
+    if get_filter('betaald'):
+        query = query.filter_by(betaald=(get_filter('betaald') == 'ja'))
+        
+    # Apply sorting (default to Evenement desc, Sponsor asc)
+    query = query.join(Evenement).join(Sponsor).join(Kontrakt, Sponsoring.kontrakt_id == Kontrakt.id).order_by(Evenement.datum.desc(), Sponsor.naam)
+    
+    sponsorings = query.all()
     
     # Prepare data for DataFrame
     data = []
@@ -362,12 +399,49 @@ def export_excel():
 def export_pdf():
     from xhtml2pdf import pisa
     import io
-    from flask import make_response
+    from flask import make_response, session, request
     from datetime import datetime
     from app.utils import get_display_amount
     
-    sponsorings = Sponsoring.query.join(Evenement).join(Sponsor).join(Kontrakt, Sponsoring.kontrakt_id == Kontrakt.id)\
-        .order_by(Evenement.datum.desc(), Sponsor.naam).all()
+    # Retrieve filters: check request.args first (URL), then session
+    session_filters = session.get('sponsoring_filters', {})
+    
+    def get_filter(key):
+        # Priority: URL arg -> Session -> None
+        return request.args.get(key) or session_filters.get(key)
+    
+    # Start with all sponsoringen
+    query = Sponsoring.query
+    
+    # Apply filters
+    if get_filter('evenement'):
+        query = query.filter_by(evenement_id=int(get_filter('evenement')))
+    
+    if get_filter('kontrakt'):
+        query = query.filter_by(kontrakt_id=int(get_filter('kontrakt')))
+    
+    if get_filter('sponsor'):
+        try:
+            query = query.filter_by(sponsor_id=int(get_filter('sponsor')))
+        except ValueError:
+            pass
+            
+    if get_filter('logo_bezorgd'):
+        query = query.filter_by(logo_bezorgd=(get_filter('logo_bezorgd') == 'ja'))
+        
+    if get_filter('logo_afgewerkt'):
+        query = query.filter_by(logo_afgewerkt=(get_filter('logo_afgewerkt') == 'ja'))
+        
+    if get_filter('gefactureerd'):
+        query = query.filter_by(gefactureerd=(get_filter('gefactureerd') == 'ja'))
+        
+    if get_filter('betaald'):
+        query = query.filter_by(betaald=(get_filter('betaald') == 'ja'))
+    
+    # Default sort
+    query = query.join(Evenement).join(Sponsor).join(Kontrakt, Sponsoring.kontrakt_id == Kontrakt.id).order_by(Evenement.datum.desc(), Sponsor.naam)
+    
+    sponsorings = query.all()
         
     html = render_template('sponsoring_pdf.html', 
                          sponsorings=sponsorings,

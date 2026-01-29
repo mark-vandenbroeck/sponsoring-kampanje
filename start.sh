@@ -20,7 +20,7 @@ if [ -f $PID_FILE ]; then
 fi
 
 # Start Gunicorn in background
-gunicorn -w $WORKERS -b 0.0.0.0:$PORT run:app --daemon --pid $PID_FILE
+gunicorn -w $WORKERS -b 0.0.0.0:$PORT run:app --daemon --pid $PID_FILE --access-logfile access.log --error-logfile error.log
 
 # Verify start
 sleep 2

@@ -113,6 +113,23 @@ Bij de eerste start wordt automatisch:
 - Een standaard beheerder account aangemaakt (email: `admin@kampanje.be`)
 - De uploads directory aangemaakt
 
+### Helper Scripts (Mac/Linux)
+Voor eenvoudig beheer zijn de volgende scripts beschikbaar:
+
+- **`./start.sh`**: Start de applicatie in de achtergrond (daemon mode) met Gunicorn.
+  - Logt toegang naar `access.log`
+  - Logt fouten naar `error.log`
+  - Beheert automatisch PID bestanden
+- **`./stop.sh`**: Stopt de draaiende applicatie netjes.
+
+```bash
+# Start de app
+./start.sh
+
+# Stop de app
+./stop.sh
+```
+
 ## Deployment
 
 ### Productie Deployment
