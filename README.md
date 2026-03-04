@@ -97,9 +97,9 @@ docker run -d -p 5100:5100 \
   sponsoring-kampanje
 ```
 
-4. **Of gebruik docker-compose:**
+4. **Of gebruik docker compose:**
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 #### **Option 3: One-Command Deployment**
@@ -120,18 +120,26 @@ Bij de eerste start wordt automatisch:
 ### Helper Scripts (Mac/Linux)
 Voor eenvoudig beheer zijn de volgende scripts beschikbaar:
 
+**Lokale executie:**
 - **`./start.sh`**: Start de applicatie in de achtergrond (daemon mode) met Gunicorn.
   - Logt toegang naar `access.log`
   - Logt fouten naar `error.log`
   - Beheert automatisch PID bestanden
 - **`./stop.sh`**: Stopt de draaiende applicatie netjes.
 
+**Docker executie:**
+- **`./start_docker.sh`**: Start de Docker container (`sponsoring-app`) en herbouwt de image indien nodig.
+- **`./stop_docker.sh`**: Stopt en verwijdert de draaiende Docker container netjes.
+
 ```bash
-# Start de app
+# Start de app (Lokaal)
 ./start.sh
 
-# Stop de app
-./stop.sh
+# Start de app (Docker)
+./start_docker.sh
+
+# Stop de app (Lokaal/Docker)
+./stop.sh # of ./stop_docker.sh
 ```
 
 ## Deployment
@@ -160,13 +168,13 @@ docker run -d -p 5100:5100 \
   sponsoring-kampanje
 ```
 
-3. **Met docker-compose (aanbevolen):**
+3. **Met docker compose (aanbevolen):**
 ```bash
 # Start alle services
-docker-compose up -d
+docker compose up -d
 
 # Met Nginx reverse proxy
-docker-compose -f docker-compose.yml up -d
+docker compose -f docker-compose.yml up -d
 ```
 
 4. **Met deploy script:**
@@ -336,7 +344,7 @@ cd sponsoring-kampanje
 ```bash
 # 1. Server voorbereiden
 sudo apt-get update
-sudo apt-get install docker.io docker-compose
+sudo apt-get install docker.io docker-compose-plugin
 
 # 2. Domein configureren
 # DNS: sponsoring.kampanje.be → server-ip
@@ -357,7 +365,7 @@ sudo crontab -e
 openssl x509 -in ssl/sponsoring.crt -text -noout
 
 # Certificaat vernieuwing (Let's Encrypt)
-docker-compose -f docker-compose-letsencrypt.yml run --rm certbot renew
+docker compose -f docker-compose-letsencrypt.yml run --rm certbot renew
 
 # Certificaat testen
 curl -I https://your-domain.com
@@ -419,8 +427,8 @@ docker run -d -p 5100:5100 \
   --name sponsoring-app \
   sponsoring-kampanje
 
-# Of gebruik docker-compose
-docker-compose up -d
+# Of gebruik docker compose
+docker compose up -d
 ```
 
 #### **4. Production Deployment**
@@ -430,7 +438,7 @@ chmod +x deploy.sh
 ./deploy.sh production
 
 # Of handmatig
-FLASK_ENV=production docker-compose up -d
+FLASK_ENV=production docker compose up -d
 ```
 
 ### **📋 GitHub Workflow**
@@ -591,7 +599,7 @@ lsof -ti:5100 | xargs kill -9
 
 # Docker container issues
 docker system prune -a
-docker-compose down && docker-compose up -d
+docker compose down && docker compose up -d
 
 # Permission issues
 sudo chown -R $USER:$USER .
@@ -931,8 +939,8 @@ docker run -d -p 5100:5100 \
   --name sponsoring-app \
   sponsoring-kampanje
 
-# Met docker-compose
-docker-compose up -d
+# Met docker compose
+docker compose up -d
 
 # Met deploy script
 ./deploy.sh production
