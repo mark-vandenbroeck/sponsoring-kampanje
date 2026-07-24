@@ -57,20 +57,28 @@ def create_app(config_name='default'):
             current_user = Gebruiker.query.get(session['user_id'])
         return dict(current_user=current_user)
     
-    # Create tables
+    # Create tables and seed admin user
     with app.app_context():
-        db.create_all()
+        # Handle database table creation gracefully in multi-worker environments
+        try:
+            db.create_all()
+        except Exception as e:
+            app.logger.warning(f"Database table creation check encountered an error (likely due to concurrent worker startup): {e}")
         
-        # Ensure default admin user exists
-        admin_user = Gebruiker.query.filter_by(email='admin@kampanje.be').first()
-        if not admin_user:
-            admin_user = Gebruiker(
-                email='admin@kampanje.be',
-                rol='beheerder'
-            )
-            admin_user.set_password('DeKampanje!1840')
-            db.session.add(admin_user)
-            db.session.commit()
+        # Ensure default admin user exists, handling potential concurrent inserts
+        try:
+            admin_user = Gebruiker.query.filter_by(email='admin@kampanje.be').first()
+            if not admin_user:
+                admin_user = Gebruiker(
+                    email='admin@kampanje.be',
+                    rol='beheerder'
+                )
+                admin_user.set_password('DeKampanje!1840')
+                db.session.add(admin_user)
+                db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            app.logger.warning(f"Admin seeding encountered an error (likely due to concurrent worker startup): {e}")
         
         # Register audit listeners
         from app.audit import register_audit_listeners
