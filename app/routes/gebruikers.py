@@ -50,6 +50,26 @@ def add():
         db.session.add(gebruiker)
         db.session.commit()
         
+        # Send account creation email
+        try:
+            from app.utils.email import send_email
+            subject = "Je account voor Sponsoring De Kampanje"
+            html_content = f"""
+            <h3>Beste gebruiker,</h3>
+            <p>Er is een nieuw account voor je aangemaakt op de Sponsoring Kampanje applicatie.</p>
+            <p><strong>Gebruikersnaam (e-mail):</strong> {email}<br>
+            <strong>Standaard wachtwoord:</strong> DeKampanje!1840</p>
+            <p>Je kunt inloggen via de volgende link:</p>
+            <p><a href="{request.url_root}">{request.url_root}</a></p>
+            <p><em>Let op: Je bent verplicht om dit standaard wachtwoord bij je eerste aanmelding te wijzigen.</em></p>
+            <br>
+            <p>Met vriendelijke groet,<br>
+            Sponsoring De Kampanje</p>
+            """
+            send_email(email, subject, html_content)
+        except Exception:
+            pass
+        
         flash(f"Gebruiker {email} is toegevoegd met het standaard wachtwoord 'DeKampanje!1840'. Ze moeten dit wachtwoord wijzigen bij de eerste login.", 'success')
         return redirect(url_for('gebruikers.list'))
     
@@ -100,5 +120,24 @@ def reset_password(user_id):
     gebruiker.set_password('DeKampanje!1840')
     db.session.commit()
     
+    # Send password reset email
+    try:
+        from app.utils.email import send_email
+        subject = "Je wachtwoord is gereset - Sponsoring De Kampanje"
+        html_content = f"""
+        <h3>Beste gebruiker,</h3>
+        <p>Het wachtwoord van je account op de Sponsoring Kampanje applicatie is gereset.</p>
+        <p><strong>Nieuw tijdelijk wachtwoord:</strong> DeKampanje!1840</p>
+        <p>Je kunt inloggen via de volgende link:</p>
+        <p><a href="{request.url_root}">{request.url_root}</a></p>
+        <p><em>Let op: Je bent verplicht om dit wachtwoord bij je volgende aanmelding te wijzigen.</em></p>
+        <br>
+        <p>Met vriendelijke groet,<br>
+        Sponsoring De Kampanje</p>
+        """
+        send_email(gebruiker.email, subject, html_content)
+    except Exception:
+        pass
+        
     flash(f"Wachtwoord van {gebruiker.email} is gereset naar 'DeKampanje!1840'. De gebruiker moet dit wachtwoord wijzigen bij de volgende login.", 'success')
     return redirect(url_for('gebruikers.list'))
