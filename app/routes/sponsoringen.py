@@ -22,6 +22,13 @@ def process_logo_upload(file):
         return None
         
     filename = secure_filename(file.filename)
+    
+    # Validate file extension for security
+    allowed_extensions = {'.png', '.jpg', '.jpeg', '.gif', '.pdf', '.eps', '.svg', '.ai', '.psd'}
+    ext = os.path.splitext(filename)[1].lower()
+    if ext not in allowed_extensions:
+        return None
+        
     file_bytes = file.read()
     mime_type = file.mimetype
     
