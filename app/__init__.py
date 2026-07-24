@@ -69,14 +69,24 @@ def create_app(config_name='default'):
             if 'gebruiker' in inspector.get_table_names():
                 columns = [c['name'] for c in inspector.get_columns('gebruiker')]
                 if 'reset_code' not in columns:
-                    db.session.execute(text("ALTER TABLE gebruiker ADD COLUMN reset_code VARCHAR(6)"))
+                    try:
+                        db.session.execute(text("ALTER TABLE gebruiker ADD COLUMN reset_code VARCHAR(6)"))
+                        db.session.commit()
+                    except Exception:
+                        db.session.rollback()
                 if 'reset_code_verloopt' not in columns:
-                    db.session.execute(text("ALTER TABLE gebruiker ADD COLUMN reset_code_verloopt TIMESTAMP"))
+                    try:
+                        db.session.execute(text("ALTER TABLE gebruiker ADD COLUMN reset_code_verloopt TIMESTAMP"))
+                        db.session.commit()
+                    except Exception:
+                        db.session.rollback()
                 if 'reset_code_pogingen' not in columns:
-                    db.session.execute(text("ALTER TABLE gebruiker ADD COLUMN reset_code_pogingen INTEGER DEFAULT 0"))
-                db.session.commit()
+                    try:
+                        db.session.execute(text("ALTER TABLE gebruiker ADD COLUMN reset_code_pogingen INTEGER DEFAULT 0"))
+                        db.session.commit()
+                    except Exception:
+                        db.session.rollback()
         except Exception as e:
-            db.session.rollback()
             app.logger.warning(f"Database table creation check or reset columns check encountered an error: {e}")
         
         # Ensure default admin user exists, handling potential concurrent inserts
