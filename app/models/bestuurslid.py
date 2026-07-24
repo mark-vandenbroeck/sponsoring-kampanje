@@ -2,7 +2,7 @@ from . import db
 
 class Bestuurslid(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    initialen = db.Column(db.String(10), nullable=False)
+    initialen = db.Column(db.String(100), nullable=False)
     naam = db.Column(db.String(100), nullable=True)
     
     # Relationships
