@@ -144,8 +144,104 @@ def create_app(config_name='default'):
             db.session.rollback()
             app.logger.warning(f"Admin seeding encountered an error (likely due to concurrent worker startup): {e}")
         
-        # Register audit listeners
+         # Register audit listeners
         from app.audit import register_audit_listeners
         register_audit_listeners(app, db)
+        
+        # Global error handler to mail administrators on unhandled exceptions (500)
+        @app.errorhandler(Exception)
+        def handle_exception(e):
+            # Pass through HTTP exceptions
+            from werkzeug.exceptions import HTTPException
+            if isinstance(e, HTTPException):
+                return e
+                
+            import traceback
+            from datetime import datetime
+            from flask import request, session
+            from app.models import Gebruiker
+            from app.utils.email import send_email
+            
+            tb = traceback.format_exc()
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+            # Safe session user details extraction
+            user_info = "Niet ingelogd"
+            if 'user_id' in session:
+                try:
+                    # Rollback session to clear any failed state before querying
+                    db.session.rollback()
+                    user = Gebruiker.query.get(session['user_id'])
+                    if user:
+                        user_info = f"{user.email} (Rol: {user.rol}, ID: {user.id})"
+                except Exception:
+                    user_info = f"User ID: {session['user_id']} (Kon details niet laden)"
+            
+            request_url = request.url
+            request_method = request.method
+            request_args = dict(request.args)
+            request_form = {k: v for k, v in request.form.items() if 'password' not in k.lower()}
+            
+            subject = "⚠️ Kritieke Fout in Sponsoring De Kampanje"
+            html_content = f"""
+            <h2>Kritieke Foutrapportage</h2>
+            <p>Er heeft zich een onverwachte fout voorgedaan in de Sponsoring-applicatie.</p>
+            
+            <h3>Details:</h3>
+            <ul>
+                <li><strong>Tijdstip:</strong> {timestamp}</li>
+                <li><strong>Gebruiker:</strong> {user_info}</li>
+                <li><strong>URL:</strong> {request_url}</li>
+                <li><strong>Method:</strong> {request_method}</li>
+                <li><strong>URL Parameters:</strong> {request_args}</li>
+                <li><strong>Form Data (beveiligd):</strong> {request_form}</li>
+                <li><strong>Foutmelding:</strong> {str(e)}</li>
+            </ul>
+            
+            <h3>Traceback:</h3>
+            <pre style="background-color: #f8f9fa; padding: 10px; border: 1px solid #e1e8ed; overflow-x: auto; font-family: monospace; font-size: 12px;">{tb}</pre>
+            
+            <p><em>Dit is een automatisch gegenereerde e-mail van het Sponsoring Management Systeem.</em></p>
+            """
+            
+            # Find all administrator emails
+            admin_emails = []
+            try:
+                db.session.rollback()
+                admins = Gebruiker.query.filter_by(rol='beheerder').all()
+                admin_emails = [a.email for a in admins if a.email]
+            except Exception as db_err:
+                app.logger.error(f"Fout bij ophalen beheerders voor foutrapportage: {db_err}")
+                
+            if not admin_emails:
+                admin_emails = ['admin@kampanje.be']
+                
+            for email in admin_emails:
+                try:
+                    send_email(email, subject, html_content)
+                except Exception as mail_err:
+                    app.logger.error(f"Fout bij verzenden foutrapportage naar {email}: {mail_err}")
+            
+            return """
+            <!DOCTYPE html>
+            <html lang="nl">
+            <head>
+                <meta charset="UTF-8">
+                <title>Internal Server Error</title>
+                <style>
+                    body { font-family: sans-serif; text-align: center; padding: 50px; background-color: #FAFBFC; color: #2C3E50; }
+                    h1 { color: #E74C3C; }
+                    p { color: #7F8C8D; }
+                    a { color: #4A90E2; text-decoration: none; }
+                    a:hover { text-decoration: underline; }
+                </style>
+            </head>
+            <body>
+                <h1>Oeps, er ging iets mis!</h1>
+                <p>Er is een interne fout opgetreden in de applicatie. De beheerders zijn hiervan automatisch per e-mail op de hoogte gesteld.</p>
+                <a href="/">Terug naar home</a>
+            </body>
+            </html>
+            """, 500
     
     return app

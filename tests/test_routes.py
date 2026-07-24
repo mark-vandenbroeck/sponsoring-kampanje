@@ -241,5 +241,29 @@ def test_forgot_password_flow(client, app):
         assert user.reset_code_pogingen == 0
         assert user.check_password('newpassword123') is True
 
+def test_global_error_handler(client, app):
+    """Test that unhandled exceptions trigger emails to administrators."""
+    from app.models import Gebruiker, db
+    
+    # 1. Register a test route that crashes
+    @app.route('/trigger-crash')
+    def trigger_crash():
+        raise RuntimeError("Test crash exception")
+        
+    # 2. Seed an administrator
+    with app.app_context():
+        admin = Gebruiker.query.filter_by(email='admin_test@example.com').first()
+        if not admin:
+            admin = Gebruiker(email='admin_test@example.com', rol='beheerder')
+            admin.set_password('pass123')
+            db.session.add(admin)
+            db.session.commit()
+            
+    # 3. Call the crash route
+    resp = client.get('/trigger-crash')
+    assert resp.status_code == 500
+    assert b'er ging iets mis' in resp.data
+
+
 
 
