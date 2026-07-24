@@ -28,6 +28,7 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL', 'True').lower() in ('true', '1', 't', 'y', 'yes')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
+    BREVO_API_KEY = os.environ.get('BREVO_API_KEY')
 
 class DevelopmentConfig(Config):
     """Development configuration"""
