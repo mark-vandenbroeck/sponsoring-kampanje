@@ -27,7 +27,7 @@ Een moderne Python Flask applicatie voor het beheren van evenement sponsoringen 
 - **Dashboard met statistieken**: Direct inzicht in opgehaalde bedragen, openstaande facturen en per-event visualisaties
 - **Audit Log**: Volledige historie van alle wijzigingen (wie, wat, wanneer) met filters en zoekfunctie
 - **Uitgebreide Handleidingen**: Geïntegreerde html-handleiding in de app + formele Word-handleiding (`doc/gebruikershandleiding.docx`)
-- **Beveiligingsrapportage**: Formeel security audit verslag beschikbaar als Word-document (`doc/security_audit.docx`)
+- **Beveiligingsrapportage**: Formeel security audit verslag (`doc/security_audit.docx`) en GDPR audit rapport (`doc/gdpr_audit.docx`) beschikbaar als Word-documenten
 - **Interactieve Tabellen**: Sorteerbare kolommen en geavanceerde filtering voor alle overzichten
 - **File management**: Veilige bestandsuploads (met bestandsextensie-validatie) direct naar database met thumbnails en zip downloads
 - **Design file support**: Volledige ondersteuning voor professionele design bestanden (AI, PSD, EPS, SVG, PDF)
