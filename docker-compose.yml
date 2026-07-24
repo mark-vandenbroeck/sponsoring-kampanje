@@ -12,6 +12,8 @@ services:
       - ./static/uploads:/app/static/uploads
       # Optional: mount config
       - ./config:/app/config:ro
+    env_file:
+      - .env
     environment:
       - FLASK_ENV=production
       - FLASK_APP=run.py
