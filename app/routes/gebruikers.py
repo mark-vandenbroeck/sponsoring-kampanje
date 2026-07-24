@@ -66,7 +66,11 @@ def add():
             <p>Met vriendelijke groet,<br>
             Sponsoring De Kampanje</p>
             """
-            send_email(email, subject, html_content)
+            import os
+            from flask import current_app
+            project_root = os.path.dirname(current_app.root_path)
+            manual_path = os.path.join(project_root, 'doc', 'gebruikershandleiding.docx')
+            send_email(email, subject, html_content, attachments=[manual_path])
         except Exception:
             pass
         

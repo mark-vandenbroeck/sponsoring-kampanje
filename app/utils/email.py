@@ -3,9 +3,11 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import threading
 import requests
+import os
+import base64
 from flask import current_app
 
-def send_async_email_via_http(app, to, subject, html_content, sender, api_key):
+def send_async_email_via_http(app, to, subject, html_content, sender, api_key, attachments=None):
     with app.app_context():
         try:
             url = "https://api.brevo.com/v3/smtp/email"
@@ -27,6 +29,22 @@ def send_async_email_via_http(app, to, subject, html_content, sender, api_key):
                 "subject": subject,
                 "htmlContent": html_content
             }
+            
+            # Add attachments for Brevo HTTP API (base64 encoded)
+            if attachments:
+                brevo_attachments = []
+                for filepath in attachments:
+                    if os.path.exists(filepath):
+                        with open(filepath, 'rb') as f:
+                            content_b64 = base64.b64encode(f.read()).decode('utf-8')
+                        filename = os.path.basename(filepath)
+                        brevo_attachments.append({
+                            "content": content_b64,
+                            "name": filename
+                        })
+                if brevo_attachments:
+                    payload["attachment"] = brevo_attachments
+                    
             response = requests.post(url, json=payload, headers=headers, timeout=10)
             if response.status_code in (200, 201, 202):
                 app.logger.info(f"E-mail succesvol verzonden via Brevo HTTP API naar {to}")
@@ -67,7 +85,7 @@ def send_async_email_via_smtp(app, msg):
         except Exception as e:
             app.logger.error(f"Fout bij verzenden e-mail via SMTP naar {msg['To']}: {e}")
 
-def send_email(to, subject, html_content):
+def send_email(to, subject, html_content, attachments=None):
     app = current_app._get_current_object()
     
     sender = app.config.get('MAIL_DEFAULT_SENDER') or app.config.get('MAIL_USERNAME')
@@ -78,15 +96,32 @@ def send_email(to, subject, html_content):
     api_key = app.config.get('BREVO_API_KEY')
     if api_key:
         # Use Brevo HTTP API (ideal for cloud platforms like Render that block SMTP ports)
-        threading.Thread(target=send_async_email_via_http, args=(app, to, subject, html_content, sender, api_key)).start()
+        threading.Thread(target=send_async_email_via_http, args=(app, to, subject, html_content, sender, api_key, attachments)).start()
     else:
         # Fallback to standard SMTP (ideal for local development)
-        msg = MIMEMultipart('alternative')
+        msg = MIMEMultipart('mixed')
         msg['Subject'] = subject
         msg['From'] = f"Sponsoring De Kampanje <{sender}>"
         msg['To'] = to
         
+        # Create body container (alternative)
+        body_container = MIMEMultipart('alternative')
         part = MIMEText(html_content, 'html', 'utf-8')
-        msg.attach(part)
+        body_container.attach(part)
+        msg.attach(body_container)
+        
+        # Attach files to SMTP message
+        if attachments:
+            from email.mime.base import MIMEBase
+            from email import encoders
+            for filepath in attachments:
+                if os.path.exists(filepath):
+                    filename = os.path.basename(filepath)
+                    part = MIMEBase('application', 'octet-stream')
+                    with open(filepath, 'rb') as f:
+                        part.set_payload(f.read())
+                    encoders.encode_base64(part)
+                    part.add_header('Content-Disposition', f'attachment; filename="{filename}"')
+                    msg.attach(part)
         
         threading.Thread(target=send_async_email_via_smtp, args=(app, msg)).start()
