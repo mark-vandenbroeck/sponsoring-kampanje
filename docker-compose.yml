@@ -17,6 +17,7 @@ services:
     environment:
       - FLASK_ENV=production
       - FLASK_APP=run.py
+      - DATABASE_URL=
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5100/"]
