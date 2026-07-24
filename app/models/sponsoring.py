@@ -1,4 +1,5 @@
 from . import db
+from sqlalchemy.orm import deferred
 
 class Sponsoring(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -17,10 +18,10 @@ class Sponsoring(db.Model):
     logo_origineel = db.Column(db.String(255))
     logo_afgewerkt_file = db.Column(db.String(255))
     
-    # Binary data columns for database storage
-    logo_origineel_data = db.Column(db.LargeBinary, nullable=True)
+    # Binary data columns for database storage (deferred to prevent loading large blobs in standard queries)
+    logo_origineel_data = deferred(db.Column(db.LargeBinary, nullable=True))
     logo_origineel_mime = db.Column(db.String(100), nullable=True)
-    logo_origineel_thumb_data = db.Column(db.LargeBinary, nullable=True)
-    logo_afgewerkt_data = db.Column(db.LargeBinary, nullable=True)
+    logo_origineel_thumb_data = deferred(db.Column(db.LargeBinary, nullable=True))
+    logo_afgewerkt_data = deferred(db.Column(db.LargeBinary, nullable=True))
     logo_afgewerkt_mime = db.Column(db.String(100), nullable=True)
-    logo_afgewerkt_thumb_data = db.Column(db.LargeBinary, nullable=True)
+    logo_afgewerkt_thumb_data = deferred(db.Column(db.LargeBinary, nullable=True))
