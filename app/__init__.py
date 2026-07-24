@@ -61,6 +61,17 @@ def create_app(config_name='default'):
     with app.app_context():
         db.create_all()
         
+        # Ensure default admin user exists
+        admin_user = Gebruiker.query.filter_by(email='admin@kampanje.be').first()
+        if not admin_user:
+            admin_user = Gebruiker(
+                email='admin@kampanje.be',
+                rol='beheerder'
+            )
+            admin_user.set_password('DeKampanje!1840')
+            db.session.add(admin_user)
+            db.session.commit()
+        
         # Register audit listeners
         from app.audit import register_audit_listeners
         register_audit_listeners(app, db)

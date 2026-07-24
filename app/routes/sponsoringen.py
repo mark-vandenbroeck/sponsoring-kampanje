@@ -4,6 +4,67 @@ from app.models import Evenement, Kontrakt, Sponsor, Bestuurslid, Sponsoring
 
 sponsoringen_bp = Blueprint('sponsoringen', __name__)
 
+def process_logo_upload(file):
+    """
+    Processes an uploaded logo file:
+    1. Reads binary data.
+    2. Writes to a temporary file to run the thumbnail generation.
+    3. If thumbnail generation is successful, reads thumbnail bytes.
+    4. Cleans up temp files.
+    Returns a dict with filename, data, mime, and thumb_data (or None).
+    """
+    import os
+    import tempfile
+    from werkzeug.utils import secure_filename
+    from app.utils.thumbnails import generate_thumbnail
+    
+    if not file or not file.filename:
+        return None
+        
+    filename = secure_filename(file.filename)
+    file_bytes = file.read()
+    mime_type = file.mimetype
+    
+    thumb_bytes = None
+    
+    # Check if we should try to generate a thumbnail
+    supported_extensions = ['.pdf', '.eps', '.svg', '.ai', '.psd']
+    ext = os.path.splitext(filename)[1].lower()
+    
+    if ext in supported_extensions:
+        # Create a temp file to save the uploaded content
+        temp_file_path = None
+        temp_thumb_path = None
+        try:
+            with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as temp_file:
+                temp_file.write(file_bytes)
+                temp_file_path = temp_file.name
+                
+            # Create a temp path for the thumbnail
+            temp_thumb_fd, temp_thumb_path = tempfile.mkstemp(suffix='_thumb.png')
+            os.close(temp_thumb_fd)
+            
+            # Generate the thumbnail
+            if generate_thumbnail(temp_file_path, temp_thumb_path):
+                # Read thumbnail bytes
+                with open(temp_thumb_path, 'rb') as f:
+                    thumb_bytes = f.read()
+        except Exception as e:
+            print(f"Error in process_logo_upload generating thumbnail: {e}")
+        finally:
+            # Clean up temp files
+            if temp_file_path and os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
+            if temp_thumb_path and os.path.exists(temp_thumb_path):
+                os.remove(temp_thumb_path)
+                
+    return {
+        'filename': filename,
+        'data': file_bytes,
+        'mime': mime_type,
+        'thumb_data': thumb_bytes
+    }
+
 @sponsoringen_bp.route('/')
 @login_required
 def list():
@@ -148,21 +209,32 @@ def add():
     if request.method == 'POST':
         # Handle file uploads
         logo_origineel = None
+        logo_origineel_data = None
+        logo_origineel_mime = None
+        logo_origineel_thumb_data = None
+        
         logo_afgewerkt_file = None
+        logo_afgewerkt_data = None
+        logo_afgewerkt_mime = None
+        logo_afgewerkt_thumb_data = None
         
         if 'logo_origineel' in request.files:
             file = request.files['logo_origineel']
-            if file and file.filename:
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
-                logo_origineel = filename
+            res = process_logo_upload(file)
+            if res:
+                logo_origineel = res['filename']
+                logo_origineel_data = res['data']
+                logo_origineel_mime = res['mime']
+                logo_origineel_thumb_data = res['thumb_data']
         
         if 'logo_afgewerkt' in request.files:
             file = request.files['logo_afgewerkt']
-            if file and file.filename:
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
-                logo_afgewerkt_file = filename
+            res = process_logo_upload(file)
+            if res:
+                logo_afgewerkt_file = res['filename']
+                logo_afgewerkt_data = res['data']
+                logo_afgewerkt_mime = res['mime']
+                logo_afgewerkt_thumb_data = res['thumb_data']
 
         sponsoring = Sponsoring(
             evenement_id=int(request.form['evenement_id']),
@@ -177,7 +249,13 @@ def add():
             logo_bezorgd=bool(logo_origineel),
             logo_afgewerkt=bool(logo_afgewerkt_file),
             logo_origineel=logo_origineel,
+            logo_origineel_data=logo_origineel_data,
+            logo_origineel_mime=logo_origineel_mime,
+            logo_origineel_thumb_data=logo_origineel_thumb_data,
             logo_afgewerkt_file=logo_afgewerkt_file,
+            logo_afgewerkt_data=logo_afgewerkt_data,
+            logo_afgewerkt_mime=logo_afgewerkt_mime,
+            logo_afgewerkt_thumb_data=logo_afgewerkt_thumb_data,
             opmerkingen=request.form.get('opmerkingen', '')
         )
         db.session.add(sponsoring)
@@ -245,17 +323,21 @@ def edit(id):
         # Handle file uploads
         if 'logo_origineel' in request.files:
             file = request.files['logo_origineel']
-            if file and file.filename:
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
-                sponsoring.logo_origineel = filename
+            res = process_logo_upload(file)
+            if res:
+                sponsoring.logo_origineel = res['filename']
+                sponsoring.logo_origineel_data = res['data']
+                sponsoring.logo_origineel_mime = res['mime']
+                sponsoring.logo_origineel_thumb_data = res['thumb_data']
         
         if 'logo_afgewerkt' in request.files:
             file = request.files['logo_afgewerkt']
-            if file and file.filename:
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
-                sponsoring.logo_afgewerkt_file = filename
+            res = process_logo_upload(file)
+            if res:
+                sponsoring.logo_afgewerkt_file = res['filename']
+                sponsoring.logo_afgewerkt_data = res['data']
+                sponsoring.logo_afgewerkt_mime = res['mime']
+                sponsoring.logo_afgewerkt_thumb_data = res['thumb_data']
         
         # Update boolean flags based on file presence
         sponsoring.logo_bezorgd = bool(sponsoring.logo_origineel)
@@ -513,13 +595,16 @@ def download_logos():
             # Directory per evenement, file per sponsor
             base_path = f"{evenement_name}"
             
-            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], s.logo_afgewerkt_file)
-            if os.path.exists(file_path):
-                # Get the extension
-                ext = os.path.splitext(s.logo_afgewerkt_file)[1]
-                # Create a nice name for inside the zip: Event/SponsorName.ext
-                zip_name = f"{base_path}/{sponsor_name}{ext}"
-                zf.write(file_path, zip_name)
+            ext = os.path.splitext(s.logo_afgewerkt_file)[1]
+            # Create a nice name for inside the zip: Event/SponsorName.ext
+            zip_name = f"{base_path}/{sponsor_name}{ext}"
+            
+            if s.logo_afgewerkt_data:
+                zf.writestr(zip_name, s.logo_afgewerkt_data)
+            else:
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], s.logo_afgewerkt_file)
+                if os.path.exists(file_path):
+                    zf.write(file_path, zip_name)
                 
     memory_file.seek(0)
     

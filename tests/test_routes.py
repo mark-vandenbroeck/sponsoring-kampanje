@@ -77,3 +77,105 @@ def test_rate_limit(client, app):
     # The 6th attempt should fail
     resp = client.post('/login', data={'email': 'bad@example.com', 'password': 'wrong'})
     assert resp.status_code == 429
+
+def test_logo_db_storage(auth_client, app):
+    """Test that logo uploads are stored in the database and served correctly."""
+    from app.models import Evenement, Kontrakt, Sponsor, Bestuurslid, Sponsoring, db
+    from datetime import datetime
+    import io
+    
+    # 1. Create dependencies
+    with app.app_context():
+        ev = Evenement(evenementcode='EVT_TEST', naam='Test Evenement', datum=datetime.now().date(), locatie='Test Locatie')
+        db.session.add(ev)
+        db.session.flush()
+        
+        ko = Kontrakt(evenement_id=ev.id, kontrakt='Premium Test', bedrag=500.0)
+        sp = Sponsor(naam='Test Sponsor')
+        be = Bestuurslid(initialen='TT', naam='Test Member')
+        db.session.add_all([ko, sp, be])
+        db.session.commit()
+        
+        ev_id = ev.id
+        ko_id = ko.id
+        sp_id = sp.id
+        be_id = be.id
+
+    # 2. Perform sponsoring add with files
+    file_content = b"fake binary image content"
+    data = {
+        'evenement_id': ev_id,
+        'kontrakt_id': ko_id,
+        'sponsor_id': sp_id,
+        'aangebracht_door_id': be_id,
+        'bedrag_kaarten': '',
+        'netto_bedrag_excl_btw': '',
+        'facturatiebedrag_incl_btw': '',
+        'opmerkingen': 'Test database logo storage',
+        'logo_origineel': (io.BytesIO(file_content), 'logo_original.png'),
+        'logo_afgewerkt': (io.BytesIO(file_content), 'logo_finished.png')
+    }
+    
+    resp = auth_client.post('/sponsoringen/add', data=data, content_type='multipart/form-data', follow_redirects=True)
+    assert resp.status_code == 200
+    
+    # 3. Verify it is stored in database
+    with app.app_context():
+        sponsoring = Sponsoring.query.filter_by(opmerkingen='Test database logo storage').first()
+        assert sponsoring is not None
+        assert sponsoring.logo_origineel == 'logo_original.png'
+        assert sponsoring.logo_origineel_data == file_content
+        assert sponsoring.logo_origineel_mime == 'image/png'
+        assert sponsoring.logo_afgewerkt_file == 'logo_finished.png'
+        assert sponsoring.logo_afgewerkt_data == file_content
+        assert sponsoring.logo_afgewerkt_mime == 'image/png'
+        
+    # 4. Fetch the file via /uploads/ route
+    resp = auth_client.get('/uploads/logo_original.png')
+    assert resp.status_code == 200
+    assert resp.data == file_content
+    assert resp.content_type == 'image/png'
+
+    # 5. Fetch the finished file via /uploads/ route
+    resp = auth_client.get('/uploads/logo_finished.png')
+    assert resp.status_code == 200
+    assert resp.data == file_content
+    assert resp.content_type == 'image/png'
+
+def test_force_password_change(client, app):
+    """Test that users logging in with default password are forced to change it."""
+    from app.models import Gebruiker, db
+    
+    # 1. Create a user with default password
+    with app.app_context():
+        u = Gebruiker(email='defaultpass@example.com', rol='gebruiker')
+        u.set_password('DeKampanje!1840')
+        db.session.add(u)
+        db.session.commit()
+        
+    # 2. Login with the default password should redirect to set_password
+    resp = client.post('/login', data={
+        'email': 'defaultpass@example.com',
+        'password': 'DeKampanje!1840'
+    }, follow_redirects=True)
+    assert resp.status_code == 200
+    assert b'standaard wachtwoord wijzigen' in resp.data or b'wachtwoord instellen' in resp.data
+    
+    # 3. Accessing dashboard directly should also redirect to set_password
+    resp = client.get('/dashboard', follow_redirects=True)
+    assert b'Wachtwoord instellen' in resp.data or b'set-password' in resp.data or b'bevestig_wachtwoord' in resp.data or b'wachtwoord' in resp.data
+
+    # 4. Set a new password
+    resp = client.post('/set-password', data={
+        'password': 'newsecurepassword123',
+        'confirm_password': 'newsecurepassword123'
+    }, follow_redirects=True)
+    assert resp.status_code == 200
+    assert b'Wachtwoord succesvol' in resp.data
+    
+    # 5. Dashboard should now be accessible
+    resp = client.get('/dashboard')
+    assert resp.status_code == 200
+    assert b'Dashboard' in resp.data
+
+

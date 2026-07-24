@@ -16,21 +16,27 @@ def login():
         user = Gebruiker.query.filter_by(email=email).first()
         
         if user:
-            # Check if user has no password set (new user)
+            # If no password is set at all (fallback for legacy or reset users)
             if not user.password_hash:
-                # Allow login without password for new users (password can be empty or anything)
                 session['user_id'] = user.id
                 session['user_email'] = user.email
                 user.laatste_activiteit = datetime.utcnow()
                 db.session.commit()
                 flash('Welkom! Je moet eerst je wachtwoord instellen.', 'info')
                 return redirect(url_for('auth.set_password'))
+            
+            # Normal password check
             elif password and user.check_password(password):
-                # Normal login with password
                 session['user_id'] = user.id
                 session['user_email'] = user.email
                 user.laatste_activiteit = datetime.utcnow()
                 db.session.commit()
+                
+                # Check if they logged in with the default password
+                if password == 'DeKampanje!1840':
+                    flash('Je moet eerst je standaard wachtwoord wijzigen.', 'info')
+                    return redirect(url_for('auth.set_password'))
+                
                 flash('Succesvol ingelogd!', 'success')
                 return redirect(url_for('auth.dashboard'))
             else:
@@ -53,7 +59,7 @@ def dashboard():
     user = Gebruiker.query.get(session['user_id'])
     
     # Check if user needs to set password
-    if not user.password_hash:
+    if not user.password_hash or user.check_password('DeKampanje!1840'):
         return redirect(url_for('auth.set_password'))
     
     # Get dashboard statistics
@@ -102,7 +108,7 @@ def change_password():
 def set_password():
     user = Gebruiker.query.get(session['user_id'])
     
-    if user.password_hash:  # User already has a password
+    if user.password_hash and not user.check_password('DeKampanje!1840'):  # User already has a customized password
         return redirect(url_for('auth.dashboard'))
     
     if request.method == 'POST':

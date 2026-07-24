@@ -3,8 +3,10 @@
 Script om admin gebruiker aan te maken in de database
 """
 
-from app import app, db, Gebruiker
-from werkzeug.security import generate_password_hash
+from app import create_app
+from app.models import db, Gebruiker
+
+app = create_app()
 
 def create_admin_user():
     with app.app_context():
@@ -20,16 +22,16 @@ def create_admin_user():
         # Create admin user
         admin_user = Gebruiker(
             email='admin@kampanje.be',
-            password_hash=None,  # No password set initially
             rol='beheerder'
         )
+        admin_user.set_password('DeKampanje!1840')
         
         db.session.add(admin_user)
         db.session.commit()
         
         print("✅ Admin gebruiker aangemaakt!")
         print("Email: admin@kampanje.be")
-        print("Wachtwoord: Laat leeg bij eerste login")
+        print("Wachtwoord: DeKampanje!1840")
         print("Rol: beheerder")
 
 if __name__ == '__main__':

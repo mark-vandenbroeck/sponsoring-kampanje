@@ -45,12 +45,12 @@ def add():
         gebruiker = Gebruiker(
             email=email,
             rol=rol
-            # password_hash remains None for first-time setup
         )
+        gebruiker.set_password('DeKampanje!1840')
         db.session.add(gebruiker)
         db.session.commit()
         
-        flash(f'Gebruiker {email} is toegevoegd. Ze moeten hun wachtwoord instellen bij eerste login.', 'success')
+        flash(f"Gebruiker {email} is toegevoegd met het standaard wachtwoord 'DeKampanje!1840'. Ze moeten dit wachtwoord wijzigen bij de eerste login.", 'success')
         return redirect(url_for('gebruikers.list'))
     
     return render_template('gebruiker_toevoegen.html')
@@ -96,9 +96,9 @@ def delete(user_id):
 def reset_password(user_id):
     gebruiker = Gebruiker.query.get_or_404(user_id)
     
-    # Reset password by setting password_hash to None
-    gebruiker.password_hash = None
+    # Reset password by setting it to the default password
+    gebruiker.set_password('DeKampanje!1840')
     db.session.commit()
     
-    flash(f'Wachtwoord van {gebruiker.email} is gereset. De gebruiker moet een nieuw wachtwoord instellen bij de volgende login.', 'success')
+    flash(f"Wachtwoord van {gebruiker.email} is gereset naar 'DeKampanje!1840'. De gebruiker moet dit wachtwoord wijzigen bij de volgende login.", 'success')
     return redirect(url_for('gebruikers.list'))

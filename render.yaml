@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: sponsoring-de-kampanje
+    runtime: docker
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        sync: false  # The user will paste their Supabase connection string here
+      - key: SECRET_KEY
+        generateValue: true  # Generates a random secure secret key automatically
+      - key: PORT
+        value: 5100

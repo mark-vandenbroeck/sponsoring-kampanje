@@ -52,7 +52,7 @@ def log_insert(mapper, connection, target):
         'target_type': target.__class__.__name__,
         'target_id': target.id,
         'action': 'CREATE',
-        'changes': json.dumps(changes, default=str),
+        'changes': json.loads(json.dumps(changes, default=str)),
         'timestamp': datetime.utcnow()
     }
     
@@ -87,7 +87,7 @@ def log_update(mapper, connection, target):
         'target_type': target.__class__.__name__,
         'target_id': target.id,
         'action': 'UPDATE',
-        'changes': json.dumps(changes, default=str),
+        'changes': json.loads(json.dumps(changes, default=str)),
         'timestamp': datetime.utcnow()
     }
     
@@ -113,7 +113,7 @@ def log_delete(mapper, connection, target):
         'target_type': target.__class__.__name__,
         'target_id': target.id,
         'action': 'DELETE',
-        'changes': json.dumps(changes, default=str),
+        'changes': json.loads(json.dumps(changes, default=str)),
         'timestamp': datetime.utcnow()
     }
     
