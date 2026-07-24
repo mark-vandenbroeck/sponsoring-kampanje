@@ -32,6 +32,7 @@
                         <thead>
                             <tr>
                                 <th>Kontrakt</th>
+                                <th class="text-center">Aantal</th>
                                 <th class="amount-column">Excl. BTW</th>
                                 <th class="amount-column">Incl. BTW</th>
                                 <th class="amount-column">Betaald</th>
@@ -42,6 +43,7 @@
                             {% for kontrakt in stats.kontrakt_stats %}
                             <tr>
                                 <td><strong>{{ kontrakt.kontrakt }}</strong></td>
+                                <td class="text-center">{{ kontrakt.aantal }}</td>
                                 <td class="amount-column">€{{ format_european_currency(kontrakt.excl_btw) }}</td>
                                 <td class="amount-column">€{{ format_european_currency(kontrakt.incl_btw) }}</td>
                                 <td class="amount-column">€{{ format_european_currency(kontrakt.betaald) }}</td>
@@ -52,6 +54,7 @@
                         <tfoot>
                             <tr class="table-info">
                                 <td><strong>Totaal:</strong></td>
+                                <td class="text-center"><strong>{{ stats.total_aantal }}</strong></td>
                                 <td class="amount-column"><strong>€{{ format_european_currency(stats.total_excl_btw) }}</strong></td>
                                 <td class="amount-column"><strong>€{{ format_european_currency(stats.total_incl_btw) }}</strong></td>
                                 <td class="amount-column"><strong>€{{ format_european_currency(stats.total_betaald) }}</strong></td>

@@ -226,6 +226,7 @@ def statistieken():
     evenement_stats = []
     for evenement in evenementen:
         kontrakt_stats = []
+        total_aantal = 0
         total_excl_btw = 0
         total_incl_btw = 0
         total_betaald = 0
@@ -270,11 +271,13 @@ def statistieken():
             if kontrakt_excl_btw > 0 or kontrakt_incl_btw > 0:
                 kontrakt_stats.append({
                     'kontrakt': kontrakt.kontrakt,
+                    'aantal': len(kontrakt.sponsoringen),
                     'excl_btw': kontrakt_excl_btw,
                     'incl_btw': kontrakt_incl_btw,
                     'betaald': kontrakt_betaald,
                     'openstaand': kontrakt_openstaand
                 })
+                total_aantal += len(kontrakt.sponsoringen)
                 total_excl_btw += kontrakt_excl_btw
                 total_incl_btw += kontrakt_incl_btw
                 total_betaald += kontrakt_betaald
@@ -284,6 +287,7 @@ def statistieken():
             'evenement': evenement,
             'kontrakt_stats': kontrakt_stats,
             'status_counts': status_counts,
+            'total_aantal': total_aantal,
             'total_excl_btw': total_excl_btw,
             'total_incl_btw': total_incl_btw,
             'total_betaald': total_betaald,
