@@ -32,11 +32,17 @@
                             </div>
                         </div>
                         
-                        <div class="d-grid">
+                        <div class="d-grid mb-3">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-sign-in-alt me-2"></i>
                                 Inloggen
                             </button>
+                        </div>
+                        
+                        <div class="text-center">
+                            <a href="{{ url_for('auth.forgot_password') }}" class="text-decoration-none small text-muted">
+                                <i class="fas fa-key me-1"></i> Wachtwoord vergeten?
+                            </a>
                         </div>
                     </form>
                 </div>

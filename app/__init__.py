@@ -62,8 +62,22 @@ def create_app(config_name='default'):
         # Handle database table creation gracefully in multi-worker environments
         try:
             db.create_all()
+            
+            # Ensure password reset columns exist on the gebruiker table (database-agnostic)
+            from sqlalchemy import inspect, text
+            inspector = inspect(db.engine)
+            if 'gebruiker' in inspector.get_table_names():
+                columns = [c['name'] for c in inspector.get_columns('gebruiker')]
+                if 'reset_code' not in columns:
+                    db.session.execute(text("ALTER TABLE gebruiker ADD COLUMN reset_code VARCHAR(6)"))
+                if 'reset_code_verloopt' not in columns:
+                    db.session.execute(text("ALTER TABLE gebruiker ADD COLUMN reset_code_verloopt TIMESTAMP"))
+                if 'reset_code_pogingen' not in columns:
+                    db.session.execute(text("ALTER TABLE gebruiker ADD COLUMN reset_code_pogingen INTEGER DEFAULT 0"))
+                db.session.commit()
         except Exception as e:
-            app.logger.warning(f"Database table creation check encountered an error (likely due to concurrent worker startup): {e}")
+            db.session.rollback()
+            app.logger.warning(f"Database table creation check or reset columns check encountered an error: {e}")
         
         # Ensure default admin user exists, handling potential concurrent inserts
         try:

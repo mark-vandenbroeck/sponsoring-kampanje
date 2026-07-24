@@ -178,4 +178,68 @@ def test_force_password_change(client, app):
     assert resp.status_code == 200
     assert b'Dashboard' in resp.data
 
+def test_forgot_password_flow(client, app):
+    """Test the forgot password code verification and reset flow."""
+    from app.models import Gebruiker, db
+    
+    # 1. Create a user
+    with app.app_context():
+        u = Gebruiker(email='resetuser@example.com', rol='gebruiker')
+        u.set_password('oldpassword123')
+        db.session.add(u)
+        db.session.commit()
+        
+    # 2. Trigger forgot password
+    resp = client.post('/forgot-password', data={
+        'email': 'resetuser@example.com'
+    }, follow_redirects=True)
+    assert resp.status_code == 200
+    assert b'herstelcode naar verzonden' in resp.data
+    
+    # 3. Retrieve code from DB
+    with app.app_context():
+        user = Gebruiker.query.filter_by(email='resetuser@example.com').first()
+        code = user.reset_code
+        assert code is not None
+        assert len(code) == 6
+        
+    # 4. Try invalid code (should increment attempts)
+    resp = client.post(f'/reset-password?email=resetuser@example.com', data={
+        'code': '000000',
+        'new_password': 'newpassword123',
+        'confirm_password': 'newpassword123'
+    }, follow_redirects=True)
+    assert resp.status_code == 200
+    assert b'Ongeldige herstelcode' in resp.data
+    
+    with app.app_context():
+        user = Gebruiker.query.filter_by(email='resetuser@example.com').first()
+        assert user.reset_code_pogingen == 1
+        
+    # 5. Try valid code with mismatching password
+    resp = client.post(f'/reset-password?email=resetuser@example.com', data={
+        'code': code,
+        'new_password': 'newpassword123',
+        'confirm_password': 'mismatchpassword'
+    }, follow_redirects=True)
+    assert resp.status_code == 200
+    assert b'komen niet overeen' in resp.data
+    
+    # 6. Try valid code with valid password
+    resp = client.post(f'/reset-password?email=resetuser@example.com', data={
+        'code': code,
+        'new_password': 'newpassword123',
+        'confirm_password': 'newpassword123'
+    }, follow_redirects=True)
+    assert resp.status_code == 200
+    assert b'succesvol hersteld' in resp.data
+    
+    # 7. Check reset fields cleared and password updated
+    with app.app_context():
+        user = Gebruiker.query.filter_by(email='resetuser@example.com').first()
+        assert user.reset_code is None
+        assert user.reset_code_pogingen == 0
+        assert user.check_password('newpassword123') is True
+
+
 

@@ -10,6 +10,11 @@ class Gebruiker(db.Model):
     laatste_activiteit = db.Column(db.DateTime, default=datetime.utcnow)
     rol = db.Column(db.String(20), nullable=False, default='lezer')  # beheerder, gebruiker, lezer
     
+    # Password reset fields
+    reset_code = db.Column(db.String(6), nullable=True)
+    reset_code_verloopt = db.Column(db.DateTime, nullable=True)
+    reset_code_pogingen = db.Column(db.Integer, default=0)
+    
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
     

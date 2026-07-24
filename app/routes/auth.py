@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from app.models import db, Gebruiker, Evenement, Sponsoring, Sponsor, Bestuurslid
 from app.utils import login_required
@@ -178,3 +178,120 @@ def backup_database():
         flash(f'Fout bij maken backup: {str(e)}', 'error')
         
     return redirect(url_for('auth.dashboard'))
+
+@auth_bp.route('/forgot-password', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip()
+        user = Gebruiker.query.filter_by(email=email).first()
+        
+        # Security best practice: don't reveal if the user email exists or not
+        flash('Indien het e-mailadres bekend is, is er een herstelcode naar verzonden.', 'info')
+        
+        if user:
+            import random
+            # Generate 6-digit code
+            code = f"{random.randint(100000, 999999)}"
+            user.reset_code = code
+            user.reset_code_verloopt = datetime.utcnow() + timedelta(minutes=30)
+            user.reset_code_pogingen = 0
+            db.session.commit()
+            
+            # Send email
+            try:
+                from app.utils.email import send_email
+                subject = "Herstelcode voor je wachtwoord - Sponsoring De Kampanje"
+                html_content = f"""
+                <h3>Beste gebruiker,</h3>
+                <p>Er is een verzoek ingediend om het wachtwoord van je account te herstellen.</p>
+                <p>Gebruik de volgende 6-digit herstelcode om je wachtwoord opnieuw in te stellen:</p>
+                <h2 style="letter-spacing: 5px; font-size: 24px; color: #0d6efd;">{code}</h2>
+                <p>De code is <strong>30 minuten</strong> geldig. Je hebt maximaal <strong>5 pogingen</strong>.</p>
+                <p>Klik op de onderstaande link of ga naar de herstelpagina in de app om de code in te voeren:</p>
+                <p><a href="{request.url_root}reset-password?email={email}">{request.url_root}reset-password?email={email}</a></p>
+                <p>Als je dit verzoek niet hebt gedaan, kun je deze e-mail veilig negeren. Je wachtwoord blijft dan ongewijzigd.</p>
+                <br>
+                <p>Met vriendelijke groet,<br>
+                Sponsoring De Kampanje</p>
+                """
+                send_email(email, subject, html_content)
+            except Exception as e:
+                # Log error
+                from flask import current_app
+                current_app.logger.error(f"Fout bij verzenden herstelcode e-mail: {e}")
+                
+        return redirect(url_for('auth.reset_password', email=email))
+        
+    return render_template('forgot_password.html')
+
+@auth_bp.route('/reset-password', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
+def reset_password():
+    email = request.args.get('email', '') or request.form.get('email', '')
+    email = email.strip()
+    
+    if request.method == 'POST':
+        code = request.form.get('code', '').strip()
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        
+        user = Gebruiker.query.filter_by(email=email).first()
+        
+        if not user:
+            flash('Ongeldig e-mailadres.', 'error')
+            return redirect(url_for('auth.forgot_password'))
+            
+        if not user.reset_code:
+            flash('Geen actieve herstelcode gevonden voor dit e-mailadres. Vraag een nieuwe code aan.', 'error')
+            return redirect(url_for('auth.forgot_password'))
+            
+        # Check if expired (30 minutes)
+        if datetime.utcnow() > user.reset_code_verloopt:
+            user.reset_code = None
+            user.reset_code_verloopt = None
+            user.reset_code_pogingen = 0
+            db.session.commit()
+            flash('De herstelcode is verlopen (maximaal 30 minuten geldig). Vraag een nieuwe code aan.', 'error')
+            return redirect(url_for('auth.forgot_password'))
+            
+        # Increment attempt counter
+        user.reset_code_pogingen += 1
+        db.session.commit()
+        
+        # Check if attempts exceeded (max 5 pogingen)
+        if user.reset_code_pogingen > 5:
+            user.reset_code = None
+            user.reset_code_verloopt = None
+            user.reset_code_pogingen = 0
+            db.session.commit()
+            flash('Te veel mislukte pogingen. De code is ongeldig gemaakt. Vraag een nieuwe code aan.', 'error')
+            return redirect(url_for('auth.forgot_password'))
+            
+        # Check if code matches
+        if code != user.reset_code:
+            remaining = 5 - user.reset_code_pogingen
+            flash(f'Ongeldige herstelcode. Je hebt nog {remaining} poging(en) over.', 'error')
+            return render_template('reset_password.html', email=email)
+            
+        # Validate password length
+        if len(new_password) < 6:
+            flash('Wachtwoord moet minimaal 6 karakters lang zijn.', 'error')
+            return render_template('reset_password.html', email=email)
+            
+        # Validate password confirmation
+        if new_password != confirm_password:
+            flash('Wachtwoorden komen niet overeen.', 'error')
+            return render_template('reset_password.html', email=email)
+            
+        # If code matches and validation passes, reset password
+        user.set_password(new_password)
+        user.reset_code = None
+        user.reset_code_verloopt = None
+        user.reset_code_pogingen = 0
+        db.session.commit()
+        
+        flash('Je wachtwoord is succesvol hersteld. Je kunt nu inloggen met je nieuwe wachtwoord.', 'success')
+        return redirect(url_for('auth.login'))
+        
+    return render_template('reset_password.html', email=email)
