@@ -15,6 +15,9 @@ Een moderne Python Flask applicatie voor het beheren van evenement sponsoringen 
 ### Geavanceerde Features
 - **Authenticatie & Autorisatie**: Volledig gebruikerssysteem met rollen (Beheerder, Gebruiker, Lezer)
 - **Rolgebaseerde toegang**: Verschillende rechten per gebruikerstype
+- **Wachtwoord vergeten & herstel**: Veilige herstelprocedure via een 6-cijferige e-mailcode (30 min geldig, max 5 pogingen voor automatische blokkade/verwijdering)
+- **Sessie & Cookie Hardening**: Veilige sessie-cookies (Secure, HttpOnly, SameSite=Lax) actief in productie
+- **Hybride e-mailverzending**: SMTP-ondersteuning voor lokale runtime + Brevo REST HTTP API (poort 443) om SMTP-netwerkblokkades op cloud-platfomen zoals Render te omzeilen
 - **Geavanceerde filtering**: Filter op evenement, kontrakt, sponsor, aanbrenger, status
 - **Smart defaults**: Automatische selectie van het meest recente evenement als default filter
 - **Export functionaliteit**: Excel en PDF export voor alle overzichten
@@ -23,10 +26,12 @@ Een moderne Python Flask applicatie voor het beheren van evenement sponsoringen 
 - **Modern UI**: Strakke interface met levendige maar zachte kleuren
 - **Dashboard met statistieken**: Direct inzicht in opgehaalde bedragen, openstaande facturen en per-event visualisaties
 - **Audit Log**: Volledige historie van alle wijzigingen (wie, wat, wanneer) met filters en zoekfunctie
-- **Uitgebreide Handleiding**: Geïntegreerde gebruikershandleiding met navigatie en zoekfunctie
+- **Uitgebreide Handleidingen**: Geïntegreerde html-handleiding in de app + formele Word-handleiding (`doc/gebruikershandleiding.docx`)
+- **Beveiligingsrapportage**: Formeel security audit verslag beschikbaar als Word-document (`doc/security_audit.docx`)
 - **Interactieve Tabellen**: Sorteerbare kolommen en geavanceerde filtering voor alle overzichten
-- **File management**: Veilige bestandsuploads met thumbnails en zip downloads
+- **File management**: Veilige bestandsuploads (met bestandsextensie-validatie) direct naar database met thumbnails en zip downloads
 - **Design file support**: Volledige ondersteuning voor professionele design bestanden (AI, PSD, EPS, SVG, PDF)
+
 
 ### Smart Filtering & Defaults
 - **Intelligente defaults**: De applicatie selecteert automatisch het meest recente evenement als default filter
