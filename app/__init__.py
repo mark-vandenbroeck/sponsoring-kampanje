@@ -86,6 +86,46 @@ def create_app(config_name='default'):
                         db.session.commit()
                     except Exception:
                         db.session.rollback()
+            
+            # Ensure Sponsoring binary upload columns exist on the sponsoring table
+            if 'sponsoring' in inspector.get_table_names():
+                columns = [c['name'] for c in inspector.get_columns('sponsoring')]
+                if 'logo_origineel_data' not in columns:
+                    try:
+                        db.session.execute(text("ALTER TABLE sponsoring ADD COLUMN logo_origineel_data BLOB"))
+                        db.session.commit()
+                    except Exception:
+                        db.session.rollback()
+                if 'logo_origineel_mime' not in columns:
+                    try:
+                        db.session.execute(text("ALTER TABLE sponsoring ADD COLUMN logo_origineel_mime VARCHAR(100)"))
+                        db.session.commit()
+                    except Exception:
+                        db.session.rollback()
+                if 'logo_origineel_thumb_data' not in columns:
+                    try:
+                        db.session.execute(text("ALTER TABLE sponsoring ADD COLUMN logo_origineel_thumb_data BLOB"))
+                        db.session.commit()
+                    except Exception:
+                        db.session.rollback()
+                if 'logo_afgewerkt_data' not in columns:
+                    try:
+                        db.session.execute(text("ALTER TABLE sponsoring ADD COLUMN logo_afgewerkt_data BLOB"))
+                        db.session.commit()
+                    except Exception:
+                        db.session.rollback()
+                if 'logo_afgewerkt_mime' not in columns:
+                    try:
+                        db.session.execute(text("ALTER TABLE sponsoring ADD COLUMN logo_afgewerkt_mime VARCHAR(100)"))
+                        db.session.commit()
+                    except Exception:
+                        db.session.rollback()
+                if 'logo_afgewerkt_thumb_data' not in columns:
+                    try:
+                        db.session.execute(text("ALTER TABLE sponsoring ADD COLUMN logo_afgewerkt_thumb_data BLOB"))
+                        db.session.commit()
+                    except Exception:
+                        db.session.rollback()
         except Exception as e:
             app.logger.warning(f"Database table creation check or reset columns check encountered an error: {e}")
         
