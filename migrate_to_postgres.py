@@ -44,12 +44,14 @@ print(f"Target (Postgres) : {masked_pg_uri}\n")
 try:
     pg_engine = create_engine(postgres_uri)
     
-    # Alter the table schema on Postgres to support longer initials before reflection
+    # Alter the table schema on Postgres to support longer values before reflection
     with pg_engine.connect() as conn:
         try:
             conn.execute(text("ALTER TABLE bestuurslid ALTER COLUMN initialen TYPE VARCHAR(100)"))
+            conn.execute(text("ALTER TABLE sponsor ALTER COLUMN huisnummer TYPE VARCHAR(100)"))
+            conn.execute(text("ALTER TABLE sponsor ALTER COLUMN postcode TYPE VARCHAR(100)"))
             conn.commit()
-            print("🔧 Kolom 'initialen' in 'bestuurslid' succesvol vergroot naar VARCHAR(100) op Postgres.")
+            print("🔧 Kolommen 'initialen' (bestuurslid) en 'huisnummer'/'postcode' (sponsor) succesvol vergroot naar VARCHAR(100) op Postgres.")
         except Exception as alter_err:
             pass
             
