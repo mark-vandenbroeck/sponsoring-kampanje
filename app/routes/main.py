@@ -64,3 +64,11 @@ def handleiding():
     """Show user manual"""
     from flask import render_template
     return render_template('handleiding.html')
+
+@main_bp.route('/service-worker.js')
+def service_worker():
+    return send_from_directory(current_app.static_folder, 'js/service-worker.js', mimetype='application/javascript')
+
+@main_bp.route('/manifest.json')
+def manifest_pwa():
+    return send_from_directory(current_app.static_folder, 'manifest.json', mimetype='application/json')
