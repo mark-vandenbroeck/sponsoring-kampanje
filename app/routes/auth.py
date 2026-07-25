@@ -164,29 +164,25 @@ def backup_database():
                     continue
                 table = metadata.tables[table_name]
                 
-                # Haal alle rijen op
-                result = conn.execute(select(table))
+                # Filter binaire kolommen uit om OOM en timeouts te voorkomen
+                blob_columns = ('logo_origineel_data', 'logo_origineel_thumb_data', 'logo_afgewerkt_data', 'logo_afgewerkt_thumb_data')
+                columns_to_select = [c for c in table.columns if c.name not in blob_columns]
+                
+                # Haal alle rijen op met alleen de geselecteerde kolommen
+                result = conn.execute(select(*columns_to_select))
                 rows = result.fetchall()
                 if not rows:
                     continue
 
                 sql_output.write(f"-- Data voor tabel {table_name}\n")
-                columns = [c.name for c in table.columns]
-                columns_str = ", ".join([f'"{c}"' for c in columns])
+                columns_str = ", ".join([f'"{c.name}"' for c in columns_to_select])
 
                 for row in rows:
                     values = []
-                    for col in table.columns:
+                    for col in columns_to_select:
                         val = row._mapping.get(col.name)
                         if val is None:
                             values.append("NULL")
-                        elif col.type.__class__.__name__ in ('LargeBinary', 'BLOB'):
-                            # Zorg voor correcte hex-notatie voor binaire bestanden (logo's)
-                            hex_str = val.hex()
-                            if db.engine.dialect.name == 'sqlite':
-                                values.append(f"X'{hex_str}'")
-                            else:
-                                values.append(f"decode('{hex_str}', 'hex')")
                         elif isinstance(val, bool):
                             values.append("TRUE" if val else "FALSE")
                         elif isinstance(val, (int, float)):
