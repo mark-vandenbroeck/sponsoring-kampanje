@@ -133,51 +133,88 @@ def set_password():
 @auth_bp.route('/backup-database', methods=['POST'])
 @login_required
 def backup_database():
-    import os
-    import sqlite3
-    from flask import current_app
-    
+    from flask import Response
+    from sqlalchemy import select
+    import io
+    import json
+    from datetime import datetime, date
+    from app.models import db, Gebruiker
+
     user = Gebruiker.query.get(session['user_id'])
     if user.rol != 'beheerder':
         flash('Geen toegang.', 'error')
         return redirect(url_for('auth.dashboard'))
-    
+
     try:
-        # Determine paths
-        db_uri = current_app.config['SQLALCHEMY_DATABASE_URI']
-        if db_uri.startswith('sqlite:///'):
-            db_path = db_uri.replace('sqlite:///', '')
-        else:
-             flash('Backup alleen ondersteund voor SQLite.', 'error')
-             return redirect(url_for('auth.dashboard'))
+        # Volgorde van tabellen om foreign key constraints te respecteren
+        tables_order = ['gebruiker', 'evenement', 'bestuurslid', 'kontrakt', 'sponsor', 'sponsoring', 'audit_logs']
+        metadata = db.metadata
+        sql_output = io.StringIO()
+
+        sql_output.write("-- Sponsoring Database Backup\n")
+        sql_output.write(f"-- Gegenereerd op: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
         
-        # Handle relative/absolute paths
-        # If relative, it's usually relative to the project root (CWD in run.py)
-        if not os.path.isabs(db_path):
-            # If running from run.py, CWD is project root.
-            db_path = os.path.abspath(db_path)
-            
-        backup_dir = os.path.join(os.path.dirname(db_path), 'backups')
-        if not os.path.exists(backup_dir):
-            os.makedirs(backup_dir)
-            
-        timestamp = datetime.now().strftime('%Y%m%d')
-        backup_filename = f'sponsoring-{timestamp}.db'
-        backup_path = os.path.join(backup_dir, backup_filename)
-        
-        # Perform online backup
-        src = sqlite3.connect(db_path)
-        dst = sqlite3.connect(backup_path)
-        with dst:
-            src.backup(dst)
-        dst.close()
-        src.close()
-        
-        flash(f'Backup succesvol gemaakt: {backup_filename}', 'success')
+        # Tijdelijk uitschakelen van constraints voor database-agnostische import
+        sql_output.write("PRAGMA foreign_keys = OFF;\n")
+        sql_output.write("SET CONSTRAINTS ALL DEFERRED;\n\n")
+
+        with db.engine.connect() as conn:
+            for table_name in tables_order:
+                if table_name not in metadata.tables:
+                    continue
+                table = metadata.tables[table_name]
+                
+                # Haal alle rijen op
+                result = conn.execute(select(table))
+                rows = result.fetchall()
+                if not rows:
+                    continue
+
+                sql_output.write(f"-- Data voor tabel {table_name}\n")
+                columns = [c.name for c in table.columns]
+                columns_str = ", ".join([f'"{c}"' for c in columns])
+
+                for row in rows:
+                    values = []
+                    for col in table.columns:
+                        val = row._mapping.get(col.name)
+                        if val is None:
+                            values.append("NULL")
+                        elif col.type.__class__.__name__ in ('LargeBinary', 'BLOB'):
+                            # Zorg voor correcte hex-notatie voor binaire bestanden (logo's)
+                            hex_str = val.hex()
+                            if db.engine.dialect.name == 'sqlite':
+                                values.append(f"X'{hex_str}'")
+                            else:
+                                values.append(f"decode('{hex_str}', 'hex')")
+                        elif isinstance(val, bool):
+                            values.append("TRUE" if val else "FALSE")
+                        elif isinstance(val, (int, float)):
+                            values.append(str(val))
+                        elif isinstance(val, (datetime, date)):
+                            values.append(f"'{val.isoformat()}'")
+                        elif isinstance(val, (dict, list)):
+                            json_str = json.dumps(val).replace("'", "''")
+                            values.append(f"'{json_str}'")
+                        else:
+                            val_str = str(val).replace("'", "''")
+                            values.append(f"'{val_str}'")
+
+                    values_str = ", ".join(values)
+                    sql_output.write(f"INSERT INTO {table_name} ({columns_str}) VALUES ({values_str});\n")
+                sql_output.write("\n")
+
+        sql_output.write("PRAGMA foreign_keys = ON;\n")
+
+        filename = f"sponsoring_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.sql"
+        return Response(
+            sql_output.getvalue(),
+            mimetype="application/sql",
+            headers={"Content-disposition": f"attachment; filename={filename}"}
+        )
     except Exception as e:
         flash(f'Fout bij maken backup: {str(e)}', 'error')
-        
-    return redirect(url_for('auth.dashboard'))
+        return redirect(url_for('auth.dashboard'))
 
 @auth_bp.route('/forgot-password', methods=['GET', 'POST'])
 @limiter.limit("5 per minute")
