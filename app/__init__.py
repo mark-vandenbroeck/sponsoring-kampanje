@@ -126,6 +126,18 @@ def create_app(config_name='default'):
                         db.session.commit()
                     except Exception:
                         db.session.rollback()
+            
+            # Ensure indexes exist on foreign keys (database-agnostic)
+            try:
+                db.session.execute(text("CREATE INDEX IF NOT EXISTS idx_sponsoring_evenement_id ON sponsoring (evenement_id)"))
+                db.session.execute(text("CREATE INDEX IF NOT EXISTS idx_sponsoring_kontrakt_id ON sponsoring (kontrakt_id)"))
+                db.session.execute(text("CREATE INDEX IF NOT EXISTS idx_sponsoring_sponsor_id ON sponsoring (sponsor_id)"))
+                db.session.execute(text("CREATE INDEX IF NOT EXISTS idx_sponsoring_aangebracht_door_id ON sponsoring (aangebracht_door_id)"))
+                db.session.execute(text("CREATE INDEX IF NOT EXISTS idx_sponsor_bestuurslid_id ON sponsor (bestuurslid_id)"))
+                db.session.commit()
+            except Exception as idx_err:
+                db.session.rollback()
+                app.logger.warning(f"Failed to create indexes: {idx_err}")
         except Exception as e:
             app.logger.warning(f"Database table creation check or reset columns check encountered an error: {e}")
         

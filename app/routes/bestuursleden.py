@@ -13,7 +13,11 @@ def list():
     sort = request.args.get('sort', 'naam')
     direction = request.args.get('dir', 'asc')
     
-    query = Bestuurslid.query
+    from sqlalchemy.orm import selectinload
+    query = Bestuurslid.query.options(
+        selectinload(Bestuurslid.sponsors),
+        selectinload(Bestuurslid.sponsoringen)
+    )
     
     if sort == 'naam':
         if direction == 'desc':

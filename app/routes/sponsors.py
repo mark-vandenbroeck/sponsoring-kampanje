@@ -38,7 +38,11 @@ def list():
     direction = request.args.get('dir', 'asc')
     
     # Start with all sponsors
-    query = Sponsor.query
+    from sqlalchemy.orm import joinedload, selectinload
+    query = Sponsor.query.options(
+        joinedload(Sponsor.bestuurslid),
+        selectinload(Sponsor.sponsoringen)
+    )
     
     # Apply filters
     if naam_filter:

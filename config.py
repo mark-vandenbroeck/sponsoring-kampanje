@@ -40,6 +40,14 @@ class ProductionConfig(Config):
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
+    
+    # Optimize connection pooling for Supabase / PostgreSQL in production
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_size': 5,
+        'max_overflow': 2,
+        'pool_recycle': 280,
+        'pool_pre_ping': True
+    }
 
 class TestingConfig(Config):
     """Testing configuration"""

@@ -11,7 +11,7 @@ class Sponsor(db.Model):
     telefoon = db.Column(db.String(20))
     email = db.Column(db.String(100))
     btw_nummer = db.Column(db.String(50))
-    bestuurslid_id = db.Column(db.Integer, db.ForeignKey('bestuurslid.id'))
+    bestuurslid_id = db.Column(db.Integer, db.ForeignKey('bestuurslid.id'), index=True)
     opmerkingen = db.Column(db.Text)
     
     # Relationships

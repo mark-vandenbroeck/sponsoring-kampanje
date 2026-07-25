@@ -115,7 +115,13 @@ def list():
     betaald_filter = request.args.get('betaald', '')
     
     # Start with all sponsoringen
-    query = Sponsoring.query
+    from sqlalchemy.orm import joinedload
+    query = Sponsoring.query.options(
+        joinedload(Sponsoring.evenement),
+        joinedload(Sponsoring.kontrakt),
+        joinedload(Sponsoring.sponsor),
+        joinedload(Sponsoring.aangebracht_door)
+    )
     
     # Apply filters
     if evenement_filter:

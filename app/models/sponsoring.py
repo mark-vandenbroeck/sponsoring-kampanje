@@ -3,10 +3,10 @@ from sqlalchemy.orm import deferred
 
 class Sponsoring(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    evenement_id = db.Column(db.Integer, db.ForeignKey('evenement.id'), nullable=False)
-    kontrakt_id = db.Column(db.Integer, db.ForeignKey('kontrakt.id'), nullable=False)
-    sponsor_id = db.Column(db.Integer, db.ForeignKey('sponsor.id'), nullable=False)
-    aangebracht_door_id = db.Column(db.Integer, db.ForeignKey('bestuurslid.id'), nullable=False)
+    evenement_id = db.Column(db.Integer, db.ForeignKey('evenement.id'), nullable=False, index=True)
+    kontrakt_id = db.Column(db.Integer, db.ForeignKey('kontrakt.id'), nullable=False, index=True)
+    sponsor_id = db.Column(db.Integer, db.ForeignKey('sponsor.id'), nullable=False, index=True)
+    aangebracht_door_id = db.Column(db.Integer, db.ForeignKey('bestuurslid.id'), nullable=False, index=True)
     bedrag_kaarten = db.Column(db.Float)
     netto_bedrag_excl_btw = db.Column(db.Float)
     facturatiebedrag_incl_btw = db.Column(db.Float)

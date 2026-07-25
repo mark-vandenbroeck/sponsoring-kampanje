@@ -29,7 +29,11 @@ def list():
         if latest_evenement:
             evenement_filter = str(latest_evenement.id)
     
-    query = Kontrakt.query
+    from sqlalchemy.orm import joinedload, selectinload
+    query = Kontrakt.query.options(
+        joinedload(Kontrakt.evenement),
+        selectinload(Kontrakt.sponsoringen)
+    )
     
     # Apply filters
     if evenement_filter:

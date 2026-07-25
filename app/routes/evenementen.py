@@ -220,7 +220,10 @@ def api_kontrakten(evenement_id):
 def statistieken():
     from app.utils import get_display_amount
     
-    evenementen = Evenement.query.order_by(Evenement.datum.desc()).all()
+    from sqlalchemy.orm import subqueryload
+    evenementen = Evenement.query.options(
+        subqueryload(Evenement.kontrakten).subqueryload(Kontrakt.sponsoringen)
+    ).order_by(Evenement.datum.desc()).all()
     
     # Calculate statistics for each evenement
     evenement_stats = []

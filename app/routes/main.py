@@ -20,12 +20,17 @@ def uploaded_file(filename):
     from flask import send_file
     import io
     
+    from sqlalchemy.orm import undefer
+
     # 1. Check if this is a request for a thumbnail
     if filename.endswith('_thumb.png'):
         base_name = filename[:-10]  # strip '_thumb.png'
         
-        # Find record where original or finished filename starts with this base name
-        sponsoring = Sponsoring.query.filter(
+        # Find record and undefer the thumbnails
+        sponsoring = Sponsoring.query.options(
+            undefer(Sponsoring.logo_origineel_thumb_data),
+            undefer(Sponsoring.logo_afgewerkt_thumb_data)
+        ).filter(
             (Sponsoring.logo_origineel.like(f"{base_name}%")) |
             (Sponsoring.logo_afgewerkt_file.like(f"{base_name}%"))
         ).first()
@@ -33,12 +38,15 @@ def uploaded_file(filename):
         if sponsoring:
             # Determine which thumbnail to serve
             if sponsoring.logo_origineel and sponsoring.logo_origineel.startswith(base_name) and sponsoring.logo_origineel_thumb_data:
-                return send_file(io.BytesIO(sponsoring.logo_origineel_thumb_data), mimetype='image/png', download_name=filename)
+                return send_file(io.BytesIO(sponsoring.logo_origineel_thumb_data), mimetype='image/png', download_name=filename, max_age=2592000)
             elif sponsoring.logo_afgewerkt_file and sponsoring.logo_afgewerkt_file.startswith(base_name) and sponsoring.logo_afgewerkt_thumb_data:
-                return send_file(io.BytesIO(sponsoring.logo_afgewerkt_thumb_data), mimetype='image/png', download_name=filename)
+                return send_file(io.BytesIO(sponsoring.logo_afgewerkt_thumb_data), mimetype='image/png', download_name=filename, max_age=2592000)
     
     # 2. Check if this is a request for the original or finished file
-    sponsoring = Sponsoring.query.filter(
+    sponsoring = Sponsoring.query.options(
+        undefer(Sponsoring.logo_origineel_data),
+        undefer(Sponsoring.logo_afgewerkt_data)
+    ).filter(
         (Sponsoring.logo_origineel == filename) |
         (Sponsoring.logo_afgewerkt_file == filename)
     ).first()
@@ -46,10 +54,10 @@ def uploaded_file(filename):
     if sponsoring:
         if sponsoring.logo_origineel == filename and sponsoring.logo_origineel_data:
             mime = sponsoring.logo_origineel_mime or 'application/octet-stream'
-            return send_file(io.BytesIO(sponsoring.logo_origineel_data), mimetype=mime, download_name=filename)
+            return send_file(io.BytesIO(sponsoring.logo_origineel_data), mimetype=mime, download_name=filename, max_age=2592000)
         elif sponsoring.logo_afgewerkt_file == filename and sponsoring.logo_afgewerkt_data:
             mime = sponsoring.logo_afgewerkt_mime or 'application/octet-stream'
-            return send_file(io.BytesIO(sponsoring.logo_afgewerkt_data), mimetype=mime, download_name=filename)
+            return send_file(io.BytesIO(sponsoring.logo_afgewerkt_data), mimetype=mime, download_name=filename, max_age=2592000)
             
     # 3. Fallback to local filesystem if not found in database
     upload_folder = os.path.join(
