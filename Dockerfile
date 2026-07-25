@@ -43,4 +43,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:5100/ || exit 1
 
 # Run the application
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5100", "run:app"]
+CMD ["gunicorn", "-w", "2", "-t", "120", "-b", "0.0.0.0:5100", "run:app"]
